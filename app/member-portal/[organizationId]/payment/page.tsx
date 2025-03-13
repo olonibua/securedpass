@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback  } from 'react';
 import { useParams } from 'next/navigation';
 import { databases, Query } from '@/lib/appwrite';
 import { 
@@ -68,7 +68,7 @@ export default function PaymentPage() {
   const [cvv, setCvv] = useState('');
   const [isDefault, setIsDefault] = useState(false);
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       setLoading(true);
 
@@ -109,7 +109,7 @@ export default function PaymentPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
   
   useEffect(() => {
     if (user) {

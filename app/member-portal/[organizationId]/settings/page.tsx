@@ -46,14 +46,7 @@ interface MemberDetails {
   promotionalEmails?: boolean;
 }
 
-interface CustomField {
-  $id: string;
-  label: string;
-  type: string;
-  required: boolean;
-  options?: string[];
-  value?: string;
-}
+
 
 export default function SettingsPage() {
   const { organizationId } = useParams();

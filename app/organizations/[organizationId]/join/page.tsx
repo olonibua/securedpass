@@ -55,7 +55,7 @@ export default function JoinOrganizationPage() {
     fetchData();
   }, [organizationId]);
 
-  const handleSubmit = async (data: Record<string, any>) => {
+  const handleSubmit = async (data: Record<string, unknown>) => {
     try {
       const response = await fetch('/api/membership/register', {
         method: 'POST',
