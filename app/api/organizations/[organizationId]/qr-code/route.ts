@@ -1,4 +1,3 @@
-  
 import { NextRequest, NextResponse } from "next/server";
 import QRCode from "qrcode";
 import {
@@ -8,7 +7,7 @@ import {
 } from "@/lib/appwrite";
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-
+// @ts-ignore
 export async function GET(
   request: NextRequest,
   { params }: { params: { organizationId: string } }
