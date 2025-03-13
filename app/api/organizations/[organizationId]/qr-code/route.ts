@@ -6,13 +6,16 @@ import {
   ORGANIZATIONS_COLLECTION_ID,
 } from "@/lib/appwrite";
 
-// Use the correct type signature for App Router in Next.js
+interface RouteContext {
+  params: { organizationId: string }
+}
+
 export async function GET(
-  request: NextRequest,
-  context: { params: { organizationId: string } }
+  _req: NextRequest,
+  { params }: RouteContext
 ) {
   try {
-    const organizationId = context.params.organizationId;
+    const organizationId = params.organizationId;
 
     // Verify the organization exists
     await databases.getDocument(
