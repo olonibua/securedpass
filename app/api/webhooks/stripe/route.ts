@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { DATABASE_ID, databases, ORGANIZATIONS_COLLECTION_ID, Query, USERS_COLLECTION_ID } from '@/lib/appwrite';
 import { resend } from '@/lib/resend';
 import Stripe from 'stripe';
-import QRCode from 'qrcode';
+// import QRCode from 'qrcode';
 
 // Initialize Stripe
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
