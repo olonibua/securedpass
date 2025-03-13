@@ -134,3 +134,5 @@ The following environment variables need to be configured:
   // Or use more specific types like:
   const data: CustomType = response.data;
   ```
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars

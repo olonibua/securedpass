@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { DATABASE_ID, databases, MEMBERS_COLLECTION_ID, Query } from '@/lib/appwrite';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -21,7 +21,7 @@ export default function MembershipManager({ organizationId }: MembershipManagerP
   const [members, setMembers] = useState<Record<string, unknown>[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchMembers = async () => {
+  const fetchMembers = useCallback(async () => {
     try {
       setLoading(true);
       const response = await databases.listDocuments(
@@ -33,7 +33,13 @@ export default function MembershipManager({ organizationId }: MembershipManagerP
         ]
       );
       
-      setMembers(response.documents);
+      const transformedMembers = response.documents.map(member => ({
+        ...member,
+        id: member.$id,
+        customFields: member.customFields ? JSON.parse(member.customFields) : {}
+      }));
+      
+      setMembers(transformedMembers);
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to fetch members';
       console.error('Error fetching members:', errorMessage);
@@ -41,11 +47,11 @@ export default function MembershipManager({ organizationId }: MembershipManagerP
     } finally {
       setLoading(false);
     }
-  };
+  }, [organizationId]);
 
   useEffect(() => {
     fetchMembers();
-  }, [organizationId, fetchMembers]);
+  }, [fetchMembers]);
 
   const handleStatusChange = async (memberId: string, newStatus: 'active' | 'inactive') => {
     try {

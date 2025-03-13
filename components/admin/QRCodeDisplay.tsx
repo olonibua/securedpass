@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, } from 'react';
+import { useEffect, useState, } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -21,30 +21,30 @@ export default function QRCodeDisplay({ organizationId }: QRCodeDisplayProps) {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [loading, setLoading] = useState(true);
 
-  // useEffect(() => {
-  //   const fetchQRCode = async () => {
-  //     try {
-  //       setLoading(true);
-  //       const response = await fetch(`/api/organizations/${organizationId}/qr-code`);
+  useEffect(() => {
+    const fetchQRCode = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(`/api/organizations/${organizationId}/qr-code`);
 
-  //       if (!response.ok) {
-  //         throw new Error('Failed to generate QR code');
-  //       }
+        if (!response.ok) {
+          throw new Error('Failed to generate QR code');
+        }
 
-  //       const data = await response.json();
-  //       setQrCode(data.qrCodeDataUrl);
-  //       setCheckInUrl(data.checkInUrl);
-  //     } catch (error: unknown) {
-  //       const errorMessage = error instanceof Error ? error.message : 'Failed to generate QR code';
-  //       console.error('Error fetching QR code:', errorMessage);
-  //       toast.error('Failed to generate QR code');
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
+        const data = await response.json();
+        setQrCode(data.qrCodeDataUrl);
+        setCheckInUrl(data.checkInUrl);
+      } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : 'Failed to generate QR code';
+        console.error('Error fetching QR code:', errorMessage);
+        toast.error('Failed to generate QR code');
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  //   fetchQRCode();
-  // }, [organizationId]);
+    fetchQRCode();
+  }, [organizationId]);
 
   const handleDownload = () => {
     if (!qrCode) return;
