@@ -12,39 +12,42 @@ interface QRCodeDisplayProps {
 }
 
 export default function QRCodeDisplay({ organizationId }: QRCodeDisplayProps) {
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   const [qrCode, setQrCode] = useState<string | null>(null);
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   const [checkInUrl, setCheckInUrl] = useState<string | null>(null);
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchQRCode = async () => {
-      try {
-        setLoading(true);
-        const response = await fetch(`/api/organizations/${organizationId}/qr-code`);
-        
-        if (!response.ok) {
-          throw new Error('Failed to generate QR code');
-        }
-        
-        const data = await response.json();
-        setQrCode(data.qrCodeDataUrl);
-        setCheckInUrl(data.checkInUrl);
-      } catch (error: unknown) {
-        const errorMessage = error instanceof Error ? error.message : 'Failed to generate QR code';
-        console.error('Error fetching QR code:', errorMessage);
-        toast.error('Failed to generate QR code');
-      } finally {
-        setLoading(false);
-      }
-    };
+  // useEffect(() => {
+  //   const fetchQRCode = async () => {
+  //     try {
+  //       setLoading(true);
+  //       const response = await fetch(`/api/organizations/${organizationId}/qr-code`);
 
-    fetchQRCode();
-  }, [organizationId]);
+  //       if (!response.ok) {
+  //         throw new Error('Failed to generate QR code');
+  //       }
+
+  //       const data = await response.json();
+  //       setQrCode(data.qrCodeDataUrl);
+  //       setCheckInUrl(data.checkInUrl);
+  //     } catch (error: unknown) {
+  //       const errorMessage = error instanceof Error ? error.message : 'Failed to generate QR code';
+  //       console.error('Error fetching QR code:', errorMessage);
+  //       toast.error('Failed to generate QR code');
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
+
+  //   fetchQRCode();
+  // }, [organizationId]);
 
   const handleDownload = () => {
     if (!qrCode) return;
-    
-    const link = document.createElement('a');
+
+    const link = document.createElement("a");
     link.href = qrCode;
     link.download = `check-in-qr-code-${organizationId}.png`;
     document.body.appendChild(link);
@@ -54,13 +57,13 @@ export default function QRCodeDisplay({ organizationId }: QRCodeDisplayProps) {
 
   const handlePrint = () => {
     if (!qrCode) return;
-    
-    const printWindow = window.open('', '_blank');
+
+    const printWindow = window.open("", "_blank");
     if (!printWindow) {
       toast.error("Please allow pop-ups to print the QR code");
       return;
     }
-    
+
     printWindow.document.write(`
       <html>
         <head>
@@ -95,10 +98,10 @@ export default function QRCodeDisplay({ organizationId }: QRCodeDisplayProps) {
         </body>
       </html>
     `);
-    
+
     printWindow.document.close();
     printWindow.focus();
-    
+
     // Print after a short delay to ensure the image is loaded
     setTimeout(() => {
       printWindow.print();
@@ -108,17 +111,18 @@ export default function QRCodeDisplay({ organizationId }: QRCodeDisplayProps) {
 
   const handleShare = async () => {
     if (!checkInUrl) return;
-    
+
     if (navigator.share) {
       try {
         await navigator.share({
-          title: 'Check-in QR Code',
-          text: 'Scan this QR code to check in',
+          title: "Check-in QR Code",
+          text: "Scan this QR code to check in",
           url: checkInUrl,
         });
       } catch (error: unknown) {
-        const errorMessage = error instanceof Error ? error.message : 'Failed to share';
-        console.error('Error sharing:', errorMessage);
+        const errorMessage =
+          error instanceof Error ? error.message : "Failed to share";
+        console.error("Error sharing:", errorMessage);
       }
     } else {
       // Fallback for browsers that don't support the Web Share API
@@ -148,9 +152,9 @@ export default function QRCodeDisplay({ organizationId }: QRCodeDisplayProps) {
             </TabsList>
             <TabsContent value="qrcode" className="flex justify-center">
               <div className="border p-4 rounded-md">
-                <Image 
-                  src={qrCode} 
-                  alt="Check-in QR Code" 
+                <Image
+                  src={qrCode}
+                  alt="Check-in QR Code"
                   className="h-64 w-64 object-contain"
                   width={256}
                   height={256}
