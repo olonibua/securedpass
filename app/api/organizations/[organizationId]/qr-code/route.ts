@@ -7,11 +7,11 @@ import {
 } from "@/lib/appwrite";
 
 export async function GET(
-  _request: NextRequest,
-  { params }: { params: { organizationId: string } }
+  request: NextRequest,
+  { params }: { params: { organizationId: string } } // ✅ Corrected Type
 ) {
   try {
-    const organizationId = params.organizationId;
+    const organizationId = params.organizationId; // ✅ Extracting dynamic route param
 
     // Verify the organization exists
     await databases.getDocument(
