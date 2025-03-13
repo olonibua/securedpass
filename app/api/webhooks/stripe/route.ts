@@ -2,18 +2,19 @@ import { NextRequest, NextResponse } from 'next/server';
 import { DATABASE_ID, databases, ORGANIZATIONS_COLLECTION_ID, Query, USERS_COLLECTION_ID } from '@/lib/appwrite';
 import { resend } from '@/lib/resend';
 import Stripe from 'stripe';
+import QRCode from 'qrcode';
 
 // Initialize Stripe
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2025-02-24.acacia',
 });
 
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+
 // This is needed to parse the raw body for Stripe webhook verification
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};
+export const preferredRegion = 'iad1';
+export const maxDuration = 60;
 
 export async function POST(request: NextRequest) {
   try {
