@@ -45,7 +45,7 @@ export default function MembershipManager({ organizationId }: MembershipManagerP
 
   useEffect(() => {
     fetchMembers();
-  }, [organizationId]);
+  }, [organizationId, fetchMembers]);
 
   const handleStatusChange = async (memberId: string, newStatus: 'active' | 'inactive') => {
     try {

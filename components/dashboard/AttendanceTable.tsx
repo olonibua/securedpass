@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { 
   Table, 
   TableBody, 
@@ -50,7 +50,7 @@ export default function AttendanceTable({ organizationId }: AttendanceTableProps
 
   const ITEMS_PER_PAGE = 10;
 
-  const fetchCheckIns = async () => {
+  const fetchCheckIns = useCallback(async () => {
     try {
       setLoading(true);
       
@@ -101,7 +101,7 @@ export default function AttendanceTable({ organizationId }: AttendanceTableProps
     } finally {
       setLoading(false);
     }
-  };
+  }, [organizationId, dateRange, page]);
 
   useEffect(() => {
     const fetchData = async () => {

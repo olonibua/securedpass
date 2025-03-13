@@ -33,12 +33,6 @@ export default function MemberSidebar({ organizationId, onSignOut }: MemberSideb
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [userOrganizations, setUserOrganizations] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
-  
-  useEffect(() => {
-    if (user) {
-      fetchUserOrganizations();
-    }
-  }, [user]);
 
   const fetchUserOrganizations = async () => {
     try {
@@ -46,18 +40,29 @@ export default function MemberSidebar({ organizationId, onSignOut }: MemberSideb
       const response = await databases.listDocuments(
         DATABASE_ID,
         ORGANIZATIONS_MEMBERS_COLLECTION_ID,
-        [Query.equal('userId', user?.$id || '')]
+        [Query.equal("userId", user?.$id || "")]
       );
-      
-      const orgIds = response.documents.map(doc => doc.organizationId);
+
+      const orgIds = response.documents.map((doc) => doc.organizationId);
       setUserOrganizations(orgIds);
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to fetch user organizations';
-      console.error('Error fetching user organizations:', errorMessage);
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Failed to fetch user organizations";
+      console.error("Error fetching user organizations:", errorMessage);
     } finally {
       setLoading(false);
     }
   };
+  
+  useEffect(() => {
+    if (user) {
+      fetchUserOrganizations();
+    }
+  }, [user, fetchUserOrganizations]);
+
+  
   
   const isActive = (path: string) => {
     return pathname === path;

@@ -162,7 +162,7 @@ export default function QRCodeDisplay({ organizationId }: QRCodeDisplayProps) {
                 <p className="text-sm break-all">{checkInUrl}</p>
               </div>
               <p className="text-sm text-muted-foreground mt-2">
-                Share this link with members who can't scan the QR code
+                Share this link with members who can&apos;t scan the QR code
               </p>
             </TabsContent>
           </Tabs>

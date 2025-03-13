@@ -30,12 +30,33 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 
+interface PaymentMethod {
+  $id: string;
+  userId: string;
+  type: string;
+  cardBrand: string;
+  last4: string;
+  expiryMonth: string;
+  expiryYear: string;
+  isDefault: boolean;
+  createdAt: string;
+}
+
+interface PaymentHistory {
+  $id: string;
+  userId: string;
+  amount: number;
+  status: string; 
+  date: string;
+  description: string;
+}
+
 export default function PaymentPage() {
   const { organizationId } = useParams();
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
-  const [paymentMethods, setPaymentMethods] = useState<any[]>([]);
-  const [paymentHistory, setPaymentHistory] = useState<any[]>([]);
+  const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
+  const [paymentHistory, setPaymentHistory] = useState<PaymentHistory[]>([]);
   const [isAddingPaymentMethod, setIsAddingPaymentMethod] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   
@@ -46,54 +67,57 @@ export default function PaymentPage() {
   const [expiryYear, setExpiryYear] = useState('');
   const [cvv, setCvv] = useState('');
   const [isDefault, setIsDefault] = useState(false);
+
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+
+      // Fetch payment methods
+      const paymentMethodsResponse = await databases.listDocuments(
+        DATABASE_ID,
+        PAYMENT_METHODS_COLLECTION_ID,
+        [Query.equal("userId", user?.$id || "")]
+      );
+
+      setPaymentMethods(
+        paymentMethodsResponse.documents as unknown as PaymentMethod[]
+      );
+
+      // Fetch payment history (mock data for now)
+      // In a real app, you would fetch from your payments collection
+      setPaymentHistory([
+        {
+          $id: "1",
+          userId: user?.$id || "",
+          amount: 29.99,
+          status: "completed",
+          date: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+          description: "Monthly Subscription Payment",
+        },
+        {
+          $id: "2",
+          userId: user?.$id || "",
+          amount: 29.99,
+          status: "completed",
+          date: new Date(Date.now() - 37 * 24 * 60 * 60 * 1000).toISOString(),
+          description: "Monthly Subscription Payment",
+        },
+      ]);
+    } catch (error) {
+      console.error("Error fetching payment data:", error);
+      toast.error("Failed to load payment data");
+    } finally {
+      setLoading(false);
+    }
+  };
   
   useEffect(() => {
     if (user) {
       fetchData();
     }
-  }, [user, organizationId]);
+  }, [user, organizationId, fetchData]);
 
-  const fetchData = async () => {
-    try {
-      setLoading(true);
-      
-      // Fetch payment methods
-      const paymentMethodsResponse = await databases.listDocuments(
-        DATABASE_ID,
-        PAYMENT_METHODS_COLLECTION_ID,
-        [Query.equal('userId', user?.$id || '')]
-      );
-      
-      setPaymentMethods(paymentMethodsResponse.documents);
-      
-      // Fetch payment history (mock data for now)
-      // In a real app, you would fetch from your payments collection
-      setPaymentHistory([
-        {
-          $id: '1',
-          userId: user?.$id || '',
-          amount: 29.99,
-          status: 'completed',
-          date: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-          description: 'Monthly Subscription Payment'
-        },
-        {
-          $id: '2',
-          userId: user?.$id || '',
-          amount: 29.99,
-          status: 'completed',
-          date: new Date(Date.now() - 37 * 24 * 60 * 60 * 1000).toISOString(),
-          description: 'Monthly Subscription Payment'
-        }
-      ]);
-      
-    } catch (error) {
-      console.error('Error fetching payment data:', error);
-      toast.error('Failed to load payment data');
-    } finally {
-      setLoading(false);
-    }
-  };
+  
 
   const getCardBrand = (cardNumber: string) => {
     // Simple card brand detection
@@ -207,7 +231,7 @@ export default function PaymentPage() {
   }
 
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
@@ -219,30 +243,39 @@ export default function PaymentPage() {
         transition={{ delay: 0.1, duration: 0.4 }}
       >
         <h1 className="text-3xl font-bold mb-6">Payment Management</h1>
-        
+
         <Tabs defaultValue="methods" className="w-full">
           <TabsList className="mb-6">
             <TabsTrigger value="methods">Payment Methods</TabsTrigger>
             <TabsTrigger value="history">Payment History</TabsTrigger>
           </TabsList>
-          
+
           <TabsContent value="methods">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <Card className="md:col-span-2">
                 <CardHeader>
                   <CardTitle>Your Payment Methods</CardTitle>
-                  <CardDescription>Manage your saved payment methods</CardDescription>
+                  <CardDescription>
+                    Manage your saved payment methods
+                  </CardDescription>
                 </CardHeader>
                 <CardContent>
                   {paymentMethods.length > 0 ? (
                     <div className="space-y-4">
-                      {paymentMethods.map(method => (
-                        <div key={method.$id} className="flex justify-between items-center p-4 border rounded-lg">
+                      {paymentMethods.map((method) => (
+                        <div
+                          key={method.$id}
+                          className="flex justify-between items-center p-4 border rounded-lg"
+                        >
                           <div className="flex items-center">
                             <CreditCard className="h-10 w-10 mr-4 text-primary" />
                             <div>
-                              <div className="font-medium">{method.cardBrand}</div>
-                              <div className="text-sm text-muted-foreground">•••• {method.last4}</div>
+                              <div className="font-medium">
+                                {method.cardBrand}
+                              </div>
+                              <div className="text-sm text-muted-foreground">
+                                •••• {method.last4}
+                              </div>
                               <div className="text-xs text-muted-foreground mt-1">
                                 Expires {method.expiryMonth}/{method.expiryYear}
                               </div>
@@ -250,20 +283,29 @@ export default function PaymentPage() {
                           </div>
                           <div className="flex items-center space-x-2">
                             {method.isDefault ? (
-                              <Badge variant="outline" className="bg-primary/10">Default</Badge>
+                              <Badge
+                                variant="outline"
+                                className="bg-primary/10"
+                              >
+                                Default
+                              </Badge>
                             ) : (
-                              <Button 
-                                variant="outline" 
+                              <Button
+                                variant="outline"
                                 size="sm"
-                                onClick={() => handleSetDefaultPaymentMethod(method.$id)}
+                                onClick={() =>
+                                  handleSetDefaultPaymentMethod(method.$id)
+                                }
                               >
                                 Set Default
                               </Button>
                             )}
-                            <Button 
-                              variant="ghost" 
+                            <Button
+                              variant="ghost"
                               size="icon"
-                              onClick={() => handleDeletePaymentMethod(method.$id)}
+                              onClick={() =>
+                                handleDeletePaymentMethod(method.$id)
+                              }
                             >
                               <Trash2 className="h-4 w-4 text-destructive" />
                             </Button>
@@ -274,9 +316,11 @@ export default function PaymentPage() {
                   ) : (
                     <div className="text-center py-8">
                       <Wallet className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-                      <h3 className="text-lg font-medium mb-2">No Payment Methods</h3>
+                      <h3 className="text-lg font-medium mb-2">
+                        No Payment Methods
+                      </h3>
                       <p className="text-muted-foreground mb-6">
-                        You haven't added any payment methods yet.
+                        You haven&apos;t added any payment methods yet.
                       </p>
                     </div>
                   )}
@@ -319,13 +363,18 @@ export default function PaymentPage() {
                           <div className="grid grid-cols-3 gap-4">
                             <div className="grid gap-2">
                               <Label htmlFor="expiryMonth">Month</Label>
-                              <Select value={expiryMonth} onValueChange={setExpiryMonth}>
+                              <Select
+                                value={expiryMonth}
+                                onValueChange={setExpiryMonth}
+                              >
                                 <SelectTrigger id="expiryMonth">
                                   <SelectValue placeholder="MM" />
                                 </SelectTrigger>
                                 <SelectContent>
                                   {Array.from({ length: 12 }, (_, i) => {
-                                    const month = (i + 1).toString().padStart(2, '0');
+                                    const month = (i + 1)
+                                      .toString()
+                                      .padStart(2, "0");
                                     return (
                                       <SelectItem key={month} value={month}>
                                         {month}
@@ -337,13 +386,18 @@ export default function PaymentPage() {
                             </div>
                             <div className="grid gap-2">
                               <Label htmlFor="expiryYear">Year</Label>
-                              <Select value={expiryYear} onValueChange={setExpiryYear}>
+                              <Select
+                                value={expiryYear}
+                                onValueChange={setExpiryYear}
+                              >
                                 <SelectTrigger id="expiryYear">
                                   <SelectValue placeholder="YY" />
                                 </SelectTrigger>
                                 <SelectContent>
                                   {Array.from({ length: 10 }, (_, i) => {
-                                    const year = (new Date().getFullYear() + i).toString().slice(-2);
+                                    const year = (new Date().getFullYear() + i)
+                                      .toString()
+                                      .slice(-2);
                                     return (
                                       <SelectItem key={year} value={year}>
                                         {year}
@@ -367,20 +421,27 @@ export default function PaymentPage() {
                             <Checkbox
                               id="isDefault"
                               checked={isDefault}
-                              onCheckedChange={(checked) => setIsDefault(checked === true)}
+                              onCheckedChange={(checked) =>
+                                setIsDefault(checked === true)
+                              }
                             />
-                            <Label htmlFor="isDefault">Set as default payment method</Label>
+                            <Label htmlFor="isDefault">
+                              Set as default payment method
+                            </Label>
                           </div>
                         </div>
                         <DialogFooter>
-                          <Button type="submit" disabled={isAddingPaymentMethod}>
+                          <Button
+                            type="submit"
+                            disabled={isAddingPaymentMethod}
+                          >
                             {isAddingPaymentMethod ? (
                               <>
                                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                                 Adding...
                               </>
                             ) : (
-                              'Add Payment Method'
+                              "Add Payment Method"
                             )}
                           </Button>
                         </DialogFooter>
@@ -389,11 +450,13 @@ export default function PaymentPage() {
                   </Dialog>
                 </CardFooter>
               </Card>
-              
+
               <Card>
                 <CardHeader>
                   <CardTitle>Payment Options</CardTitle>
-                  <CardDescription>Available payment processors</CardDescription>
+                  <CardDescription>
+                    Available payment processors
+                  </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
@@ -403,27 +466,33 @@ export default function PaymentPage() {
                       </div>
                       <div>
                         <div className="font-medium">Stripe</div>
-                        <div className="text-sm text-muted-foreground">Credit/Debit Cards</div>
+                        <div className="text-sm text-muted-foreground">
+                          Credit/Debit Cards
+                        </div>
                       </div>
                     </div>
-                    
+
                     <div className="p-4 border rounded-lg flex items-center">
                       <div className="h-10 w-10 bg-[#0BA4DB] rounded-md flex items-center justify-center mr-4">
                         <span className="text-white font-bold">P</span>
                       </div>
                       <div>
                         <div className="font-medium">PayStack</div>
-                        <div className="text-sm text-muted-foreground">Local Payment Methods</div>
+                        <div className="text-sm text-muted-foreground">
+                          Local Payment Methods
+                        </div>
                       </div>
                     </div>
-                    
+
                     <div className="p-4 border rounded-lg flex items-center">
                       <div className="h-10 w-10 bg-[#003087] rounded-md flex items-center justify-center mr-4">
                         <span className="text-white font-bold">P</span>
                       </div>
                       <div>
                         <div className="font-medium">PayPal</div>
-                        <div className="text-sm text-muted-foreground">PayPal Account</div>
+                        <div className="text-sm text-muted-foreground">
+                          PayPal Account
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -431,35 +500,55 @@ export default function PaymentPage() {
               </Card>
             </div>
           </TabsContent>
-          
+
           <TabsContent value="history">
             <Card>
               <CardHeader>
                 <CardTitle>Payment History</CardTitle>
-                <CardDescription>Your recent payment transactions</CardDescription>
+                <CardDescription>
+                  Your recent payment transactions
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 {paymentHistory.length > 0 ? (
                   <div className="space-y-4">
-                    {paymentHistory.map(payment => (
-                      <div key={payment.$id} className="flex justify-between items-center p-4 border rounded-lg">
+                    {paymentHistory.map((payment) => (
+                      <div
+                        key={payment.$id}
+                        className="flex justify-between items-center p-4 border rounded-lg"
+                      >
                         <div>
-                          <div className="font-medium">{payment.description}</div>
-                          <div className="text-sm text-muted-foreground">{formatDate(payment.date)}</div>
+                          <div className="font-medium">
+                            {payment.description}
+                          </div>
+                          <div className="text-sm text-muted-foreground">
+                            {formatDate(payment.date)}
+                          </div>
                         </div>
                         <div className="flex items-center space-x-4">
-                          <Badge 
-                            variant={payment.status === 'completed' ? 'default' : 'outline'}
-                            className={payment.status === 'completed' ? 'bg-green-500' : ''}
+                          <Badge
+                            variant={
+                              payment.status === "completed"
+                                ? "default"
+                                : "outline"
+                            }
+                            className={
+                              payment.status === "completed"
+                                ? "bg-green-500"
+                                : ""
+                            }
                           >
-                            {payment.status === 'completed' ? (
+                            {payment.status === "completed" ? (
                               <CheckCircle2 className="h-3 w-3 mr-1" />
                             ) : (
                               <AlertCircle className="h-3 w-3 mr-1" />
                             )}
-                            {payment.status.charAt(0).toUpperCase() + payment.status.slice(1)}
+                            {payment.status.charAt(0).toUpperCase() +
+                              payment.status.slice(1)}
                           </Badge>
-                          <span className="font-medium">${payment.amount.toFixed(2)}</span>
+                          <span className="font-medium">
+                            ${payment.amount.toFixed(2)}
+                          </span>
                         </div>
                       </div>
                     ))}
@@ -467,9 +556,11 @@ export default function PaymentPage() {
                 ) : (
                   <div className="text-center py-8">
                     <CreditCard className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-                    <h3 className="text-lg font-medium mb-2">No Payment History</h3>
+                    <h3 className="text-lg font-medium mb-2">
+                      No Payment History
+                    </h3>
                     <p className="text-muted-foreground">
-                      You haven't made any payments yet.
+                      You haven&apos;t made any payments yet.
                     </p>
                   </div>
                 )}

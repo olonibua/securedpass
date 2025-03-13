@@ -81,9 +81,6 @@ export default function SettingsPage() {
   const [paymentReminders, setPaymentReminders] = useState(true);
   const [promotionalEmails, setPromotionalEmails] = useState(false);
   
-  const [customFields, setCustomFields] = useState<CustomField[]>([]);
-  const [formData, setFormData] = useState<Record<string, string>>({});
-  
   const fetchData = useCallback(async () => {
     try {
       setLoading(true);

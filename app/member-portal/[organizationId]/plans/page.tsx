@@ -11,12 +11,32 @@ import { useAuth } from '@/lib/auth-context';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 
+interface MemberDetails {
+  $id: string;
+  email: string;
+  organizationId: string;
+  status: string;
+  planId: string;
+  createdAt: string;
+}
+
+interface MembershipPlan {
+  $id: string;
+  name: string;
+  description: string;
+  price: number;
+    interval: string;
+  features: string[];
+  isActive: boolean;
+}
+
+
 export default function MemberPlansPage() {
   const { organizationId } = useParams();
   const { user } = useAuth();
   const [organization, setOrganization] = useState<Organization | null>(null);
-  const [memberDetails, setMemberDetails] = useState<any>(null);
-  const [plans, setPlans] = useState<any[]>([]);
+  const [memberDetails, setMemberDetails] = useState<MemberDetails | null >(null);
+  const [plans, setPlans] = useState<MembershipPlan[]>([]);
   const [loading, setLoading] = useState(true);
   const [subscribing, setSubscribing] = useState<string | null>(null);
 
@@ -43,7 +63,7 @@ export default function MemberPlansPage() {
       );
       
       if (memberResponse.documents.length > 0) {
-        setMemberDetails(memberResponse.documents[0]);
+        setMemberDetails(memberResponse.documents[0] as unknown as MemberDetails);
       }
       
       // Fetch all active plans for this organization
@@ -57,7 +77,7 @@ export default function MemberPlansPage() {
         ]
       );
       
-      setPlans(plansResponse.documents);
+      setPlans(plansResponse.documents as unknown as MembershipPlan[]);
       
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to load data';
@@ -82,7 +102,7 @@ export default function MemberPlansPage() {
       await databases.updateDocument(
         DATABASE_ID!,
         MEMBERS_COLLECTION_ID!,
-        memberDetails.$id,
+        memberDetails?.$id || '',
         {
           planId: planId,
           planStartDate: new Date().toISOString(),
@@ -141,9 +161,9 @@ export default function MemberPlansPage() {
       ) : (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {plans.map((plan) => {
-            const isCurrentPlan = plan.$id === memberDetails.planId;
+            const isCurrentPlan = plan.$id === memberDetails?.planId;
             const features = plan.features ? 
-              (typeof plan.features === 'string' ? plan.features.split('\n') : plan.features) : 
+              (typeof plan.features === 'string' ? (plan.features as string).split('\n') : plan.features) : 
               [];
             
             return (

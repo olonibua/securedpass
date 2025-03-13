@@ -6,7 +6,7 @@ import { databases, Query } from '@/lib/appwrite';
 import { toast } from 'sonner';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2 } from 'lucide-react';
-import { Organization } from '@/types';
+import { Organization, CustomField } from '@/types';
 import DynamicRegistrationForm from '@/components/registration/DynamicRegistrationForm';
 import { DATABASE_ID, ORGANIZATIONS_COLLECTION_ID, CUSTOMFIELDS_COLLECTION_ID } from '@/lib/appwrite';
 
@@ -16,7 +16,7 @@ export default function JoinOrganizationPage() {
   const [organization, setOrganization] = useState<Organization | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitted, setSubmitted] = useState(false);
-  const [customFields, setCustomFields] = useState<any[]>([]);
+  const [customFields, setCustomFields] = useState<CustomField[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -42,7 +42,7 @@ export default function JoinOrganizationPage() {
           ]
         );
         
-        setCustomFields(fieldsResponse.documents);
+        setCustomFields(fieldsResponse.documents as unknown as CustomField[]);
       } catch (error: unknown) {
         const errorMessage = error instanceof Error ? error.message : 'Failed to fetch data';
         console.error('Error fetching data:', errorMessage);
@@ -101,7 +101,7 @@ export default function JoinOrganizationPage() {
           <CardHeader>
             <CardTitle className="text-center text-destructive">Organization Not Found</CardTitle>
             <CardDescription className="text-center">
-              The organization you're looking for doesn't exist or is no longer active.
+              The organization you&apos;re looking for doesn&apos;t exist or is no longer active.
             </CardDescription>
           </CardHeader>
         </Card>
@@ -131,7 +131,7 @@ export default function JoinOrganizationPage() {
           ) : (
             <DynamicRegistrationForm 
               organizationId={organizationId as string} 
-              customFields={customFields}
+              customFields={customFields as CustomField[]}
               onSubmit={handleSubmit} 
             />
           )}

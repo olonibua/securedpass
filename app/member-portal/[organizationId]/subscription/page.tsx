@@ -23,44 +23,72 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import MembershipPlans from '@/components/member/MembershipPlans';
 
-interface MemberDetails {
+interface Subscription {
   $id: string;
-  planId?: string;
-  planStartDate?: string;
-  planStatus?: 'active' | 'inactive';
-  email: string;
+  userId: string;
+  organizationId: string;
+  planId: string;
+  startDate: string;
+  endDate: string;  
+  isPaused: boolean;
+  pausesUsed: number;
+  pauseAllowed: number;
+  pauseDate: string | null;
+  status: 'active' | 'inactive';
 }
 
-interface MembershipPlan {
+interface CheckIn {
+  $id: string;
+  userId: string;
+  organizationId: string;
+  timestamp: string;
+  date: string;
+}
+
+interface Organization {
   $id: string;
   name: string;
   description: string;
-  price: number;
-  interval: 'monthly' | 'yearly' | 'one-time';
-  features: string[];
-}
+} 
 
-interface PaymentHistory {
-  $id: string;
-  amount: number;
-  status: 'success' | 'failed' | 'pending';
-  date: string;
-  description: string;
-}
+// interface MemberDetails {
+//   $id: string;
+//   planId?: string;
+//   planStartDate?: string;
+//   planStatus?: 'active' | 'inactive';
+//   email: string;
+// }
+
+// interface MembershipPlan {
+//   $id: string;
+//   name: string;
+//   description: string;
+//   price: number;
+//   interval: 'monthly' | 'yearly' | 'one-time';
+//   features: string[];
+// }
+
+// interface PaymentHistory {
+//   $id: string;
+//   amount: number;
+//   status: 'success' | 'failed' | 'pending';
+//   date: string;
+//   description: string;
+// }
 
 export default function SubscriptionPage() {
   const { organizationId } = useParams();
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
-  const [subscription, setSubscription] = useState<any>(null);
-  const [checkIns, setCheckIns] = useState<any[]>([]);
-  const [organization, setOrganization] = useState<any>(null);
+  const [subscription, setSubscription] = useState<Subscription | null  >(null);
+  const [checkIns, setCheckIns] = useState<CheckIn[]>([]);
+  const [organization, setOrganization] = useState<Organization | null>(null);
   const [isPausingSubscription, setIsPausingSubscription] = useState(false);
   const [isResumingSubscription, setIsResumingSubscription] = useState(false);
   const [date, setDate] = useState<Date>(new Date());
-  const [memberDetails, setMemberDetails] = useState<MemberDetails | null>(null);
-  const [currentPlan, setCurrentPlan] = useState<MembershipPlan | null>(null);
-  const [paymentHistory, setPaymentHistory] = useState<PaymentHistory[]>([]);
+  // const [memberDetails, setMemberDetails] = useState<MemberDetails | null>(null);
+  // const [currentPlan, setCurrentPlan] = useState<MembershipPlan | null>(null);
+  // const [paymentHistory, setPaymentHistory] = useState<PaymentHistory[]>([]);
   
   // Calculate days until subscription ends
   const daysUntilEnd = subscription?.endDate 
@@ -84,7 +112,7 @@ export default function SubscriptionPage() {
           ORGANIZATIONS_COLLECTION_ID,
           organizationId as string
         );
-        setOrganization(org);
+        setOrganization(org as unknown as Organization);
       }
       
       // Fetch subscription details
@@ -99,7 +127,7 @@ export default function SubscriptionPage() {
       );
       
       if (subscriptionsResponse.documents.length > 0) {
-        setSubscription(subscriptionsResponse.documents[0]);
+        setSubscription(subscriptionsResponse.documents[0] as unknown as Subscription);
       }
       
       // Fetch check-ins
@@ -112,7 +140,7 @@ export default function SubscriptionPage() {
         ]
       );
       
-      setCheckIns(checkInsResponse.documents);
+      setCheckIns(checkInsResponse.documents as unknown as CheckIn[]);
       
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to fetch subscription data';
@@ -463,7 +491,7 @@ export default function SubscriptionPage() {
                     <AlertCircle className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
                     <h3 className="text-lg font-medium mb-2">Organization Not Found</h3>
                     <p className="text-muted-foreground">
-                      The organization information couldn't be loaded.
+                      The organization information couldn&apos;t be loaded.
                     </p>
                   </div>
                 )}

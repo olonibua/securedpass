@@ -19,22 +19,17 @@ export default function RegistrationLinkGenerator({
   const [registrationCode, setRegistrationCode] = useState<string>('');
   const [copied, setCopied] = useState(false);
   const [loading, setLoading] = useState(true);
-  
-  useEffect(() => {
-    fetchOrCreateRegistrationCode();
-  }, [organizationId]);
-  
   const fetchOrCreateRegistrationCode = async () => {
     try {
       setLoading(true);
-      
+
       // Try to fetch existing registration code
       const response = await databases.listDocuments(
         DATABASE_ID,
         REGISTRATION_CODES_COLLECTION_ID as string,
-        [Query.equal('organizationId', organizationId)]
+        [Query.equal("organizationId", organizationId)]
       );
-      
+
       if (response.documents.length > 0) {
         // Use existing code
         setRegistrationCode(response.documents[0].code);
@@ -43,13 +38,22 @@ export default function RegistrationLinkGenerator({
         await generateNewCode();
       }
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to fetch registration code';
-      console.error('Error fetching registration code:', errorMessage);
-      toast.error('Failed to load registration code');
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Failed to fetch registration code";
+      console.error("Error fetching registration code:", errorMessage);
+      toast.error("Failed to load registration code");
     } finally {
       setLoading(false);
     }
   };
+  
+  useEffect(() => {
+    fetchOrCreateRegistrationCode();
+  }, [organizationId, fetchOrCreateRegistrationCode]);
+  
+  
   
   const generateNewCode = async () => {
     try {

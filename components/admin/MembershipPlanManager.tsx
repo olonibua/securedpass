@@ -89,7 +89,7 @@ export default function MembershipPlanManager({ organizationId }: MembershipPlan
 
   useEffect(() => {
     fetchPlans();
-  }, [organizationId]);
+  }, [organizationId, fetchPlans]);
 
   const handleCreatePlan = async (values: PlanFormValues) => {
     try {

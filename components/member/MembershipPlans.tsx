@@ -7,6 +7,7 @@ import { Loader2, Check } from 'lucide-react';
 import { DATABASE_ID, MEMBERSHIP_PLANS_COLLECTION_ID, databases, Query } from '@/lib/appwrite';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
+import { MembershipPlan } from '@/types'; 
 
 interface MembershipPlansProps {
   organizationId: string;
@@ -19,13 +20,9 @@ export default function MembershipPlans({
   currentPlanId,
   organizationName 
 }: MembershipPlansProps) {
-  const [plans, setPlans] = useState<any[]>([]);
+  const [plans, setPlans] = useState<MembershipPlan[]>([]);
   const [loading, setLoading] = useState(true);
   const [subscribing, setSubscribing] = useState<string | null>(null);
-
-  useEffect(() => {
-    fetchPlans();
-  }, [organizationId]);
 
   const fetchPlans = async () => {
     try {
@@ -34,21 +31,28 @@ export default function MembershipPlans({
         DATABASE_ID,
         MEMBERSHIP_PLANS_COLLECTION_ID as string,
         [
-          Query.equal('organizationId', organizationId as string),
-          Query.equal('isActive', true),
-          Query.orderAsc('price'),
+          Query.equal("organizationId", organizationId as string),
+          Query.equal("isActive", true),
+          Query.orderAsc("price"),
         ]
       );
-      
-      setPlans(response.documents);
+
+      setPlans(response.documents as unknown as MembershipPlan[]);
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to fetch plans';
-      console.error('Error fetching membership plans:', errorMessage);
-      toast.error('Failed to load membership plans');
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to fetch plans";
+      console.error("Error fetching membership plans:", errorMessage);
+      toast.error("Failed to load membership plans");
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchPlans();
+  }, [organizationId, fetchPlans]);
+
+  
 
   const handleSubscribe = async (planId: string) => {
     try {

@@ -37,7 +37,7 @@ export interface Member {
   organizationId: string;
   email: string;
   name?: string;
-  profileData: Record<string, any>;
+  profileData: Record<string, string>;
   active: boolean;
   lastCheckIn?: string;
   createdAt: string;
@@ -50,7 +50,7 @@ export interface CheckIn {
   organizationId: string;
   memberId?: string;
   timestamp: string;
-  customFieldValues: Record<string, any>;
+  customFieldValues: Record<string, string>;
   deviceInfo?: string;
 }
 
@@ -74,4 +74,50 @@ export interface SubscriptionPlan {
     adminUsers: number;
     customFields: number;
   };
+}
+
+// Payment Method
+export interface PaymentMethod {
+  $id: string;
+  userId: string;
+  type: string;
+  cardBrand: string;
+  last4: string;
+  expiryMonth: string;
+  expiryYear: string;
+  isDefault: boolean;
+  createdAt: string;
+}
+
+// Payment History
+export interface PaymentHistory {
+  $id: string;
+  userId: string;
+  amount: number;
+  status: string;
+  date: string;
+  description: string;
+}
+
+// Membership Plan
+export interface MembershipPlan {
+  $id: string;
+  name: string;
+  description: string;
+  price: number;
+  interval: string;
+  features: string[];
+  isActive: boolean;
+}
+
+// Subscription
+export interface Subscription {
+  $id: string;
+  userId: string;
+  planId: string;
+  organizationId: string;
+  status: string;
+  startDate: string;
+  endDate?: string;
+  createdAt: string;
 }

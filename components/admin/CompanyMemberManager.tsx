@@ -11,21 +11,24 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Loader2, Plus, Trash2 } from 'lucide-react';
 import { formatDate } from '@/lib/utils';
 
+interface Member {
+  $id: string;
+  name: string;
+  email: string;
+  createdAt: string;
+}
+
 interface CompanyMemberManagerProps {
   organizationId: string;
 }
 
 export default function CompanyMemberManager({ organizationId }: CompanyMemberManagerProps) {
-  const [members, setMembers] = useState<any[]>([]);
+  const [members, setMembers] = useState<Member[]>([]);
   const [loading, setLoading] = useState(true);
   const [newMemberName, setNewMemberName] = useState('');
   const [newMemberEmail, setNewMemberEmail] = useState('');
   const [isAddingMember, setIsAddingMember] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-
-  useEffect(() => {
-    fetchMembers();
-  }, [organizationId]);
 
   const fetchMembers = async () => {
     try {
@@ -33,18 +36,25 @@ export default function CompanyMemberManager({ organizationId }: CompanyMemberMa
       const response = await databases.listDocuments(
         DATABASE_ID!,
         MEMBERS_COLLECTION_ID!,
-        [Query.equal('organizationId', organizationId)]
+        [Query.equal("organizationId", organizationId)]
       );
-      
-      setMembers(response.documents);
+
+      setMembers(response.documents as unknown as Member[]);
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to fetch members';
-      console.error('Error fetching members:', errorMessage);
-      toast.error('Failed to load members');
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to fetch members";
+      console.error("Error fetching members:", errorMessage);
+      toast.error("Failed to load members");
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchMembers();
+  }, [organizationId, fetchMembers]);
+
+  
 
   const handleAddMember = async () => {
     try {

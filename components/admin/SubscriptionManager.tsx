@@ -8,7 +8,7 @@ import { Loader2, CheckCircle, AlertCircle } from 'lucide-react';
 import { DATABASE_ID, CUSTOMFIELDS_COLLECTION_ID, ORGANIZATIONS_COLLECTION_ID,  databases, Query, CHECKINS_COLLECTION_ID, ORGANIZATIONS_MEMBERS_COLLECTION_ID } from '@/lib/appwrite';
 import { toast } from 'sonner';
 import { useAuth } from '@/lib/auth-context';
-
+import { Organization } from '@/types';
 interface SubscriptionManagerProps {
   organizationId: string;
   currentPlan: 'free' | 'basic' | 'premium';
@@ -73,7 +73,7 @@ const PLANS = [
 export default function SubscriptionManager({ 
   organizationId, 
 }: SubscriptionManagerProps) {
-  const [organization, setOrganization] = useState<any>(null);
+  const [organization, setOrganization] = useState<Organization | null>(null);
   const [loading, setLoading] = useState(true);
   const [processingPayment, setProcessingPayment] = useState(false);
   const [currentUsage, setCurrentUsage] = useState({
@@ -95,7 +95,7 @@ export default function SubscriptionManager({
           ORGANIZATIONS_COLLECTION_ID!,
           organizationId
         );
-        setOrganization(org);
+        setOrganization(org as unknown as Organization);
         
         // Fetch current month's check-ins count
         const now = new Date();
@@ -200,7 +200,7 @@ export default function SubscriptionManager({
         organizationId
       );
       
-      setOrganization(updatedOrg);
+      setOrganization(updatedOrg as unknown as Organization);
       
       toast.success(`Successfully upgraded to ${planId.charAt(0).toUpperCase() + planId.slice(1)} plan!`);
       
@@ -237,7 +237,7 @@ export default function SubscriptionManager({
       <div>
         <h2 className="text-2xl font-bold">Subscription Management</h2>
         <p className="text-muted-foreground">
-          Manage your organization's subscription plan and billing.
+          Manage your organization&apos;s subscription plan and billing.
         </p>
       </div>
       
