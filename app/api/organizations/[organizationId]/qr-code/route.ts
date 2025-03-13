@@ -1,18 +1,19 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import QRCode from 'qrcode';
 import { databases, DATABASE_ID, ORGANIZATIONS_COLLECTION_ID } from '@/lib/appwrite';
 
-type RouteParams = {
+interface RouteContext {
   params: {
     organizationId: string;
   };
-};
+}
 
 export async function GET(
-  { params }: RouteParams
+  request: NextRequest,
+  context: RouteContext
 ) {
   try {
-    const organizationId = params.organizationId;
+    const organizationId = context.params.organizationId;
     
     // Verify the organization exists
     await databases.getDocument(
