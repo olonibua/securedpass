@@ -4,11 +4,10 @@ import { DATABASE_ID, ORGANIZATIONS_COLLECTION_ID } from '@/lib/appwrite';
 import QRCode from 'qrcode';
 
 export async function GET(
-  request: NextRequest,
-  { params }: { params: { organizationId: string } }
+  request: NextRequest
 ) {
   try {
-    // Extract organizationId from URL instead of params
+    // Extract organizationId from URL
     const url = request.nextUrl.pathname;
     const segments = url.split('/');
     const organizationId = segments[segments.length - 2]; // Get the ID from URL
