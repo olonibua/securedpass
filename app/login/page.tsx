@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import {
   Form,
@@ -111,7 +110,7 @@ export default function LoginPage() {
         
         <div className="text-center mt-6">
           <p className="text-sm text-muted-foreground">
-            Don't have an account?{' '}
+            Don&apos;t have an account?{' '}
             <Link href="/register" className="text-primary hover:underline">
               Create an organization
             </Link>

@@ -79,7 +79,7 @@ export const SubscriptionReminderEmail = ({
               </Text>
               
               <Text className="text-gray-700 mb-4">
-                If you have any questions or need assistance, please don't hesitate to contact our support team.
+                If you have any questions or need assistance, please don&apos;t hesitate to contact our support team.
               </Text>
               
               <Text className="text-gray-700 mb-4">

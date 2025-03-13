@@ -8,7 +8,7 @@ interface WelcomeEmailProps {
   organizationId: string;
 }
 
-export async function sendWelcomeEmail({ name, email, organizationId }: WelcomeEmailProps) {
+export async function sendWelcomeEmail({ name, email, }: WelcomeEmailProps) {
   try {
     await resend.emails.send({
       from: 'noreply@yourdomain.com',

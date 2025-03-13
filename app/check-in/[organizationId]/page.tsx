@@ -7,12 +7,19 @@ import { toast } from 'sonner';
 import DynamicCheckInForm from '@/components/check-in/DynamicCheckInForm';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2 } from 'lucide-react';
+import Image from 'next/image';
+
+interface Organization {
+  name: string;
+  logo?: string;
+  $id: string;
+}
 
 export default function CheckInPage() {
   const params = useParams();
   const organizationId = params.organizationId as string;
   
-  const [organization, setOrganization] = useState<any>(null);
+  const [organization, setOrganization] = useState<Organization | null>(null);
   const [loading, setLoading] = useState(true);
   const [success, setSuccess] = useState(false);
 
@@ -25,7 +32,7 @@ export default function CheckInPage() {
           ORGANIZATIONS_COLLECTION_ID!,
           organizationId
         );
-        setOrganization(org);
+        setOrganization((org as unknown) as Organization);
       } catch (error: unknown) {
         const errorMessage = error instanceof Error ? error.message : 'Failed to fetch organization';
         console.error('Error fetching organization:', errorMessage);
@@ -38,7 +45,7 @@ export default function CheckInPage() {
     fetchOrganization();
   }, [organizationId]);
 
-  const handleCheckIn = async (formData: Record<string, any>) => {
+  const handleCheckIn = async (formData: Record<string, unknown>) => {
     try {
       const response = await fetch('/api/check-in', {
         method: 'POST',
@@ -85,7 +92,7 @@ export default function CheckInPage() {
           <CardHeader>
             <CardTitle className="text-center text-destructive">Organization Not Found</CardTitle>
             <CardDescription className="text-center">
-              The organization you're looking for doesn't exist or is no longer active.
+              The organization you&apos;re looking for doesn&apos;t exist or is no longer active.
             </CardDescription>
           </CardHeader>
         </Card>
@@ -99,9 +106,11 @@ export default function CheckInPage() {
         <CardHeader className="text-center">
           {organization.logo && (
             <div className="flex justify-center mb-4">
-              <img 
+              <Image 
                 src={organization.logo} 
                 alt={organization.name} 
+                width={64}
+                height={64}
                 className="h-16 w-auto object-contain"
               />
             </div>

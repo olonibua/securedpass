@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { databases, Query, DATABASE_ID, ORGANIZATIONS_COLLECTION_ID } from '@/lib/appwrite';
 import { toast } from 'sonner';
@@ -12,14 +12,7 @@ export default function DashboardPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    // Only fetch data if user is authenticated
-    if (user && !authLoading) {
-      redirectToOrganization();
-    }
-  }, [user, authLoading]);
-
-  const redirectToOrganization = async () => {
+  const redirectToOrganization = useCallback(async () => {
     try {
       setLoading(true);
       
@@ -51,7 +44,13 @@ export default function DashboardPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user?.$id, router]);
+
+  useEffect(() => {
+    if (user && !authLoading) {
+      redirectToOrganization();
+    }
+  }, [user, authLoading, redirectToOrganization]);
 
   if (authLoading || loading) {
     return (

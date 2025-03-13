@@ -18,12 +18,8 @@ interface MembershipManagerProps {
 }
 
 export default function MembershipManager({ organizationId }: MembershipManagerProps) {
-  const [members, setMembers] = useState<any[]>([]);
+  const [members, setMembers] = useState<Record<string, unknown>[]>([]);
   const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetchMembers();
-  }, [organizationId]);
 
   const fetchMembers = async () => {
     try {
@@ -47,7 +43,10 @@ export default function MembershipManager({ organizationId }: MembershipManagerP
     }
   };
 
-  
+  useEffect(() => {
+    fetchMembers();
+  }, [organizationId]);
+
   const handleStatusChange = async (memberId: string, newStatus: 'active' | 'inactive') => {
     try {
       await databases.updateDocument(
@@ -122,15 +121,15 @@ export default function MembershipManager({ organizationId }: MembershipManagerP
                 </TableHeader>
                 <TableBody>
                   {members.map((member) => (
-                    <TableRow key={member.$id}>
-                      <TableCell className="font-medium">{member.name}</TableCell>
-                      <TableCell>{member.email}</TableCell>
+                    <TableRow key={member.$id as string}>
+                      <TableCell className="font-medium">{member.name as string}</TableCell>
+                      <TableCell>{member.email as string}</TableCell>
                       <TableCell>
                         <Badge variant={member.status === 'active' ? 'default' : 'secondary'}>
                           {member.status === 'active' ? 'Active' : 'Inactive'}
                         </Badge>
                       </TableCell>
-                      <TableCell>{formatDate(member.createdAt)}</TableCell>
+                      <TableCell>{formatDate(member.createdAt as string)}</TableCell>
                       <TableCell>
                         <div className="flex gap-2">
                           <Button 
@@ -145,7 +144,7 @@ export default function MembershipManager({ organizationId }: MembershipManagerP
                             <Button 
                               variant="outline" 
                               size="sm"
-                              onClick={() => handleStatusChange(member.$id, 'inactive')}
+                              onClick={() => handleStatusChange(member.$id as string, 'inactive')}
                             >
                               Deactivate
                             </Button>
@@ -153,7 +152,7 @@ export default function MembershipManager({ organizationId }: MembershipManagerP
                             <Button 
                               variant="outline" 
                               size="sm"
-                              onClick={() => handleStatusChange(member.$id, 'active')}
+                              onClick={() => handleStatusChange(member.$id as string, 'active')}
                             >
                               Activate
                             </Button>
@@ -189,7 +188,7 @@ export default function MembershipManager({ organizationId }: MembershipManagerP
                       <p className="text-sm text-muted-foreground">New This Month</p>
                       <p className="text-2xl font-bold">
                         {members.filter(m => {
-                          const date = new Date(m.createdAt);
+                          const date = new Date(m.createdAt as string);
                           const now = new Date();
                           return date.getMonth() === now.getMonth() && 
                                 date.getFullYear() === now.getFullYear();

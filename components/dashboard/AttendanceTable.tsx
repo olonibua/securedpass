@@ -33,9 +33,9 @@ interface AttendanceTableProps {
 
 export default function AttendanceTable({ organizationId }: AttendanceTableProps) {
   const [loading, setLoading] = useState(true);
-  const [checkIns, setCheckIns] = useState<any[]>([]);
+  const [checkIns, setCheckIns] = useState<Record<string, unknown>[]>([]);
   const [customFields, setCustomFields] = useState<CustomField[]>([]);
-  const [members, setMembers] = useState<Record<string, any>>({});
+  const [members, setMembers] = useState<Record<string, Record<string, unknown>>>({});
   
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -49,51 +49,6 @@ export default function AttendanceTable({ organizationId }: AttendanceTableProps
   const [exportLoading, setExportLoading] = useState(false);
 
   const ITEMS_PER_PAGE = 10;
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        
-        // Fetch custom fields
-        const fieldsResponse = await databases.listDocuments(
-          DATABASE_ID!,
-          CUSTOMFIELDS_COLLECTION_ID!,
-          [
-            Query.equal('organizationId', organizationId),
-            Query.orderAsc('order')
-          ]
-        );
-        setCustomFields(fieldsResponse.documents as unknown as CustomField[]);
-        
-        // Fetch members for this organization
-        const membersResponse = await databases.listDocuments(
-          DATABASE_ID!,
-          MEMBERS_COLLECTION_ID!,
-          [Query.equal('organizationId', organizationId)]
-        );
-        
-        // Create a map of member IDs to member data for quick lookup
-        const membersMap = membersResponse.documents.reduce((acc, member) => {
-          acc[member.$id] = member;
-          return acc;
-        }, {} as Record<string, any>);
-        
-        setMembers(membersMap);
-        
-        // Fetch check-ins with pagination and filters
-        await fetchCheckIns();
-      } catch (error: unknown) {
-        const errorMessage = error instanceof Error ? error.message : 'Failed to fetch data';
-        console.error('Error fetching data:', errorMessage);
-        toast.error('Failed to load attendance data');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, [organizationId]);
 
   const fetchCheckIns = async () => {
     try {
@@ -149,10 +104,53 @@ export default function AttendanceTable({ organizationId }: AttendanceTableProps
   };
 
   useEffect(() => {
-    fetchCheckIns();
-  }, [page, dateRange, organizationId]);
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        
+        // Fetch custom fields
+        const fieldsResponse = await databases.listDocuments(
+          DATABASE_ID!,
+          CUSTOMFIELDS_COLLECTION_ID!,
+          [
+            Query.equal('organizationId', organizationId),
+            Query.orderAsc('order')
+          ]
+        );
+        setCustomFields(fieldsResponse.documents as unknown as CustomField[]);
+        
+        // Fetch members for this organization
+        const membersResponse = await databases.listDocuments(
+          DATABASE_ID!,
+          MEMBERS_COLLECTION_ID!,
+          [Query.equal('organizationId', organizationId)]
+        );
+        
+        // Create a map of member IDs to member data for quick lookup
+        const membersMap = membersResponse.documents.reduce((acc, member) => {
+          acc[member.$id] = member;
+          return acc;
+        }, {} as Record<string, Record<string, unknown>>);
+        
+        setMembers(membersMap);
+        
+        // Fetch check-ins with pagination and filters
+        await fetchCheckIns();
+      } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : 'Failed to fetch data';
+        console.error('Error fetching data:', errorMessage);
+        toast.error('Failed to load attendance data');
+      } finally {
+        setLoading(false);
+      }
+    };
 
- 
+    fetchData();
+  }, [organizationId]);
+
+  useEffect(() => {
+    fetchCheckIns();
+  }, [page, dateRange, organizationId, fetchCheckIns]);
 
   const handleExportCSV = async () => {
     try {
@@ -323,18 +321,18 @@ export default function AttendanceTable({ organizationId }: AttendanceTableProps
             </TableHeader>
             <TableBody>
               {checkIns.map(checkIn => (
-                <TableRow key={checkIn.$id}>
+                <TableRow key={checkIn.$id as string}>
                   <TableCell className="font-medium">
-                    {new Date(checkIn.timestamp).toLocaleString()}
+                    {new Date(checkIn.timestamp as string).toLocaleString()}
                   </TableCell>
                   <TableCell>
-                    {checkIn.memberId && members[checkIn.memberId] 
-                      ? members[checkIn.memberId].name || members[checkIn.memberId].email
+                    {(checkIn.memberId as string | undefined) && members[checkIn.memberId as string] 
+                      ? (members[checkIn.memberId as string].name as string) || (members[checkIn.memberId as string].email as string)
                       : 'Guest'}
                   </TableCell>
                   {customFields.map(field => (
                     <TableCell key={field.$id}>
-                      {checkIn.customFieldValues[field.$id] || '-'}
+                      {(checkIn.customFieldValues as Record<string, string>)[field.$id] || '-'}
                     </TableCell>
                   ))}
                 </TableRow>

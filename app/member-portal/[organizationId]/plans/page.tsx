@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import { DATABASE_ID, ORGANIZATIONS_COLLECTION_ID, MEMBERS_COLLECTION_ID, MEMBERSHIP_PLANS_COLLECTION_ID, databases, Query } from '@/lib/appwrite';
 import { toast } from 'sonner';
@@ -20,13 +20,7 @@ export default function MemberPlansPage() {
   const [loading, setLoading] = useState(true);
   const [subscribing, setSubscribing] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (user && organizationId) {
-      fetchData();
-    }
-  }, [organizationId, user]);
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       setLoading(true);
       
@@ -72,7 +66,13 @@ export default function MemberPlansPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [organizationId, user]);
+
+  useEffect(() => {
+    if (user && organizationId) {
+      fetchData();
+    }
+  }, [organizationId, user, fetchData]);
 
   const handleSubscribe = async (planId: string) => {
     try {
@@ -116,7 +116,7 @@ export default function MemberPlansPage() {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen">
         <h1 className="text-2xl font-bold mb-2">Membership not found</h1>
-        <p className="text-muted-foreground">You don't have an active membership with this organization.</p>
+        <p className="text-muted-foreground">You don&apos;t have an active membership with this organization.</p>
       </div>
     );
   }
@@ -134,7 +134,7 @@ export default function MemberPlansPage() {
             <AlertCircle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
             <h3 className="text-xl font-medium mb-2">No Plans Available</h3>
             <p className="text-muted-foreground">
-              This organization hasn't created any membership plans yet.
+              This organization hasn&apos;t created any membership plans yet.
             </p>
           </CardContent>
         </Card>

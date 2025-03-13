@@ -27,7 +27,7 @@ import { CustomField } from '@/types';
 interface DynamicRegistrationFormProps {
   organizationId: string;
   customFields: CustomField[];
-  onSubmit: (data: Record<string, any>) => Promise<void>;
+  onSubmit: (data: Record<string, unknown>) => Promise<void>;
 }
 
 export default function DynamicRegistrationForm({ 
@@ -39,7 +39,7 @@ export default function DynamicRegistrationForm({
 
   // Build the form schema based on custom fields
   const buildFormSchema = () => {
-    const schemaMap: Record<string, any> = {
+    const schemaMap: Record<string, z.ZodTypeAny> = {
       // Always include name and email fields
       name: z.string().min(2, { message: 'Name must be at least 2 characters' }),
       email: z.string().email({ message: 'Invalid email address' }),
@@ -48,7 +48,7 @@ export default function DynamicRegistrationForm({
     
     // Add custom fields to schema
     customFields.forEach(field => {
-      let validator;
+      let validator: z.ZodTypeAny;
       
       switch (field.type) {
         case 'email':
@@ -75,7 +75,7 @@ export default function DynamicRegistrationForm({
       }
       
       if (field.required) {
-        if ('min' in validator) {
+        if (validator instanceof z.ZodString) {
           validator = validator.min(1, { message: 'This field is required' });
         } else {
           validator = z.string().min(1, { message: 'This field is required' });

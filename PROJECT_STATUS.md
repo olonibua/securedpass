@@ -51,6 +51,8 @@ We're building a QR-based access and attendance system with dynamic custom field
 1. Need to update all instances of `databases.Query` to `Query` after updating the appwrite.ts file
 2. Some components are using `toast` from 'sonner' while others use '@/components/ui/use-toast'
 3. Need to ensure consistent error handling across all components
+4. ⚠️ **DEPENDENCY CONFLICT**: There's a conflict between `react-day-picker` and `date-fns` versions. `react-day-picker@8.10.1` requires `date-fns@^2.28.0 || ^3.0.0` but the project is using `date-fns@^4.1.0`. Either downgrade `date-fns` to version 3.x or use `--force` flag during installation.
+5. ⚠️ **REACT VERSION COMPATIBILITY**: `react-day-picker` is not yet compatible with React 19. Consider using React 18 for better compatibility with third-party libraries.
 
 ## Next Steps
 1. Complete analytics for check-in patterns
@@ -122,3 +124,13 @@ The following environment variables need to be configured:
 - **Proper error handling**: Include try/catch blocks for async operations
 - **Type safety**: Use proper TypeScript types for all variables and function parameters
 - **⚠️ WARNING: No unused state variables**: Don't declare state variables (useState) without using them in the component. If you declare `setIsLoading`, you must use it in the UI (e.g., showing a loading indicator). Unused state variables cause errors during Vercel deployment.
+- **⚠️ WARNING: Avoid using `any` type**: Never use the `any` type as it defeats TypeScript's type checking. Instead:
+  ```typescript
+  // ❌ Bad
+  const data: any = response.data;
+  
+  // ✅ Good
+  const data: Record<string, unknown> = response.data;
+  // Or use more specific types like:
+  const data: CustomType = response.data;
+  ```

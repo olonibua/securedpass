@@ -63,7 +63,8 @@ export default function OrganizationDashboard() {
           <CardContent className="flex flex-col items-center justify-center py-12">
             <h3 className="text-lg font-medium mb-2">Organization not found</h3>
             <p className="text-muted-foreground text-center max-w-md mb-6">
-              The organization you're looking for doesn't exist or you don't have access to it.
+              The organization you&apos;re looking for doesn&apos;t exist or you
+              don&apos;t have access to it.
             </p>
           </CardContent>
         </Card>
@@ -78,17 +79,23 @@ export default function OrganizationDashboard() {
     <div className="container mx-auto py-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">{organization.name}</h1>
+          <h1 className="text-3xl font-bold tracking-tight">
+            {organization.name}
+          </h1>
           <p className="text-muted-foreground">
-            Manage your organization's members and settings
+            Manage your organization&apos;s members and settings
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Badge variant={organization.plan === 'free' ? 'outline' : 'default'}>
-            {organization.plan.charAt(0).toUpperCase() + organization.plan.slice(1)} Plan
+          <Badge variant={organization.plan === "free" ? "outline" : "default"}>
+            {organization.plan.charAt(0).toUpperCase() +
+              organization.plan.slice(1)}{" "}
+            Plan
           </Badge>
           <Badge variant="secondary">
-            {organization.organizationType === 'membership' ? 'Membership Organization' : 'Company'}
+            {organization.organizationType === "membership"
+              ? "Membership Organization"
+              : "Company"}
           </Badge>
         </div>
       </div>
@@ -99,24 +106,22 @@ export default function OrganizationDashboard() {
             <Users className="h-4 w-4 mr-2" />
             Members
           </TabsTrigger>
-          
+
           <TabsTrigger value="attendance">
             <Calendar className="h-4 w-4 mr-2" />
             Attendance
           </TabsTrigger>
-          
+
           <TabsTrigger value="check-in">
             <QrCode className="h-4 w-4 mr-2" />
             Check-in
           </TabsTrigger>
-          
-          
-          
+
           <TabsTrigger value="settings">
             <Settings className="h-4 w-4 mr-2" />
             Settings
           </TabsTrigger>
-          
+
           <TabsTrigger value="membership-plans">
             <CreditCard className="h-4 w-4 mr-2" />
             Membership Plans
@@ -135,7 +140,9 @@ export default function OrganizationDashboard() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <CompanyMemberManager organizationId={organizationId as string} />
+                <CompanyMemberManager
+                  organizationId={organizationId as string}
+                />
               </CardContent>
             </Card>
           ) : (
@@ -179,19 +186,20 @@ export default function OrganizationDashboard() {
               <QRCodeDisplay organizationId={organizationId as string} />
             </CardContent>
           </Card>
-          
+
           {isMembershipOrg && (
             <div className="mt-6">
               <Card>
                 <CardHeader>
                   <CardTitle>Member Registration</CardTitle>
                   <CardDescription>
-                    Share this registration link with people to join your organization
+                    Share this registration link with people to join your
+                    organization
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <RegistrationLinkGenerator 
-                    organizationId={organizationId as string} 
+                  <RegistrationLinkGenerator
+                    organizationId={organizationId as string}
                     organizationName={organization.name}
                   />
                 </CardContent>
@@ -199,9 +207,7 @@ export default function OrganizationDashboard() {
             </div>
           )}
         </TabsContent>
-        
-       
-        
+
         <TabsContent value="settings">
           <div className="flex-col gap-6">
             <Card>
@@ -212,19 +218,21 @@ export default function OrganizationDashboard() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <CustomFieldsManager organizationId={organizationId as string} />
+                <CustomFieldsManager
+                  organizationId={organizationId as string}
+                />
               </CardContent>
             </Card>
-            
+
             <Card>
               <CardHeader>
                 <CardTitle>Subscription</CardTitle>
                 <CardDescription>
-                  Manage your organization's subscription plan
+                  Manage your organization&apos;s subscription plan
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <SubscriptionManager 
+                <SubscriptionManager
                   organizationId={organizationId as string}
                   currentPlan={organization.plan}
                 />
@@ -232,7 +240,7 @@ export default function OrganizationDashboard() {
             </Card>
           </div>
         </TabsContent>
-        
+
         <TabsContent value="membership-plans">
           <Card>
             <CardHeader>
@@ -242,7 +250,9 @@ export default function OrganizationDashboard() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <MembershipPlanManager organizationId={organizationId as string} />
+              <MembershipPlanManager
+                organizationId={organizationId as string}
+              />
             </CardContent>
           </Card>
         </TabsContent>

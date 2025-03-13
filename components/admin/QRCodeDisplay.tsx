@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Loader2, Download, Printer, Share2 } from 'lucide-react';
 import { toast } from 'sonner';
-
+import Image from 'next/image';
 interface QRCodeDisplayProps {
   organizationId: string;
 }
@@ -148,10 +148,12 @@ export default function QRCodeDisplay({ organizationId }: QRCodeDisplayProps) {
             </TabsList>
             <TabsContent value="qrcode" className="flex justify-center">
               <div className="border p-4 rounded-md">
-                <img 
+                <Image 
                   src={qrCode} 
                   alt="Check-in QR Code" 
                   className="h-64 w-64 object-contain"
+                  width={256}
+                  height={256}
                 />
               </div>
             </TabsContent>

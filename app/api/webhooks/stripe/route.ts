@@ -18,9 +18,12 @@ export const config = {
 export async function POST(request: NextRequest) {
   try {
     // Get the raw body for signature verification
-    const chunks = [];
-    for await (const chunk of request.body as any) {
-      chunks.push(typeof chunk === 'string' ? Buffer.from(chunk) : chunk);
+    const chunks: Buffer[] = [];
+    const reader = (request.body as ReadableStream<Uint8Array>).getReader();
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      chunks.push(Buffer.from(value));
     }
     const rawBody = Buffer.concat(chunks).toString('utf8');
     

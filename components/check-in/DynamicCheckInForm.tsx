@@ -28,7 +28,7 @@ import { CustomField } from '@/types';
 
 interface DynamicCheckInFormProps {
   organizationId: string;
-  onSubmit: (data: Record<string, any>) => Promise<void>;
+  onSubmit: (data: Record<string, unknown>) => Promise<void>;
 }
 
 export default function DynamicCheckInForm({ 
@@ -68,10 +68,10 @@ export default function DynamicCheckInForm({
 
   // Dynamically build the form schema based on custom fields
   const buildFormSchema = () => {
-    const schemaMap: Record<string, any> = {};
+    const schemaMap: Record<string, z.ZodTypeAny> = {};
     
     customFields.forEach(field => {
-      let validator;
+      let validator: z.ZodTypeAny;
       
       switch (field.type) {
         case 'email':
@@ -98,7 +98,7 @@ export default function DynamicCheckInForm({
       }
       
       if (field.required) {
-        if ('min' in validator) {
+        if (validator instanceof z.ZodString) {
           validator = validator.min(1, { message: 'This field is required' });
         } else {
           validator = z.string().min(1, { message: 'This field is required' });
@@ -114,7 +114,7 @@ export default function DynamicCheckInForm({
   };
 
   const formSchema = buildFormSchema();
-  type FormValues = z.infer<typeof formSchema>;
+  type FormValues = z.infer<z.ZodObject<Record<string, z.ZodTypeAny>>>;
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),

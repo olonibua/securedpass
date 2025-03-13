@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import { databases, Query } from '@/lib/appwrite';
 import { 
@@ -27,12 +27,40 @@ import { Separator } from '@/components/ui/separator';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 
+interface MemberDetails {
+  $id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone?: string;
+  address?: string;
+  city?: string;
+  state?: string;
+  zipCode?: string;
+  emergencyContact?: string;
+  emergencyPhone?: string;
+  emailNotifications?: boolean;
+  smsNotifications?: boolean;
+  checkInReminders?: boolean;
+  paymentReminders?: boolean;
+  promotionalEmails?: boolean;
+}
+
+interface CustomField {
+  $id: string;
+  label: string;
+  type: string;
+  required: boolean;
+  options?: string[];
+  value?: string;
+}
+
 export default function SettingsPage() {
   const { organizationId } = useParams();
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [memberDetails, setMemberDetails] = useState<any>(null);
+  const [memberDetails, setMemberDetails] = useState<MemberDetails | null>(null);
   
   // Form state
   const [firstName, setFirstName] = useState('');
@@ -53,13 +81,10 @@ export default function SettingsPage() {
   const [paymentReminders, setPaymentReminders] = useState(true);
   const [promotionalEmails, setPromotionalEmails] = useState(false);
   
-  useEffect(() => {
-    if (user) {
-      fetchData();
-    }
-  }, [user, organizationId]);
-
-  const fetchData = async () => {
+  const [customFields, setCustomFields] = useState<CustomField[]>([]);
+  const [formData, setFormData] = useState<Record<string, string>>({});
+  
+  const fetchData = useCallback(async () => {
     try {
       setLoading(true);
       
@@ -75,7 +100,7 @@ export default function SettingsPage() {
       
       if (membersResponse.documents.length > 0) {
         const memberDoc = membersResponse.documents[0];
-        setMemberDetails(memberDoc);
+        setMemberDetails((memberDoc as unknown) as MemberDetails);
         
         // Set form values
         setFirstName(memberDoc.firstName || '');
@@ -104,7 +129,13 @@ export default function SettingsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user, organizationId]);
+
+  useEffect(() => {
+    if (user) {
+      fetchData();
+    }
+  }, [user, organizationId, fetchData]);
 
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();

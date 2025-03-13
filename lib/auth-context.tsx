@@ -33,6 +33,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(currentUser);
       return true;
     } catch (error: unknown) {
+      console.error("Check auth error:", error);
       setUser(null);
       return false;
     } finally {

@@ -48,7 +48,7 @@ const planFormSchema = z.object({
 type PlanFormValues = z.infer<typeof planFormSchema>;
 
 export default function MembershipPlanManager({ organizationId }: MembershipPlanManagerProps) {
-  const [plans, setPlans] = useState<any[]>([]);
+  const [plans, setPlans] = useState<Record<string, unknown>[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingPlan, setEditingPlan] = useState<string | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -64,10 +64,6 @@ export default function MembershipPlanManager({ organizationId }: MembershipPlan
       features: '',
     },
   });
-
-  useEffect(() => {
-    fetchPlans();
-  }, [organizationId]);
 
   const fetchPlans = async () => {
     try {
@@ -90,6 +86,10 @@ export default function MembershipPlanManager({ organizationId }: MembershipPlan
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchPlans();
+  }, [organizationId]);
 
   const handleCreatePlan = async (values: PlanFormValues) => {
     try {
@@ -175,15 +175,15 @@ export default function MembershipPlanManager({ organizationId }: MembershipPlan
     }
   };
 
-  const startEditing = (plan: any) => {
-    setEditingPlan(plan.$id);
+  const startEditing = (plan: Record<string, unknown>) => {
+    setEditingPlan(plan.$id as string);
     form.reset({
-      name: plan.name,
-      description: plan.description,
-      price: plan.price,
-      interval: plan.interval,
-      isActive: plan.isActive,
-      features: plan.features.join('\n'),
+      name: plan.name as string,
+      description: plan.description as string,
+      price: plan.price as number,
+      interval: plan.interval as "monthly" | "yearly" | "one-time",
+      isActive: plan.isActive as boolean,
+      features: (plan.features as string[]).join('\n'),
     });
   };
 
@@ -356,13 +356,13 @@ export default function MembershipPlanManager({ organizationId }: MembershipPlan
       ) : (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {plans.map((plan) => (
-            <Card key={plan.$id} className={!plan.isActive ? "opacity-70" : ""}>
+            <Card key={plan.$id as string} className={!plan.isActive ? "opacity-70" : ""}>
               <CardHeader>
                 <div className="flex justify-between items-start">
                   <div>
-                    <CardTitle>{plan.name}</CardTitle>
+                    <CardTitle>{plan.name as string}</CardTitle>
                     <CardDescription className="mt-1">
-                      {formatPrice(plan.price, plan.interval)}
+                      {formatPrice(plan.price as number, plan.interval as string)}
                     </CardDescription>
                   </div>
                   {!plan.isActive && (
@@ -373,10 +373,10 @@ export default function MembershipPlanManager({ organizationId }: MembershipPlan
                 </div>
               </CardHeader>
               <CardContent>
-                <p className="text-sm mb-4">{plan.description}</p>
-                {plan.features.length > 0 && (
+                <p className="text-sm mb-4">{plan.description as string}</p>
+                {(plan.features as string[]).length > 0 && (
                   <ul className="space-y-2">
-                    {plan.features.map((feature: string, index: number) => (
+                    {(plan.features as string[]).map((feature: string, index: number) => (
                       <li key={index} className="text-sm flex items-start">
                         <span className="text-green-500 mr-2">✓</span>
                         {feature}
@@ -389,7 +389,7 @@ export default function MembershipPlanManager({ organizationId }: MembershipPlan
                 <Button 
                   variant="outline" 
                   size="sm"
-                  onClick={() => handleDeletePlan(plan.$id)}
+                  onClick={() => handleDeletePlan(plan.$id as string)}
                 >
                   <Trash className="h-4 w-4 mr-1" />
                   Delete

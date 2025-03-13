@@ -43,12 +43,27 @@ interface Subscription {
   createdAt: string;
 }
 
+interface Organization {
+  $id: string;
+  name: string;
+  description: string;
+  type?: string;
+}
+
+interface Member {
+  $id: string;
+  email: string;
+  organizationId: string;
+  status: string;
+  createdAt: string;
+}
+
 export default function MemberPortalPage() {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
-  const [organization, setOrganization] = useState<any>(null);
-  const [memberDetails, setMemberDetails] = useState<any>(null);
-  const [membershipPlans, setMembershipPlans] = useState<any[]>([]);
+  const [organization, setOrganization] = useState<Organization | null>(null);
+  const [memberDetails, setMemberDetails] = useState<Member | null>(null);
+  const [membershipPlans, setMembershipPlans] = useState<MembershipPlan[]>([]);
   const [currentPlan, setCurrentPlan] = useState<MembershipPlan | null>(null);
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const router = useRouter();
@@ -88,7 +103,7 @@ export default function MemberPortalPage() {
         if (membersResponse.documents.length > 0) {
           const memberDoc = membersResponse.documents[0];
           console.log('Member Document:', memberDoc);
-          setMemberDetails(memberDoc);
+          setMemberDetails(memberDoc as unknown as Member);
           
           // Fetch organization details
           const org = await databases.getDocument(
@@ -97,7 +112,7 @@ export default function MemberPortalPage() {
             memberDoc.organizationId
           );
           console.log('Organization Details:', org);
-          setOrganization(org);
+          setOrganization(org as unknown as Organization);
 
           // Fetch all active membership plans for this organization
           const plansResponse = await databases.listDocuments(
@@ -109,7 +124,7 @@ export default function MemberPortalPage() {
             ]
           );
           console.log('Membership Plans:', plansResponse.documents);
-          setMembershipPlans(plansResponse.documents);
+          setMembershipPlans(plansResponse.documents as unknown as MembershipPlan[]);
 
           // Enhanced subscription fetching with better logging
           try {
@@ -233,15 +248,15 @@ export default function MemberPortalPage() {
                     <div className="flex items-center justify-between">
                       <span className="text-sm font-medium">Member since:</span>
                       <span className="text-sm">
-                        {memberDetails.createdAt 
+                        {memberDetails?.createdAt 
                           ? formatDate(memberDetails.createdAt) 
                           : formatDate(new Date().toISOString())}
                       </span>
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-sm font-medium">Status:</span>
-                      <Badge variant={memberDetails.status === 'active' ? 'success' : 'secondary'}>
-                        {memberDetails.status || 'Active'}
+                      <Badge variant={memberDetails?.status === 'active' ? 'success' : 'secondary'}>
+                        {memberDetails?.status || 'Active'}
                       </Badge>
                     </div>
                     <div className="flex items-center justify-between">
@@ -325,7 +340,7 @@ export default function MemberPortalPage() {
                     <Card className="border-dashed border-2 border-muted hover:border-primary/20 transition-all">
                       <CardContent className="p-6 text-center">
                         <p className="text-muted-foreground mb-4">
-                          You don't have an active subscription plan
+                          You don&apos;t have an active subscription plan
                         </p>
                         <Button 
                           onClick={() => router.push(`/member-portal/${organization.$id}/plans`)}

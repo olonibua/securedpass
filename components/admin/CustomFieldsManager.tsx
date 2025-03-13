@@ -74,7 +74,7 @@ export default function CustomFieldsManager({ organizationId }: CustomFieldProps
     setFields([...fields, newField as CustomField]);
   };
 
-  const updateField = (index: number, key: keyof CustomField, value: any) => {
+  const updateField = (index: number, key: keyof CustomField, value: string | boolean | string[] | number) => {
     const updatedFields = [...fields];
     updatedFields[index] = { ...updatedFields[index], [key]: value };
     setFields(updatedFields);

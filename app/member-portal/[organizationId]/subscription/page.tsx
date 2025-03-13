@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import { databases, Query } from '@/lib/appwrite';
 import { 
@@ -23,6 +23,31 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import MembershipPlans from '@/components/member/MembershipPlans';
 
+interface MemberDetails {
+  $id: string;
+  planId?: string;
+  planStartDate?: string;
+  planStatus?: 'active' | 'inactive';
+  email: string;
+}
+
+interface MembershipPlan {
+  $id: string;
+  name: string;
+  description: string;
+  price: number;
+  interval: 'monthly' | 'yearly' | 'one-time';
+  features: string[];
+}
+
+interface PaymentHistory {
+  $id: string;
+  amount: number;
+  status: 'success' | 'failed' | 'pending';
+  date: string;
+  description: string;
+}
+
 export default function SubscriptionPage() {
   const { organizationId } = useParams();
   const { user } = useAuth();
@@ -33,6 +58,9 @@ export default function SubscriptionPage() {
   const [isPausingSubscription, setIsPausingSubscription] = useState(false);
   const [isResumingSubscription, setIsResumingSubscription] = useState(false);
   const [date, setDate] = useState<Date>(new Date());
+  const [memberDetails, setMemberDetails] = useState<MemberDetails | null>(null);
+  const [currentPlan, setCurrentPlan] = useState<MembershipPlan | null>(null);
+  const [paymentHistory, setPaymentHistory] = useState<PaymentHistory[]>([]);
   
   // Calculate days until subscription ends
   const daysUntilEnd = subscription?.endDate 
@@ -45,13 +73,7 @@ export default function SubscriptionPage() {
       (new Date(subscription.endDate).getTime() - new Date(subscription.startDate).getTime())) * 100)
     : 0;
 
-  useEffect(() => {
-    if (user) {
-      fetchData();
-    }
-  }, [user, organizationId]);
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       setLoading(true);
       
@@ -99,7 +121,13 @@ export default function SubscriptionPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [organizationId, user]);
+
+  useEffect(() => {
+    if (user) {
+      fetchData();
+    }
+  }, [user, organizationId, fetchData]);
 
   const handlePauseSubscription = async () => {
     if (!subscription) return;
@@ -332,9 +360,8 @@ export default function SubscriptionPage() {
                     <div className="text-center py-8">
                       <CalendarIcon className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
                       <h3 className="text-lg font-medium mb-2">No Active Subscription</h3>
-                      <p className="text-muted-foreground mb-6">
-                        You don't have an active subscription plan with this organization.
-                      </p>
+                      <p className="text-muted-foreground">You don&apos;t have an active subscription plan</p>
+                      <p className="text-muted-foreground">This organization hasn&apos;t created any membership plans yet.</p>
                       <Button onClick={() => window.location.href = `/member-portal/${organizationId}/plans`}>
                         View Available Plans
                       </Button>

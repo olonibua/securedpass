@@ -1,97 +1,120 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { CHECKINS_COLLECTION_ID, DATABASE_ID, databases, MEMBERS_COLLECTION_ID, ORGANIZATIONS_COLLECTION_ID, MEMBERSHIP_PLANS_COLLECTION_ID, Query } from '@/lib/appwrite';
 import { toast } from 'sonner';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, } from '@/components/ui/card';
 import { Loader2, CalendarDays, QrCode, CreditCard } from 'lucide-react';
 import { Organization, CheckIn } from '@/types';
-import { useAuth } from '@/lib/auth-context';
+import { useAuth } from '@/lib/auth-context';     
 import { Button } from '@/components/ui/button';
 import { formatDate } from '@/lib/utils';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+
+interface MemberDetails {
+  $id: string;
+  name: string;
+  email: string;
+  createdAt: string;
+  planId?: string;
+  customFields?: string;
+  status: 'active' | 'inactive';
+}
+
+interface MembershipPlan {
+  $id: string;
+  name: string;
+  description: string;
+  price: number;
+  interval: 'monthly' | 'yearly' | 'one-time';
+  features: string[];
+}
 
 export default function MemberPortalPage() {
   const { organizationId } = useParams();
   const router = useRouter();
   const { user } = useAuth();
   const [organization, setOrganization] = useState<Organization | null>(null);
-  const [memberDetails, setMemberDetails] = useState<any>(null);
+  const [memberDetails, setMemberDetails] = useState<MemberDetails | null>(null);
   const [recentCheckIns, setRecentCheckIns] = useState<CheckIn[]>([]);
-  const [membershipPlan, setMembershipPlan] = useState<any>(null);
+  const [membershipPlan, setMembershipPlan] = useState<MembershipPlan | null>(null);
   const [loading, setLoading] = useState(true);
 
+
+  const fetchData = useCallback(async () => {
+  try {
+    setLoading(true);
+
+    // Fetch organization details
+    const org = await databases.getDocument(
+      DATABASE_ID!,
+      ORGANIZATIONS_COLLECTION_ID!,
+      organizationId as string
+    );
+    setOrganization(org as unknown as Organization);
+
+    // Fetch member details
+    const memberResponse = await databases.listDocuments(
+      DATABASE_ID!,
+      MEMBERS_COLLECTION_ID!,
+      [
+        Query.equal("organizationId", organizationId as string),
+        Query.equal("email", user?.email || ""),
+      ]
+    );
+
+    if (memberResponse.documents.length > 0) {
+      const memberData = memberResponse.documents[0];
+      setMemberDetails(memberData as unknown as MemberDetails);
+
+      // Fetch membership plan if available
+      if (memberData.planId) {
+        try {
+          const planResponse = await databases.getDocument(
+            DATABASE_ID!,
+            MEMBERSHIP_PLANS_COLLECTION_ID!,
+            memberData.planId
+          );
+          setMembershipPlan(planResponse as unknown as MembershipPlan);
+        } catch (error: unknown) {
+          const errorMessage =
+            error instanceof Error ? error.message : "Failed to fetch plan";
+          console.error("Error fetching plan:", errorMessage);
+        }
+      }
+
+      // Fetch recent check-ins
+      const checkInsResponse = await databases.listDocuments(
+        DATABASE_ID!,
+        CHECKINS_COLLECTION_ID!,
+        [
+          Query.equal("organizationId", organizationId as string),
+          Query.equal("memberId", memberResponse.documents[0].$id),
+          Query.orderDesc("timestamp"),
+          Query.limit(5),
+        ]
+      );
+
+      setRecentCheckIns(checkInsResponse.documents as unknown as CheckIn[]);
+    }
+  } catch (error: unknown) {
+    const errorMessage =
+      error instanceof Error ? error.message : "Failed to load member data";
+    console.error("Error fetching member data:", errorMessage);
+    toast.error("Failed to load member data");
+  } finally {
+    setLoading(false);
+  }
+}, [organizationId, user]);
+  
   useEffect(() => {
     if (user && organizationId) {
       fetchData();
     }
-  }, [organizationId, user]);
+  }, [organizationId, user, fetchData]);
 
-  const fetchData = async () => {
-    try {
-      setLoading(true);
-      
-      // Fetch organization details
-      const org = await databases.getDocument(
-        DATABASE_ID!,
-        ORGANIZATIONS_COLLECTION_ID!,
-        organizationId as string
-      );
-      setOrganization(org as unknown as Organization);
-      
-      // Fetch member details
-      const memberResponse = await databases.listDocuments(
-        DATABASE_ID!,
-        MEMBERS_COLLECTION_ID!,
-        [
-          Query.equal('organizationId', organizationId as string),
-          Query.equal('email', user?.email || '')
-        ]
-      );
-      
-      if (memberResponse.documents.length > 0) {
-        const memberData = memberResponse.documents[0];
-        setMemberDetails(memberData);
-        
-        // Fetch membership plan if available
-        if (memberData.planId) {
-          try {
-            const planResponse = await databases.getDocument(
-              DATABASE_ID!,
-              MEMBERSHIP_PLANS_COLLECTION_ID!,
-              memberData.planId
-            );
-            setMembershipPlan(planResponse);
-          } catch (error: unknown) {
-            const errorMessage = error instanceof Error ? error.message : 'Failed to fetch plan';
-            console.error("Error fetching plan:", errorMessage);
-          }
-        }
-        
-        // Fetch recent check-ins
-        const checkInsResponse = await databases.listDocuments(
-          DATABASE_ID!,
-          CHECKINS_COLLECTION_ID!,
-          [
-            Query.equal('organizationId', organizationId as string),
-            Query.equal('memberId', memberResponse.documents[0].$id),
-            Query.orderDesc('timestamp'),
-            Query.limit(5)
-          ]
-        );
-        
-        setRecentCheckIns(checkInsResponse.documents as unknown as CheckIn[]);
-      }
-      
-    } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to load member data';
-      console.error("Error fetching member data:", errorMessage);
-      toast.error('Failed to load member data');
-    } finally {
-      setLoading(false);
-    }
-  };
+  
 
   const handleCheckIn = async () => {
     try {
@@ -118,7 +141,7 @@ export default function MemberPortalPage() {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen">
         <h1 className="text-2xl font-bold mb-2">Membership not found</h1>
-        <p className="text-muted-foreground">You don't have an active membership with this organization.</p>
+        <p className="text-muted-foreground">You don&apos;t have an active membership with this organization.</p>
       </div>
     );
   }
@@ -132,7 +155,7 @@ export default function MemberPortalPage() {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h1 className="text-3xl font-bold">{organization.name}</h1>
-          <p className="text-muted-foreground">{organization.description}</p>
+          <p className="text-muted-foreground">{organization.description as string}</p>
         </div>
         <div className="flex gap-2">
           <Button onClick={handleCheckIn}>Quick Check-in</Button>
@@ -200,17 +223,17 @@ export default function MemberPortalPage() {
               {membershipPlan ? (
                 <div className="space-y-4">
                   <div>
-                    <h3 className="text-lg font-semibold">{membershipPlan.name}</h3>
+                    <h3 className="text-lg font-semibold">{membershipPlan.name as string}</h3>
                     <p className="text-muted-foreground">
-                      {formatPrice(membershipPlan.price, membershipPlan.interval)}
+                      {formatPrice(membershipPlan.price as number, membershipPlan.interval as string)}
                     </p>
                   </div>
-                  <p>{membershipPlan.description}</p>
-                  {membershipPlan.features && membershipPlan.features.length > 0 && (
+                  <p>{membershipPlan.description as string}</p>
+                  {(membershipPlan.features as string[])?.length > 0 && (
                     <div>
                       <p className="font-medium mb-2">Features:</p>
                       <ul className="list-disc pl-5 space-y-1">
-                        {membershipPlan.features.map((feature: string, index: number) => (
+                        {(membershipPlan.features as string[]).map((feature: string, index: number) => (
                           <li key={index}>{feature}</li>
                         ))}
                       </ul>
@@ -219,7 +242,7 @@ export default function MemberPortalPage() {
                 </div>
               ) : (
                 <div className="text-center py-6">
-                  <p className="text-muted-foreground mb-4">You don't have an active subscription plan</p>
+                  <p className="text-muted-foreground mb-4">You don&apos;t have an active subscription plan</p>
                   <Button onClick={() => router.push(`/member-portal/${organizationId}/plans`)}>
                     View Available Plans
                   </Button>
@@ -266,7 +289,7 @@ export default function MemberPortalPage() {
           <Card>
             <CardHeader>
               <CardTitle>Quick Check-in</CardTitle>
-              <CardDescription>Scan this QR code at the organization's location</CardDescription>
+              <CardDescription>Scan this QR code at the organization&apos;s location</CardDescription>
             </CardHeader>
             <CardContent className="flex justify-center">
               <div className="bg-white p-4 rounded-lg">
