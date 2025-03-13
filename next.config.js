@@ -1,13 +1,12 @@
-import type { NextConfig } from "next";
-
+/** @type {import('next').NextConfig} */
 const nextConfig = {
   // Your existing config
   experimental: {
     serverActions: true,
   },
   images: {
-    domains: ["cloud.appwrite.io"],
+    domains: ['cloud.appwrite.io'],
   },
 };
 
-export default nextConfig;
+module.exports = nextConfig;
