@@ -6,14 +6,13 @@ import {
   ORGANIZATIONS_COLLECTION_ID,
 } from "@/lib/appwrite";
 
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
+// Use the correct type signature for App Router in Next.js
 export async function GET(
   request: NextRequest,
-  { params }: { params: { organizationId: string } }
+  context: { params: { organizationId: string } }
 ) {
   try {
-    const organizationId = params.organizationId; // ✅ Correct way to destructure
+    const organizationId = context.params.organizationId;
 
     // Verify the organization exists
     await databases.getDocument(
