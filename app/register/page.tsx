@@ -29,7 +29,6 @@ import { Loader2 } from 'lucide-react';
 import Header from '@/components/layout/Header';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Label } from "@/components/ui/label";
 
 const formSchema = z.object({
   // User information

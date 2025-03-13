@@ -20,6 +20,13 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 
+// Add this interface near the top of the file, after the imports
+interface Organization {
+  $id: string;
+  name: string;
+  // Add other organization properties as needed
+}
+
 const formSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters" }),
   email: z.string().email({ message: "Please enter a valid email address" }),
@@ -31,7 +38,7 @@ export default function OrganizationRegistrationPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const [organization, setOrganization] = useState<any>(null);
+  const [organization, setOrganization] = useState<Organization | null>(null);
   
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -69,7 +76,7 @@ export default function OrganizationRegistrationPage() {
           registrationCode.organizationId
         );
         
-        setOrganization(org);
+        setOrganization(org as unknown as Organization);
       } catch (error: unknown) {
         const errorMessage = error instanceof Error ? error.message : 'Failed to verify registration code';
         console.error('Error verifying registration code:', errorMessage);
@@ -102,7 +109,7 @@ export default function OrganizationRegistrationPage() {
         ID.unique(),
         {
           userId: newUser.$id,
-          organizationId: organization.$id,
+          organizationId: organization?.$id,
           name: values.name,
           email: values.email,
           status: 'active',
@@ -117,7 +124,7 @@ export default function OrganizationRegistrationPage() {
         ID.unique(),
         {
           userId: newUser.$id,
-          organizationId: organization.$id,
+          organizationId: organization?.$id,
           role: 'member',
           createdAt: new Date().toISOString()
         }
@@ -149,7 +156,7 @@ export default function OrganizationRegistrationPage() {
     <div className="container max-w-md mx-auto py-10">
       <Card>
         <CardHeader>
-          <CardTitle>Register for {organization.name}</CardTitle>
+          <CardTitle>Register for {organization?.name}</CardTitle>
           <CardDescription>
             Create your account to join this organization
           </CardDescription>
