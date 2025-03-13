@@ -1,7 +1,13 @@
 import type { NextConfig } from "next";
 
-const nextConfig: NextConfig = {
-  /* config options here */
+const nextConfig = {
+  // Your existing config
+  experimental: {
+    serverActions: true,
+  },
+  images: {
+    domains: ["cloud.appwrite.io"],
+  },
 };
 
 export default nextConfig;
