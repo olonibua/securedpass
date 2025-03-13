@@ -12,16 +12,13 @@ interface QRCodeDisplayProps {
 }
 
 export default function QRCodeDisplay({ organizationId }: QRCodeDisplayProps) {
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore - Temporary bypass for state types
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [qrCode, setQrCode] = useState<string | null>(null);
-  
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore - Temporary bypass for state types
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [checkInUrl, setCheckInUrl] = useState<string | null>(null);
-  
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore - Temporary bypass for state types
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [loading, setLoading] = useState(true);
 
   // useEffect(() => {
