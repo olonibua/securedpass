@@ -1,4 +1,4 @@
-// @ts-nocheck - Disable TypeScript checking for this file
+  
 import { NextRequest, NextResponse } from "next/server";
 import QRCode from "qrcode";
 import {
@@ -6,6 +6,8 @@ import {
   DATABASE_ID,
   ORGANIZATIONS_COLLECTION_ID,
 } from "@/lib/appwrite";
+
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 
 export async function GET(
   request: NextRequest,
@@ -36,4 +38,3 @@ export async function GET(
     return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }
-
