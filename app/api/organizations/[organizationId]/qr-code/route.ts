@@ -8,10 +8,10 @@ import {
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { organizationId: string } } // ✅ Corrected Type
+  { params }: { params: { organizationId: string } }
 ) {
   try {
-    const organizationId = params.organizationId; // ✅ Extracting dynamic route param
+    const organizationId = params.organizationId; // ✅ Correct way to destructure
 
     // Verify the organization exists
     await databases.getDocument(
@@ -35,3 +35,4 @@ export async function GET(
     return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }
+
