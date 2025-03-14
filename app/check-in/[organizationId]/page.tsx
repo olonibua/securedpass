@@ -6,13 +6,11 @@ import { DATABASE_ID, databases, ORGANIZATIONS_COLLECTION_ID, CHECKINS_COLLECTIO
 import { toast } from 'sonner';
 import DynamicCheckInForm from '@/components/check-in/DynamicCheckInForm';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2, CheckCircle } from 'lucide-react';
+import { Loader2, CheckCircle, UserCircle } from 'lucide-react';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/lib/auth-context';
 import { ID, Models } from 'appwrite';
-
-
 
 export default function CheckInPage() {
   const params = useParams();
@@ -25,11 +23,13 @@ export default function CheckInPage() {
   const [processing, setProcessing] = useState(false);
   const [success, setSuccess] = useState(false);
   const [memberInfo, setMemberInfo] = useState<Models.Document | null>(null);
+  const [isCheckingMember, setIsCheckingMember] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
+        setIsCheckingMember(true);
         
         // Fetch organization data
         const org = await databases.getDocument(
@@ -39,8 +39,13 @@ export default function CheckInPage() {
         );
         setOrganization(org);
         
+        // Log authentication state for debugging
+        console.log("Auth state:", { isLoaded: authLoaded, user: _user?.email });
+        
         // If user is authenticated, check if they're a member
         if (_user?.email) {
+          console.log("Checking if user is a member:", _user.email);
+          
           const membersResponse = await databases.listDocuments(
             DATABASE_ID!,
             MEMBERS_COLLECTION_ID!,
@@ -50,8 +55,11 @@ export default function CheckInPage() {
             ]
           );
           
+          console.log("Member search results:", membersResponse.documents.length);
+          
           if (membersResponse.documents.length > 0) {
             setMemberInfo(membersResponse.documents[0] as Models.Document);
+            console.log("Member found:", membersResponse.documents[0].$id);
           }
         }
       } catch (error: unknown) {
@@ -60,6 +68,7 @@ export default function CheckInPage() {
         toast.error('Failed to load organization data');
       } finally {
         setLoading(false);
+        setIsCheckingMember(false);
       }
     };
 
@@ -70,12 +79,42 @@ export default function CheckInPage() {
 
   const handleMemberCheckIn = async () => {
     try {
-      if (!memberInfo) {
+      if (!memberInfo && !_user?.email) {
         toast.error('Member information not available');
         return;
       }
       
       setProcessing(true);
+      
+      // If we have member info, use it directly
+      let memberId = memberInfo?.$id;
+      let memberName = memberInfo?.name;
+      let memberEmail = memberInfo?.email || _user?.email;
+      
+      // If we don't have member info but have a logged-in user, try to get/create the member
+      if (!memberId && _user?.email) {
+        // Try one more time to find the member
+        const membersResponse = await databases.listDocuments(
+          DATABASE_ID!,
+          MEMBERS_COLLECTION_ID!,
+          [
+            Query.equal("organizationId", organizationId),
+            Query.equal("email", _user.email)
+          ]
+        );
+        
+        if (membersResponse.documents.length > 0) {
+          const member = membersResponse.documents[0];
+          memberId = member.$id;
+          memberName = member.name;
+          memberEmail = member.email;
+        }
+      }
+      
+      if (!memberId || !memberEmail) {
+        toast.error('Unable to identify member account');
+        return;
+      }
       
       // Create check-in record
       await databases.createDocument(
@@ -84,9 +123,9 @@ export default function CheckInPage() {
         ID.unique(),
         {
           organizationId,
-          memberId: memberInfo.$id,
-          name: memberInfo.name,
-          email: memberInfo.email,
+          memberId: memberId,
+          name: memberName || 'Member',
+          email: memberEmail,
           timestamp: new Date().toISOString(),
           checkInMethod: 'qr-code'
         }
@@ -135,13 +174,15 @@ export default function CheckInPage() {
   }
 
   // If member is recognized and authenticated, show direct check-in option
-  if (memberInfo) {
+  if (memberInfo || (_user?.email && !isCheckingMember)) {
     return (
       <div className="container max-w-md mx-auto py-12 px-4">
         <Card className="w-full">
           <CardHeader>
             <CardTitle>Member Check-In</CardTitle>
-            <CardDescription>Welcome back, {memberInfo.name}!</CardDescription>
+            <CardDescription>
+              {memberInfo ? `Welcome back, ${memberInfo.name}!` : `Welcome, ${_user?.email}`}
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             {success ? (
@@ -163,20 +204,25 @@ export default function CheckInPage() {
                 </Button>
               </div>
             ) : (
-              <Button
-                className="w-full"
-                onClick={handleMemberCheckIn}
-                disabled={processing}
-              >
-                {processing ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Processing...
-                  </>
-                ) : (
-                  "Check In Now"
-                )}
-              </Button>
+              <div className="space-y-6">
+                <div className="flex items-center justify-center">
+                  <UserCircle className="h-16 w-16 text-primary mb-4" />
+                </div>
+                <Button
+                  className="w-full"
+                  onClick={handleMemberCheckIn}
+                  disabled={processing}
+                >
+                  {processing ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Processing...
+                    </>
+                  ) : (
+                    "Check In Now"
+                  )}
+                </Button>
+              </div>
             )}
           </CardContent>
         </Card>
@@ -216,13 +262,20 @@ export default function CheckInPage() {
               </p>
             </div>
           ) : (
-            <DynamicCheckInForm 
-              organizationId={organizationId} 
-              onSubmit={handleMemberCheckIn} 
-            />
+            <>
+              <div className="mb-6">
+                <p className="text-sm text-center mb-4">
+                  Already a member? <Button variant="link" className="p-0 h-auto" onClick={() => router.push(`/member-login?redirect=/check-in/${organizationId}`)}>Sign in</Button>
+                </p>
+              </div>
+              <DynamicCheckInForm 
+                organizationId={organizationId} 
+                onSubmit={handleMemberCheckIn} 
+              />
+            </>
           )}
         </CardContent>
       </Card>
     </div>
   );
-} 
+}
