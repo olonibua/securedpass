@@ -77,6 +77,16 @@ export default function CheckInPage() {
     }
   }, [organizationId, _user?.email, authLoaded]);
 
+  useEffect(() => {
+    // Play success sound when check-in is successful
+    if (success) {
+      const audio = new Audio('/sounds/success.mp3');
+      audio.play().catch(error => {
+        console.error('Error playing success sound:', error);
+      });
+    }
+  }, [success]);
+
   const handleMemberCheckIn = async () => {
     try {
       if (!memberInfo && !_user?.email) {

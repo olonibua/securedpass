@@ -5,13 +5,14 @@ import { useParams, useRouter } from 'next/navigation';
 import { CHECKINS_COLLECTION_ID, DATABASE_ID, databases, MEMBERS_COLLECTION_ID, ORGANIZATIONS_COLLECTION_ID, MEMBERSHIP_PLANS_COLLECTION_ID, Query } from '@/lib/appwrite';
 import { toast } from 'sonner';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, } from '@/components/ui/card';
-import { Loader2, CalendarDays, QrCode, CreditCard } from 'lucide-react';
+import { Loader2, CalendarDays, QrCode, Check } from 'lucide-react';
 import { Organization, CheckIn } from '@/types';
 import { useAuth } from '@/lib/auth-context';     
 import { Button } from '@/components/ui/button';
 import { formatDate } from '@/lib/utils';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import CheckInHistory from '@/components/member/CheckInHistory';
+import { Badge } from '@/components/ui/badge';
 
 interface MemberDetails {
   $id: string;
@@ -39,6 +40,7 @@ export default function MemberPortalPage() {
   const [organization, setOrganization] = useState<Organization | null>(null);
   const [memberDetails, setMemberDetails] = useState<MemberDetails | null>(null);
   const [recentCheckIns, setRecentCheckIns] = useState<CheckIn[]>([]);
+
   const [membershipPlan, setMembershipPlan] = useState<MembershipPlan | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -117,18 +119,7 @@ export default function MemberPortalPage() {
 
   
 
-  const handleCheckIn = async () => {
-    try {
-      // Implementation for self check-in
-      toast.success('Check-in successful!');
-      // Refresh data after check-in
-      fetchData();
-    } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to check in';
-      console.error("Check-in error:", errorMessage);
-      toast.error('Failed to check in');
-    }
-  };
+  
 
   if (loading) {
     return (
@@ -151,9 +142,7 @@ export default function MemberPortalPage() {
     );
   }
 
-  // Parse custom fields if they exist
-  const customFields = memberDetails.customFields ? 
-    JSON.parse(memberDetails.customFields) : {};
+ 
 
   return (
     <div className="container px-4 mx-auto py-6 sm:py-8 max-w-6xl">
@@ -182,6 +171,39 @@ export default function MemberPortalPage() {
             <Button variant="outline" className="mt-4" onClick={() => router.push(`/member-portal/${organizationId}/plans`)}>
               View Membership Plans
             </Button>
+          </CardContent>
+        </Card>
+      )}
+    
+      {memberDetails && membershipPlan && (
+        <Card className="mb-6">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg">Your Membership Plan</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center">
+              <div>
+                <h3 className="font-medium text-lg">{membershipPlan.name}</h3>
+                <p className="text-muted-foreground">{membershipPlan.description}</p>
+              </div>
+              <Badge className="mt-2 sm:mt-0" variant={memberDetails.status === 'active' ? 'default' : 'destructive'}>
+                {memberDetails.status === 'active' ? 'Active' : 'Inactive'}
+              </Badge>
+            </div>
+            
+            {membershipPlan.features && membershipPlan.features.length > 0 && (
+              <div className="mt-4">
+                <h4 className="text-sm font-medium mb-2">Plan Features:</h4>
+                <ul className="space-y-1">
+                  {membershipPlan.features.map((feature, index) => (
+                    <li key={index} className="flex items-center">
+                      <Check className="h-4 w-4 mr-2 text-green-500" />
+                      <span className="text-sm">{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </CardContent>
         </Card>
       )}
@@ -252,10 +274,3 @@ export default function MemberPortalPage() {
   );
 }
 
-function formatPrice(price: number, interval: string) {
-  if (interval === 'one-time') {
-    return `$${price.toFixed(2)}`;
-  } else {
-    return `$${price.toFixed(2)}/${interval === 'monthly' ? 'mo' : 'yr'}`;
-  }
-} 

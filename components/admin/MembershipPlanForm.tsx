@@ -29,11 +29,25 @@ import {
 } from '@/components/ui/select';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 
+// Add this interface for the plan data shape
+interface MembershipPlanData {
+  organizationId: string;
+  name: string;
+  description: string;
+  price: number;
+  interval: string;
+  isActive: boolean;
+  features: string[];
+  createdAt: string;
+  updatedAt: string;
+  $id?: string;
+}
+
 interface MembershipPlanFormProps {
   organizationId: string;
-  onSubmit: (plan: any) => Promise<void>;
+  onSubmit: (plan: MembershipPlanData) => Promise<void>;
   onCancel: () => void;
-  existingPlan?: any;
+  existingPlan?: MembershipPlanData;
 }
 
 const planFormSchema = z.object({
@@ -54,7 +68,7 @@ export default function MembershipPlanForm({ organizationId, onSubmit, onCancel,
       name: existingPlan.name,
       description: existingPlan.description,
       price: existingPlan.price / 100, // Convert from cents to dollars for display
-      interval: existingPlan.interval,
+      interval: existingPlan.interval as 'monthly' | 'yearly' | 'one-time',
       isActive: existingPlan.isActive,
       features: Array.isArray(existingPlan.features) ? existingPlan.features.join('\n') : existingPlan.features || '',
     } : {
@@ -91,7 +105,7 @@ export default function MembershipPlanForm({ organizationId, onSubmit, onCancel,
         updatedAt: new Date().toISOString(),
       };
       
-      if (existingPlan) {
+      if (existingPlan && existingPlan.$id) {
         // Update existing plan
         await databases.updateDocument(
           DATABASE_ID,

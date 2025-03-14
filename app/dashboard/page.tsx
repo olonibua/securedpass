@@ -10,37 +10,41 @@ import { useAuth } from '@/lib/auth-context';
 export default function DashboardPage() {
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [loading, setLoading] = useState(true);
 
   const redirectToOrganization = useCallback(async () => {
     try {
       setLoading(true);
-      
+
       if (!user?.$id) {
-        throw new Error('User not found');
+        throw new Error("User not found");
       }
-      
+
       // Fetch organizations where user is owner
       const ownerOrgsResponse = await databases.listDocuments(
         DATABASE_ID,
         ORGANIZATIONS_COLLECTION_ID,
-        [Query.equal('ownerId', user.$id)]
+        [Query.equal("ownerId", user.$id)]
       );
-      
+
       // If user has an organization as owner, redirect to it
       if (ownerOrgsResponse.documents.length > 0) {
         router.push(`/dashboard/${ownerOrgsResponse.documents[0].$id}`);
         return;
       }
-      
+
       // User has no organizations, show error
-      toast.error('You are not associated with any organization');
-      router.push('/');
+      toast.error("You are not associated with any organization");
+      router.push("/");
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to load dashboard data';
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Failed to load dashboard data";
       console.error("Error in dashboard redirect:", errorMessage);
-      toast.error('Failed to load dashboard data');
-      router.push('/');
+      toast.error("Failed to load dashboard data");
+      router.push("/");
     } finally {
       setLoading(false);
     }
