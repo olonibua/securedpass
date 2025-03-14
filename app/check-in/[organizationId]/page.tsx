@@ -1,85 +1,119 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useParams } from 'next/navigation';
-import { DATABASE_ID, databases, ORGANIZATIONS_COLLECTION_ID } from '@/lib/appwrite';
+import { useParams, useRouter } from 'next/navigation';
+import { DATABASE_ID, databases, ORGANIZATIONS_COLLECTION_ID, CHECKINS_COLLECTION_ID, MEMBERS_COLLECTION_ID, Query } from '@/lib/appwrite';
 import { toast } from 'sonner';
 import DynamicCheckInForm from '@/components/check-in/DynamicCheckInForm';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2 } from 'lucide-react';
+import { Loader2, CheckCircle } from 'lucide-react';
 import Image from 'next/image';
+import { Button } from '@/components/ui/button';
+import { useAuth } from '@/lib/auth-context';
+import { ID, Models } from 'appwrite';
 
-interface Organization {
-  name: string;
-  logo?: string;
-  $id: string;
-}
+
 
 export default function CheckInPage() {
   const params = useParams();
+  const router = useRouter();
   const organizationId = params.organizationId as string;
+  const { user, isLoaded: authLoaded } = useAuth();
   
-  const [organization, setOrganization] = useState<Organization | null>(null);
+  const [organization, setOrganization] = useState<Models.Document | null>(null);
   const [loading, setLoading] = useState(true);
+  const [processing, setProcessing] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [memberInfo, setMemberInfo] = useState<Models.Document | null>(null);
 
   useEffect(() => {
-    const fetchOrganization = async () => {
+    const fetchData = async () => {
       try {
         setLoading(true);
+        
+        // Fetch organization data
         const org = await databases.getDocument(
           DATABASE_ID!,
           ORGANIZATIONS_COLLECTION_ID!,
           organizationId
         );
-        setOrganization((org as unknown) as Organization);
+        setOrganization(org);
+        
+        // If user is authenticated, check if they're a member
+        if (user?.email) {
+          const membersResponse = await databases.listDocuments(
+            DATABASE_ID!,
+            MEMBERS_COLLECTION_ID!,
+            [
+              Query.equal("organizationId", organizationId),
+              Query.equal("email", user.email)
+            ]
+          );
+          
+          if (membersResponse.documents.length > 0) {
+            setMemberInfo(membersResponse.documents[0] as Models.Document);
+          }
+        }
       } catch (error: unknown) {
-        const errorMessage = error instanceof Error ? error.message : 'Failed to fetch organization';
-        console.error('Error fetching organization:', errorMessage);
-        toast.error('Organization not found or access denied');
+        const errorMessage = error instanceof Error ? error.message : 'Failed to load data';
+        console.error("Error fetching data:", errorMessage);
+        toast.error('Failed to load organization data');
       } finally {
         setLoading(false);
       }
     };
 
-    fetchOrganization();
-  }, [organizationId]);
+    if (authLoaded) {
+      fetchData();
+    }
+  }, [organizationId, user?.email, authLoaded]);
 
-  const handleCheckIn = async (formData: Record<string, unknown>) => {
+  const handleMemberCheckIn = async () => {
     try {
-      const response = await fetch('/api/check-in', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          organizationId,
-          customFieldValues: formData,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Check-in failed');
+      if (!memberInfo) {
+        toast.error('Member information not available');
+        return;
       }
-
-      setSuccess(true);
-      toast.success('Check-in completed successfully!');
       
-      // Reset success state after 5 seconds
+      setProcessing(true);
+      
+      // Create check-in record
+      await databases.createDocument(
+        DATABASE_ID!,
+        CHECKINS_COLLECTION_ID!,
+        ID.unique(),
+        {
+          organizationId,
+          memberId: memberInfo.$id,
+          name: memberInfo.name,
+          email: memberInfo.email,
+          timestamp: new Date().toISOString(),
+          checkInMethod: 'qr-code'
+        }
+      );
+      
+      setSuccess(true);
+      toast.success('Check-in successful!');
+      
+      // Reset success state after a few seconds
       setTimeout(() => {
-        setSuccess(false);
-      }, 5000);
+        if (organization?.organizationType === 'membership') {
+          router.push(`/member-portal/${organizationId}`);
+        }
+      }, 3000);
       
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to complete check-in';
-      console.error('Error during check-in:', errorMessage);
-      toast.error('Failed to complete check-in');
+      const errorMessage = error instanceof Error ? error.message : 'Failed to check in';
+      console.error("Check-in error:", errorMessage);
+      toast.error('Failed to check in. Please try again.');
+    } finally {
+      setProcessing(false);
     }
   };
 
-  if (loading) {
+  if (loading || !authLoaded) {
     return (
-      <div className="flex justify-center items-center min-h-screen">
+      <div className="flex items-center justify-center min-h-screen">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
@@ -95,6 +129,54 @@ export default function CheckInPage() {
               The organization you&apos;re looking for doesn&apos;t exist or is no longer active.
             </CardDescription>
           </CardHeader>
+        </Card>
+      </div>
+    );
+  }
+
+  // If member is recognized and authenticated, show direct check-in option
+  if (memberInfo) {
+    return (
+      <div className="container max-w-md mx-auto py-12 px-4">
+        <Card className="w-full">
+          <CardHeader>
+            <CardTitle>Member Check-In</CardTitle>
+            <CardDescription>
+              Welcome back, {memberInfo.name}!
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {success ? (
+              <div className="flex flex-col items-center justify-center py-8 text-center">
+                <CheckCircle className="h-16 w-16 text-green-500 mb-4" />
+                <h3 className="text-xl font-semibold mb-2">Check-in Successful</h3>
+                <p className="text-muted-foreground">
+                  You've been checked in to {organization.name}.
+                </p>
+                <Button 
+                  className="mt-6" 
+                  onClick={() => router.push(`/member-portal/${organizationId}`)}
+                >
+                  Go to Member Dashboard
+                </Button>
+              </div>
+            ) : (
+              <Button 
+                className="w-full" 
+                onClick={handleMemberCheckIn}
+                disabled={processing}
+              >
+                {processing ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Processing...
+                  </>
+                ) : (
+                  'Check In Now'
+                )}
+              </Button>
+            )}
+          </CardContent>
         </Card>
       </div>
     );
@@ -134,7 +216,7 @@ export default function CheckInPage() {
           ) : (
             <DynamicCheckInForm 
               organizationId={organizationId} 
-              onSubmit={handleCheckIn} 
+              onSubmit={handleMemberCheckIn} 
             />
           )}
         </CardContent>

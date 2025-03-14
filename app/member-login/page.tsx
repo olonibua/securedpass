@@ -17,8 +17,9 @@ import {
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2 } from 'lucide-react';
-import { account } from '@/lib/appwrite';
+import { account, DATABASE_ID, MEMBERS_COLLECTION_ID, ORGANIZATIONS_MEMBERS_COLLECTION_ID, databases } from '@/lib/appwrite';
 import { toast } from 'sonner';
+import { Query } from 'appwrite';
 
 const formSchema = z.object({
   email: z.string().email({ message: 'Please enter a valid email address' }),
@@ -46,12 +47,42 @@ export default function SignInPage() {
       // Sign in with Appwrite
       await account.createEmailPasswordSession(values.email, values.password);
       
-      // Get the user's session
-      const session = await account.get();
+      // Get the user
+      const user = await account.get();
       
-      if (session) {
+      if (user) {
+        // Check if user is a member by searching for their record
+        const memberCheck = await databases.listDocuments(
+          DATABASE_ID!,
+          MEMBERS_COLLECTION_ID!,
+          [Query.equal("email", values.email)]
+        );
+        
+        // Also check organizations_members
+        const orgMemberCheck = await databases.listDocuments(
+          DATABASE_ID!,
+          ORGANIZATIONS_MEMBERS_COLLECTION_ID!,
+          [Query.equal("userId", user.$id)]
+        );
+        
+        // If no member records found, this user is likely an admin, not a member
+        if (memberCheck.documents.length === 0 && orgMemberCheck.documents.length === 0) {
+          // Sign them out
+          await account.deleteSession('current');
+          toast.error('This account does not have member access. Please use the admin login.');
+          return;
+        }
+        
+        // Continue with member login
         toast.success('Signed in successfully');
-        router.push('/member-portal');
+        
+        // If we found an organization member record, redirect to that organization
+        if (orgMemberCheck.documents.length > 0) {
+          router.push(`/member-portal/${orgMemberCheck.documents[0].organizationId}`);
+        } else {
+          // Otherwise go to member portal dashboard
+          router.push('/member-portal');
+        }
       }
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to sign in';

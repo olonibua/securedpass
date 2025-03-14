@@ -11,6 +11,7 @@ import { useAuth } from '@/lib/auth-context';
 import { Button } from '@/components/ui/button';
 import { formatDate } from '@/lib/utils';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import CheckInHistory from '@/components/member/CheckInHistory';
 
 interface MemberDetails {
   $id: string;
@@ -299,6 +300,14 @@ export default function MemberPortalPage() {
           </Card>
         </TabsContent>
       </Tabs>
+      {memberDetails && (
+        <div className="mt-8">
+          <CheckInHistory 
+            organizationId={organizationId as string} 
+            memberId={memberDetails.$id} 
+          />
+        </div>
+      )}
     </div>
   );
 }

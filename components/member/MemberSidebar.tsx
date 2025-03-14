@@ -6,18 +6,16 @@ import { usePathname, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { 
   Home, 
-  CalendarDays, 
   Settings, 
   LogOut,
   Menu,
   X,
-  Calendar,
-  CreditCard as PaymentIcon,
+  CreditCard,
   Loader2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/lib/auth-context';
-import { databases, Query, DATABASE_ID, ORGANIZATIONS_MEMBERS_COLLECTION_ID } from '@/lib/appwrite';
+import { databases, Query, DATABASE_ID, ORGANIZATIONS_MEMBERS_COLLECTION_ID, MEMBERS_COLLECTION_ID } from '@/lib/appwrite';
 import { toast } from 'sonner';
 
 
@@ -31,76 +29,89 @@ export default function MemberSidebar({ organizationId, onSignOut }: MemberSideb
   const router = useRouter();
   const { user, isLoaded: authLoaded } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [userOrganizations, setUserOrganizations] = useState<string[]>([]);
+  const [userOrganizations, setUserOrganizations] = useState<{ id: string, name: string }[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Use useCallback to prevent recreation of this function on every render
   const fetchUserOrganizations = useCallback(async () => {
-    if (!user?.$id) {
-      setLoading(false);
-      return;
-    }
-    
     try {
+      if (!user?.$id || !authLoaded) return;
+      
       setLoading(true);
-      const response = await databases.listDocuments(
+      
+      // Check organizations_members first
+      const orgMembersResponse = await databases.listDocuments(
         DATABASE_ID,
         ORGANIZATIONS_MEMBERS_COLLECTION_ID,
-        [Query.equal("userId", user.$id)]
+        [Query.equal('userId', user.$id)]
       );
-
-      const orgIds = response.documents.map((doc) => doc.organizationId);
-      setUserOrganizations(orgIds);
+      
+      let orgs: { id: string, name: string }[] = [];
+      
+      // If found in organizations_members
+      if (orgMembersResponse.documents.length > 0) {
+        // Get organization details for each membership
+        const orgPromises = orgMembersResponse.documents.map(async (doc) => {
+          const orgResponse = await databases.getDocument(
+            DATABASE_ID,
+            'organizations',
+            doc.organizationId
+          );
+          return { id: orgResponse.$id, name: orgResponse.name };
+        });
+        
+        orgs = await Promise.all(orgPromises);
+      } else {
+        // Try members collection
+        const membersResponse = await databases.listDocuments(
+          DATABASE_ID,
+          MEMBERS_COLLECTION_ID,
+          [Query.equal('email', user.email)]
+        );
+        
+        if (membersResponse.documents.length > 0) {
+          const orgPromises = membersResponse.documents.map(async (doc) => {
+            const orgResponse = await databases.getDocument(
+              DATABASE_ID,
+              'organizations',
+              doc.organizationId
+            );
+            return { id: orgResponse.$id, name: orgResponse.name };
+          });
+          
+          orgs = await Promise.all(orgPromises);
+        }
+      }
+      
+      setUserOrganizations(orgs);
     } catch (error: unknown) {
-      const errorMessage =
-        error instanceof Error
-          ? error.message
-          : "Failed to fetch user organizations";
-      console.error("Error fetching user organizations:", errorMessage);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to fetch organizations';
+      console.error("Error fetching organizations:", errorMessage);
     } finally {
       setLoading(false);
     }
-  }, [user?.$id]);
+  }, [user, authLoaded]);
   
   useEffect(() => {
-    // Only fetch once auth is loaded
-    if (!authLoaded) return;
-    
-    fetchUserOrganizations();
-  }, [authLoaded, fetchUserOrganizations]);
+    if (authLoaded) {
+      fetchUserOrganizations();
+    }
+  }, [fetchUserOrganizations, authLoaded]);
   
-  const isActive = (path: string) => {
-    return pathname === path;
-  };
+  // Choose the first organization as default if organizationId isn't provided
+  useEffect(() => {
+    if (!organizationId && userOrganizations.length > 0 && !loading && authLoaded) {
+      router.push(`/member-portal/${userOrganizations[0].id}`);
+    }
+  }, [organizationId, userOrganizations, router, loading, authLoaded]);
+  
+ ;
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
-  const handleNavigation = (path: string) => {
-    // If we have an organizationId, use it
-    if (organizationId) {
-      router.push(path.replace(':organizationId', organizationId));
-      return;
-    }
-    
-    // If user has only one organization, use that
-    if (userOrganizations.length === 1) {
-      router.push(path.replace(':organizationId', userOrganizations[0]));
-      return;
-    }
-    
-    // If no organizationId and user has multiple orgs, go to dashboard to select one
-    if (userOrganizations.length > 1) {
-      toast.info('Please select an organization first');
-      router.push('/member-portal');
-      return;
-    }
-    
-    // If no organizations at all
-    toast.error('No membership found');
-    router.push('/member-portal');
-  };
+ 
   
   const sidebarContent = (
     <>
@@ -118,73 +129,58 @@ export default function MemberSidebar({ organizationId, onSignOut }: MemberSideb
         ) : (
           // Show actual navigation when loaded
           <>
-            <Link href="/member-portal">
-              <Button
-                variant={isActive("/member-portal") ? "secondary" : "ghost"}
-                className="w-full justify-start transition-colors hover:bg-secondary/80"
+            
+            {/* Always show dashboard link for current organization */}
+            {organizationId && (
+              <Link 
+                href={`/member-portal/${organizationId}`}
+                className={`flex items-center px-3 py-2 rounded-md text-sm ${
+                  pathname === `/member-portal/${organizationId}` ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'
+                }`}
               >
                 <Home className="mr-2 h-4 w-4" />
-                Dashboard
-              </Button>
-            </Link>
-
-            {organizationId && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: "auto" }}
-                transition={{ duration: 0.3 }}
-              >
-                <div className="pt-4 pb-2">
-                  <h3 className="text-sm font-medium text-muted-foreground px-4">
-                    Organization
-                  </h3>
-                </div>
-
-                <Link href={`/check-in/${organizationId}`}>
-                  <Button
-                    variant={
-                      isActive(`/check-in/${organizationId}`)
-                        ? "secondary"
-                        : "ghost"
-                    }
-                    className="w-full justify-start transition-colors hover:bg-secondary/80"
-                  >
-                    <CalendarDays className="mr-2 h-4 w-4" />
-                    Check In
-                  </Button>
-                </Link>
-              </motion.div>
+                Main Dashboard
+              </Link>
             )}
 
-            <Button
-              variant={pathname.includes("/subscription") ? "secondary" : "ghost"}
-              className="w-full justify-start transition-colors hover:bg-secondary/80"
-              onClick={() => handleNavigation('/member-portal/:organizationId/subscription')}
-              disabled={loading}
-            >
-              <Calendar className="mr-2 h-4 w-4" />
-              Subscription
-            </Button>
+            {/* Subscription link */}
+            {organizationId && (
+              <Link 
+                href={`/member-portal/${organizationId}/subscription`}
+                className={`flex items-center px-3 py-2 rounded-md text-sm ${
+                  pathname?.includes('/subscription') ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'
+                }`}
+              >
+                <CreditCard className="mr-2 h-4 w-4" />
+                Subscription
+              </Link>
+            )}
             
-            <Button
-              variant={pathname.includes("/payment") ? "secondary" : "ghost"}
-              className="w-full justify-start transition-colors hover:bg-secondary/80"
-              onClick={() => handleNavigation('/member-portal/:organizationId/payment')}
-              disabled={loading}
-            >
-              <PaymentIcon className="mr-2 h-4 w-4" />
-              Payment
-            </Button>
-
-            <Button
-              variant={pathname.includes("/settings") ? "secondary" : "ghost"}
-              className="w-full justify-start transition-colors hover:bg-secondary/80"
-              onClick={() => handleNavigation('/member-portal/:organizationId/settings')}
-              disabled={loading}
-            >
-              <Settings className="mr-2 h-4 w-4" />
-              Settings
-            </Button>
+            {/* Membership Plans link */}
+            {organizationId && (
+              <Link 
+                href={`/member-portal/${organizationId}/plans`}
+                className={`flex items-center px-3 py-2 rounded-md text-sm ${
+                  pathname?.includes('/plans') ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'
+                }`}
+              >
+                <CreditCard className="mr-2 h-4 w-4" />
+                Membership Plans
+              </Link>
+            )}
+            
+            {/* User settings */}
+            {organizationId && (
+              <Link 
+                href={`/member-portal/${organizationId}/settings`}
+                className={`flex items-center px-3 py-2 rounded-md text-sm ${
+                  pathname?.includes('/settings') ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'
+                }`}
+              >
+                <Settings className="mr-2 h-4 w-4" />
+                Settings
+              </Link>
+            )}
           </>
         )}
       </div>
