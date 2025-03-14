@@ -39,15 +39,15 @@ export default function MemberPortalLayout({
   }
   
   return (
-    <div className="flex min-h-screen bg-background gap-6">
+    <div className="flex flex-col md:flex-row min-h-screen bg-background">
       <MemberSidebar organizationId={organizationId} onSignOut={handleSignOut} />
       <motion.main 
-        className="flex-1 overflow-y-auto pt-4 md:pt-0"
+        className="flex-1 overflow-y-auto p-4 md:pt-6"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.3 }}
       >
-        <div className="md:pl-0 pl-12">
+        <div className="container mx-auto max-w-6xl px-0 md:px-4">
           {children}
         </div>
       </motion.main>

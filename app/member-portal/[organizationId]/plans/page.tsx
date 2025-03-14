@@ -142,9 +142,9 @@ export default function MemberPlansPage() {
   }
 
   return (
-    <div className="container mx-auto py-6 space-y-8">
+    <div className="container mx-auto py-4 md:py-6 space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">{organization.name} Membership Plans</h1>
+        <h1 className="text-2xl md:text-3xl font-bold">{organization.name} Membership Plans</h1>
         <p className="text-muted-foreground">Choose a membership plan that works for you</p>
       </div>
       
@@ -159,7 +159,7 @@ export default function MemberPlansPage() {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
           {plans.map((plan) => {
             const isCurrentPlan = plan.$id === memberDetails?.planId;
             const features = plan.features ? 

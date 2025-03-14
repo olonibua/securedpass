@@ -235,23 +235,23 @@ export default function PaymentPage() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
-      className="container py-10 max-w-6xl"
+      className="container mx-auto py-4 md:py-6 px-4"
     >
       <motion.div
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.1, duration: 0.4 }}
       >
-        <h1 className="text-3xl font-bold mb-6">Payment Management</h1>
+        <h1 className="text-2xl md:text-3xl font-bold mb-4 md:mb-6">Payment Management</h1>
 
         <Tabs defaultValue="methods" className="w-full">
-          <TabsList className="mb-6">
-            <TabsTrigger value="methods">Payment Methods</TabsTrigger>
-            <TabsTrigger value="history">Payment History</TabsTrigger>
+          <TabsList className="mb-4 md:mb-6 w-full flex flex-wrap">
+            <TabsTrigger value="methods" className="flex-1">Payment Methods</TabsTrigger>
+            <TabsTrigger value="history" className="flex-1">Payment History</TabsTrigger>
           </TabsList>
 
           <TabsContent value="methods">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
               <Card className="md:col-span-2">
                 <CardHeader>
                   <CardTitle>Your Payment Methods</CardTitle>

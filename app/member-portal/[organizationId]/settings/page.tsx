@@ -216,27 +216,27 @@ export default function SettingsPage() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
-      className="container py-10 max-w-6xl"
+      className="container mx-auto py-4 md:py-6 px-4 max-w-5xl"
     >
       <motion.div
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.1, duration: 0.4 }}
       >
-        <h1 className="text-3xl font-bold mb-6">Account Settings</h1>
+        <h1 className="text-2xl md:text-3xl font-bold mb-4 md:mb-6">Account Settings</h1>
         
         <Tabs defaultValue="profile" className="w-full">
-          <TabsList className="mb-6">
-            <TabsTrigger value="profile">Profile</TabsTrigger>
-            <TabsTrigger value="notifications">Notifications</TabsTrigger>
-            <TabsTrigger value="security">Security</TabsTrigger>
+          <TabsList className="mb-4 md:mb-6 w-full flex overflow-x-auto">
+            <TabsTrigger value="profile" className="flex-1">Profile</TabsTrigger>
+            <TabsTrigger value="notifications" className="flex-1">Notifications</TabsTrigger>
+            <TabsTrigger value="security" className="flex-1">Security</TabsTrigger>
           </TabsList>
           
           <TabsContent value="profile">
             <Card>
-              <CardHeader>
-                <div className="flex items-center space-x-4">
-                  <Avatar className="h-16 w-16">
+              <CardHeader className="flex flex-col sm:flex-row sm:items-center">
+                <div className="flex items-center space-x-4 mb-4 sm:mb-0">
+                  <Avatar className="h-12 w-12 md:h-16 md:w-16">
                     <AvatarImage src={user?.prefs?.avatar || ''} alt={firstName} />
                     <AvatarFallback>{firstName?.charAt(0)}{lastName?.charAt(0)}</AvatarFallback>
                   </Avatar>
@@ -248,8 +248,8 @@ export default function SettingsPage() {
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleSaveProfile}>
-                  <div className="grid gap-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid gap-4 md:gap-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label htmlFor="firstName">First Name</Label>
                         <Input
@@ -270,7 +270,7 @@ export default function SettingsPage() {
                       </div>
                     </div>
                     
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label htmlFor="email">Email</Label>
                         <Input
@@ -305,7 +305,7 @@ export default function SettingsPage() {
                       />
                     </div>
                     
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                       <div className="space-y-2">
                         <Label htmlFor="city">City</Label>
                         <Input
@@ -339,7 +339,7 @@ export default function SettingsPage() {
                     
                     <div className="space-y-2">
                       <h3 className="text-lg font-medium">Emergency Contact</h3>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div className="space-y-2">
                           <Label htmlFor="emergencyContact">Contact Name</Label>
                           <Input
@@ -362,7 +362,7 @@ export default function SettingsPage() {
                     </div>
                   </div>
                   
-                  <div className="mt-6 flex justify-end">
+                  <div className="flex justify-end mt-2">
                     <Button type="submit" disabled={saving}>
                       {saving ? (
                         <>

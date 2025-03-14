@@ -26,6 +26,7 @@ export default function OrganizationDashboard() {
   const [organization, setOrganization] = useState<Organization | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { user, isLoaded: authLoaded } = useAuth();
   const router = useRouter();
 
@@ -38,7 +39,7 @@ export default function OrganizationDashboard() {
       try {
         setLoading(true);
         setError(null);
-        
+
         const org = await databases.getDocument(
           DATABASE_ID,
           ORGANIZATIONS_COLLECTION_ID,
@@ -46,10 +47,13 @@ export default function OrganizationDashboard() {
         );
         setOrganization(org as unknown as Organization);
       } catch (error: unknown) {
-        const errorMessage = error instanceof Error ? error.message : 'Failed to load organization';
+        const errorMessage =
+          error instanceof Error
+            ? error.message
+            : "Failed to load organization";
         console.error("Error fetching organization:", errorMessage);
         setError(errorMessage);
-        toast.error('Failed to load organization');
+        toast.error("Failed to load organization");
         // Redirect to dashboard on error (optional)
         // router.push('/dashboard');
       } finally {
@@ -75,9 +79,10 @@ export default function OrganizationDashboard() {
           <CardContent className="flex flex-col items-center justify-center py-12">
             <h3 className="text-lg font-medium mb-2">Organization not found</h3>
             <p className="text-muted-foreground text-center max-w-md mb-6">
-              {error || "The organization you&apos;re looking for doesn&apos;t exist or you don&apos;t have access to it."}
+              {error ||
+                "The organization you&apos;re looking for doesn&apos;t exist or you don&apos;t have access to it."}
             </p>
-            <Button variant="outline" onClick={() => router.push('/dashboard')}>
+            <Button variant="outline" onClick={() => router.push("/dashboard")}>
               Return to Dashboard
             </Button>
           </CardContent>
@@ -86,8 +91,8 @@ export default function OrganizationDashboard() {
     );
   }
 
-  const isMembershipOrg = organization.organizationType === 'membership';
-  const isCompanyOrg = organization.organizationType === 'company';
+  const isMembershipOrg = organization.organizationType === "membership";
+  const isCompanyOrg = organization.organizationType === "company";
 
   return (
     <div className="container mx-auto py-6">
