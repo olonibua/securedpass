@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
@@ -29,18 +29,24 @@ interface MemberSidebarProps {
 export default function MemberSidebar({ organizationId, onSignOut }: MemberSidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, isLoaded: authLoaded } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [userOrganizations, setUserOrganizations] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchUserOrganizations = async () => {
+  // Use useCallback to prevent recreation of this function on every render
+  const fetchUserOrganizations = useCallback(async () => {
+    if (!user?.$id) {
+      setLoading(false);
+      return;
+    }
+    
     try {
       setLoading(true);
       const response = await databases.listDocuments(
         DATABASE_ID,
         ORGANIZATIONS_MEMBERS_COLLECTION_ID,
-        [Query.equal("userId", user?.$id || "")]
+        [Query.equal("userId", user.$id)]
       );
 
       const orgIds = response.documents.map((doc) => doc.organizationId);
@@ -54,15 +60,14 @@ export default function MemberSidebar({ organizationId, onSignOut }: MemberSideb
     } finally {
       setLoading(false);
     }
-  };
+  }, [user?.$id]);
   
   useEffect(() => {
-    if (user) {
-      fetchUserOrganizations();
-    }
-  }, [user, fetchUserOrganizations]);
-
-  
+    // Only fetch once auth is loaded
+    if (!authLoaded) return;
+    
+    fetchUserOrganizations();
+  }, [authLoaded, fetchUserOrganizations]);
   
   const isActive = (path: string) => {
     return pathname === path;
@@ -104,11 +109,12 @@ export default function MemberSidebar({ organizationId, onSignOut }: MemberSideb
       </div>
 
       <div className="flex-1 px-4 space-y-2">
-        {loading ? (
+        {!authLoaded || loading ? (
           // Show loading UI while loading
-          <>
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          </>
+          <div className="flex items-center justify-center py-8">
+            <Loader2 className="h-5 w-5 animate-spin text-primary" />
+            <span className="ml-2 text-sm text-muted-foreground">Loading...</span>
+          </div>
         ) : (
           // Show actual navigation when loaded
           <>
@@ -188,9 +194,9 @@ export default function MemberSidebar({ organizationId, onSignOut }: MemberSideb
           variant="outline"
           className="w-full justify-start hover:bg-destructive/10 hover:text-destructive transition-colors"
           onClick={onSignOut}
-          disabled={loading}
+          disabled={loading || !authLoaded}
         >
-          {loading ? (
+          {!authLoaded || loading ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               Loading...

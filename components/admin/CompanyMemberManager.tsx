@@ -9,13 +9,15 @@ import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Loader2, Plus, Trash2 } from 'lucide-react';
-import { formatDate } from '@/lib/utils';
+import { Card, CardContent } from '@/components/ui/card';
 
 interface Member {
   $id: string;
   name: string;
   email: string;
-  createdAt: string;
+  phone?: string;
+  status: 'active' | 'inactive';
+  lastCheckIn?: string;
 }
 
 interface CompanyMemberManagerProps {
@@ -27,69 +29,68 @@ export default function CompanyMemberManager({ organizationId }: CompanyMemberMa
   const [loading, setLoading] = useState(true);
   const [newMemberName, setNewMemberName] = useState('');
   const [newMemberEmail, setNewMemberEmail] = useState('');
-  const [isAddingMember, setIsAddingMember] = useState(false);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [newMemberPhone, setNewMemberPhone] = useState('');
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
 
   const fetchMembers = async () => {
     try {
       setLoading(true);
       const response = await databases.listDocuments(
-        DATABASE_ID!,
-        MEMBERS_COLLECTION_ID!,
-        [Query.equal("organizationId", organizationId)]
+        DATABASE_ID,
+        MEMBERS_COLLECTION_ID,
+        [Query.equal('organizationId', organizationId)]
       );
-
+      
       setMembers(response.documents as unknown as Member[]);
     } catch (error: unknown) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Failed to fetch members";
-      console.error("Error fetching members:", errorMessage);
-      toast.error("Failed to load members");
+      const errorMessage = error instanceof Error ? error.message : 'Failed to fetch members';
+      console.error('Error fetching members:', errorMessage);
+      toast.error('Failed to load members');
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchMembers();
-  }, [organizationId, fetchMembers]);
-
-  
+    if (organizationId) {
+      fetchMembers();
+    }
+  }, [organizationId]);
 
   const handleAddMember = async () => {
     try {
       if (!newMemberName || !newMemberEmail) {
-        toast.error('Please provide both name and email');
+        toast.error('Name and email are required');
         return;
       }
 
-      setIsAddingMember(true);
-      
-      // Create member directly (no user account needed for company members)
       await databases.createDocument(
-        DATABASE_ID!,
-        MEMBERS_COLLECTION_ID!,
+        DATABASE_ID,
+        MEMBERS_COLLECTION_ID,
         ID.unique(),
         {
           organizationId,
           name: newMemberName,
           email: newMemberEmail,
+          phone: newMemberPhone || null,
           status: 'active',
           createdAt: new Date().toISOString()
         }
       );
-      
-      toast.success('Member added successfully');
+
+      // Reset form
       setNewMemberName('');
       setNewMemberEmail('');
-      setIsDialogOpen(false);
+      setNewMemberPhone('');
+      setIsAddDialogOpen(false);
+      
+      // Refresh member list
       fetchMembers();
+      toast.success('Member added successfully');
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to add member';
       console.error('Error adding member:', errorMessage);
       toast.error('Failed to add member');
-    } finally {
-      setIsAddingMember(false);
     }
   };
 
@@ -120,20 +121,18 @@ export default function CompanyMemberManager({ organizationId }: CompanyMemberMa
 
   return (
     <div>
-      <div className="flex justify-end mb-4">
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+      <div className="flex justify-between items-center mb-6">
+        <h3 className="text-lg font-medium">
+          Members ({loading ? '...' : members.length})
+        </h3>
+        
+        <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
           <DialogTrigger asChild>
-            <Button>
-              <Plus className="h-4 w-4 mr-2" />
-              Add Member
-            </Button>
+            <Button>Add Member</Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Add New Member</DialogTitle>
-              <DialogDescription>
-                Add a new member to your company organization.
-              </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
               <div className="grid gap-2">
@@ -142,7 +141,7 @@ export default function CompanyMemberManager({ organizationId }: CompanyMemberMa
                   id="name"
                   value={newMemberName}
                   onChange={(e) => setNewMemberName(e.target.value)}
-                  placeholder="John Doe"
+                  placeholder="Enter member name"
                 />
               </div>
               <div className="grid gap-2">
@@ -152,34 +151,51 @@ export default function CompanyMemberManager({ organizationId }: CompanyMemberMa
                   type="email"
                   value={newMemberEmail}
                   onChange={(e) => setNewMemberEmail(e.target.value)}
-                  placeholder="john@example.com"
+                  placeholder="Enter member email"
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="phone">Phone (optional)</Label>
+                <Input
+                  id="phone"
+                  value={newMemberPhone}
+                  onChange={(e) => setNewMemberPhone(e.target.value)}
+                  placeholder="Enter member phone"
                 />
               </div>
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
-                Cancel
-              </Button>
-              <Button onClick={handleAddMember} disabled={isAddingMember}>
-                {isAddingMember && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                Add Member
-              </Button>
+              <Button onClick={handleAddMember}>Add Member</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
       </div>
-
-      {members.length === 0 ? (
-        <div className="text-center py-8 text-muted-foreground">
-          No members found. Add your first member to get started.
+      
+      {loading ? (
+        <div className="flex justify-center items-center py-8">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
         </div>
+      ) : members.length === 0 ? (
+        <Card>
+          <CardContent className="flex flex-col items-center justify-center py-8">
+            <p className="text-muted-foreground mb-4">No members added yet</p>
+            <Button 
+              variant="outline" 
+              onClick={() => setIsAddDialogOpen(true)}
+            >
+              Add Your First Member
+            </Button>
+          </CardContent>
+        </Card>
       ) : (
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead>Name</TableHead>
               <TableHead>Email</TableHead>
-              <TableHead>Joined</TableHead>
+              <TableHead>Phone</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Last Check-in</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -188,7 +204,22 @@ export default function CompanyMemberManager({ organizationId }: CompanyMemberMa
               <TableRow key={member.$id}>
                 <TableCell className="font-medium">{member.name}</TableCell>
                 <TableCell>{member.email}</TableCell>
-                <TableCell>{formatDate(member.createdAt)}</TableCell>
+                <TableCell>{member.phone || '—'}</TableCell>
+                <TableCell>
+                  <span className={`px-2 py-1 rounded text-xs ${
+                    member.status === 'active' 
+                      ? 'bg-green-100 text-green-800' 
+                      : 'bg-red-100 text-red-800'
+                  }`}>
+                    {member.status}
+                  </span>
+                </TableCell>
+                <TableCell>
+                  {member.lastCheckIn 
+                    ? new Date(member.lastCheckIn).toLocaleString() 
+                    : 'Never'
+                  }
+                </TableCell>
                 <TableCell className="text-right">
                   <Button
                     variant="ghost"

@@ -12,6 +12,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   checkAuth: () => Promise<boolean>;
+  isLoaded: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -19,27 +20,36 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<Models.User<Models.Preferences> | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isLoaded, setIsLoaded] = useState(false);
   const router = useRouter();
 
-  // Check if user is logged in on initial load
-  useEffect(() => {
-    checkAuth();
-  }, []);
-
+  // Define checkAuth outside useEffect so it's available for the context value
   const checkAuth = async (): Promise<boolean> => {
     try {
-      setLoading(true);
       const currentUser = await account.get();
       setUser(currentUser);
       return true;
-    } catch (error: unknown) {
-      console.error("Check auth error:", error);
+    } catch (error) {
+      console.error('Not authenticated:', error);
       setUser(null);
       return false;
     } finally {
       setLoading(false);
+      setIsLoaded(true);
     }
   };
+
+  useEffect(() => {
+    // Initial auth check
+    checkAuth();
+    
+    // Optional polling interval
+    const authCheckInterval = setInterval(checkAuth, 60000);
+    
+    return () => {
+      clearInterval(authCheckInterval);
+    };
+  }, []);
 
   const login = async (email: string, password: string) => {
     try {
@@ -80,8 +90,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const value: AuthContextType = {
+    user,
+    loading,
+    isLoaded,
+    login,
+    logout,
+    checkAuth,
+  };
+
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout, checkAuth }}>
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );

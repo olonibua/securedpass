@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useParams } from 'next/navigation';
-import { databases, } from '@/lib/appwrite';
+import { useParams, useRouter } from 'next/navigation';
+import { databases } from '@/lib/appwrite';
 import { toast } from 'sonner';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -18,16 +18,27 @@ import { DATABASE_ID, ORGANIZATIONS_COLLECTION_ID } from '@/lib/appwrite';
 import CompanyMemberManager from '@/components/admin/CompanyMemberManager';
 import MembershipManager from '@/components/admin/MembershipManager';
 import MembershipPlanManager from '@/components/admin/MembershipPlanManager';
+import { useAuth } from '@/lib/auth-context';
+import { Button } from '@/components/ui/button';
 
 export default function OrganizationDashboard() {
   const { organizationId } = useParams();
   const [organization, setOrganization] = useState<Organization | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const { user, isLoaded: authLoaded } = useAuth();
+  const router = useRouter();
 
   useEffect(() => {
+    // Only fetch once auth is loaded and we have an organizationId
+    if (!authLoaded) return;
+    if (!organizationId) return;
+
     const fetchOrganization = async () => {
       try {
         setLoading(true);
+        setError(null);
+        
         const org = await databases.getDocument(
           DATABASE_ID,
           ORGANIZATIONS_COLLECTION_ID,
@@ -37,18 +48,19 @@ export default function OrganizationDashboard() {
       } catch (error: unknown) {
         const errorMessage = error instanceof Error ? error.message : 'Failed to load organization';
         console.error("Error fetching organization:", errorMessage);
+        setError(errorMessage);
         toast.error('Failed to load organization');
+        // Redirect to dashboard on error (optional)
+        // router.push('/dashboard');
       } finally {
         setLoading(false);
       }
     };
 
-    if (organizationId) {
-      fetchOrganization();
-    }
-  }, [organizationId]);
+    fetchOrganization();
+  }, [organizationId, authLoaded, router]);
 
-  if (loading) {
+  if (!authLoaded || loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -56,16 +68,18 @@ export default function OrganizationDashboard() {
     );
   }
 
-  if (!organization) {
+  if (error || !organization) {
     return (
       <div className="container mx-auto py-6">
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
             <h3 className="text-lg font-medium mb-2">Organization not found</h3>
             <p className="text-muted-foreground text-center max-w-md mb-6">
-              The organization you&apos;re looking for doesn&apos;t exist or you
-              don&apos;t have access to it.
+              {error || "The organization you're looking for doesn't exist or you don't have access to it."}
             </p>
+            <Button variant="outline" onClick={() => router.push('/dashboard')}>
+              Return to Dashboard
+            </Button>
           </CardContent>
         </Card>
       </div>
