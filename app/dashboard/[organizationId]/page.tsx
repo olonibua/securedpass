@@ -75,7 +75,7 @@ export default function OrganizationDashboard() {
           <CardContent className="flex flex-col items-center justify-center py-12">
             <h3 className="text-lg font-medium mb-2">Organization not found</h3>
             <p className="text-muted-foreground text-center max-w-md mb-6">
-              {error || "The organization you're looking for doesn't exist or you don't have access to it."}
+              {error || "The organization you&apos;re looking for doesn&apos;t exist or you don&apos;t have access to it."}
             </p>
             <Button variant="outline" onClick={() => router.push('/dashboard')}>
               Return to Dashboard

@@ -5,7 +5,7 @@ import { databases, Query } from '@/lib/appwrite';
 import { DATABASE_ID, CHECKINS_COLLECTION_ID } from '@/lib/appwrite';
 import { format } from 'date-fns';
 import { CalendarDays, Clock } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent,} from '@/components/ui/card';
 import { Loader2 } from 'lucide-react';
 import { Models } from 'appwrite';
 

@@ -18,7 +18,7 @@ export default function CheckInPage() {
   const params = useParams();
   const router = useRouter();
   const organizationId = params.organizationId as string;
-  const { user, isLoaded: authLoaded } = useAuth();
+  const { user: _user, isLoaded: authLoaded } = useAuth();
   
   const [organization, setOrganization] = useState<Models.Document | null>(null);
   const [loading, setLoading] = useState(true);
@@ -40,13 +40,13 @@ export default function CheckInPage() {
         setOrganization(org);
         
         // If user is authenticated, check if they're a member
-        if (user?.email) {
+        if (_user?.email) {
           const membersResponse = await databases.listDocuments(
             DATABASE_ID!,
             MEMBERS_COLLECTION_ID!,
             [
               Query.equal("organizationId", organizationId),
-              Query.equal("email", user.email)
+              Query.equal("email", _user.email)
             ]
           );
           
@@ -66,7 +66,7 @@ export default function CheckInPage() {
     if (authLoaded) {
       fetchData();
     }
-  }, [organizationId, user?.email, authLoaded]);
+  }, [organizationId, _user?.email, authLoaded]);
 
   const handleMemberCheckIn = async () => {
     try {
@@ -141,28 +141,30 @@ export default function CheckInPage() {
         <Card className="w-full">
           <CardHeader>
             <CardTitle>Member Check-In</CardTitle>
-            <CardDescription>
-              Welcome back, {memberInfo.name}!
-            </CardDescription>
+            <CardDescription>Welcome back, {memberInfo.name}!</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             {success ? (
               <div className="flex flex-col items-center justify-center py-8 text-center">
                 <CheckCircle className="h-16 w-16 text-green-500 mb-4" />
-                <h3 className="text-xl font-semibold mb-2">Check-in Successful</h3>
+                <h3 className="text-xl font-semibold mb-2">
+                  Check-in Successful
+                </h3>
                 <p className="text-muted-foreground">
-                  You've been checked in to {organization.name}.
+                  You&apos;ve been checked in to {organization.name}.
                 </p>
-                <Button 
-                  className="mt-6" 
-                  onClick={() => router.push(`/member-portal/${organizationId}`)}
+                <Button
+                  className="mt-6"
+                  onClick={() =>
+                    router.push(`/member-portal/${organizationId}`)
+                  }
                 >
                   Go to Member Dashboard
                 </Button>
               </div>
             ) : (
-              <Button 
-                className="w-full" 
+              <Button
+                className="w-full"
                 onClick={handleMemberCheckIn}
                 disabled={processing}
               >
@@ -172,7 +174,7 @@ export default function CheckInPage() {
                     Processing...
                   </>
                 ) : (
-                  'Check In Now'
+                  "Check In Now"
                 )}
               </Button>
             )}

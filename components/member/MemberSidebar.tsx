@@ -16,7 +16,6 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/lib/auth-context';
 import { databases, Query, DATABASE_ID, ORGANIZATIONS_MEMBERS_COLLECTION_ID, MEMBERS_COLLECTION_ID } from '@/lib/appwrite';
-import { toast } from 'sonner';
 
 
 interface MemberSidebarProps {
