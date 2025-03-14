@@ -56,7 +56,6 @@ export default function CheckInPage() {
             ]
           );
           
-          console.log("Member search results:", membersResponse.documents.length);
           
           if (membersResponse.documents.length > 0) {
             setMemberInfo(membersResponse.documents[0] as Models.Document);
