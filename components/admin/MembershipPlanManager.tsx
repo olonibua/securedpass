@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -65,31 +65,40 @@ export default function MembershipPlanManager({ organizationId }: MembershipPlan
     },
   });
 
-  const fetchPlans = async () => {
+  const fetchPlans = useCallback(async () => {
     try {
       setLoading(true);
+      
+      // Make sure we have the collection ID
+      if (!MEMBERSHIP_PLANS_COLLECTION_ID) {
+        throw new Error("Membership plans collection ID is not defined");
+      }
+      
+      console.log("Fetching membership plans for org:", organizationId);
+      
       const response = await databases.listDocuments(
         DATABASE_ID,
-        MEMBERSHIP_PLANS_COLLECTION_ID as string,
+        MEMBERSHIP_PLANS_COLLECTION_ID,
         [
           Query.equal('organizationId', organizationId),
-          Query.orderAsc('price'),
+          Query.orderAsc('price')
         ]
       );
       
+      console.log("Received plans:", response.documents.length);
       setPlans(response.documents);
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to fetch plans';
+      const errorMessage = error instanceof Error ? error.message : 'Failed to fetch membership plans';
       console.error('Error fetching membership plans:', errorMessage);
       toast.error('Failed to load membership plans');
     } finally {
       setLoading(false);
     }
-  };
+  }, [organizationId]);
 
   useEffect(() => {
     fetchPlans();
-  }, [organizationId, fetchPlans]);
+  }, [fetchPlans]);
 
   const handleCreatePlan = async (values: PlanFormValues) => {
     try {
@@ -195,18 +204,10 @@ export default function MembershipPlanManager({ organizationId }: MembershipPlan
     }
   };
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center py-12">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-xl font-semibold">Membership Plans</h2>
+        <h2 className="text-lg font-medium">Membership Plans</h2>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Button>
@@ -343,16 +344,21 @@ export default function MembershipPlanManager({ organizationId }: MembershipPlan
         </Dialog>
       </div>
       
-      {plans.length === 0 ? (
-        <Card>
-          <CardContent className="flex flex-col items-center justify-center py-12">
-            <p className="text-muted-foreground mb-4">No membership plans created yet</p>
-            <Button onClick={() => setIsDialogOpen(true)}>
-              <Plus className="h-4 w-4 mr-2" />
-              Create Your First Plan
-            </Button>
-          </CardContent>
-        </Card>
+      {loading ? (
+        <div className="flex justify-center p-12">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      ) : plans.length === 0 ? (
+        <div className="text-center p-12 border rounded-lg">
+          <p className="text-muted-foreground">No membership plans created yet.</p>
+          <Button 
+            variant="outline" 
+            className="mt-4"
+            onClick={() => { setIsDialogOpen(true); setEditingPlan(null); }}
+          >
+            Create your first plan
+          </Button>
+        </div>
       ) : (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {plans.map((plan) => (

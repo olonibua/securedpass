@@ -35,8 +35,11 @@ export default function AttendanceTable({ organizationId }: AttendanceTableProps
   const [loading, setLoading] = useState(true);
   const [checkIns, setCheckIns] = useState<Record<string, unknown>[]>([]);
   const [customFields, setCustomFields] = useState<CustomField[]>([]);
-  const [members, setMembers] = useState<Record<string, Record<string, unknown>>>({});
-  
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [members, setMembers] = useState<
+    Record<string, Record<string, unknown>>
+  >({});
+
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [dateRange, setDateRange] = useState<{
@@ -53,51 +56,50 @@ export default function AttendanceTable({ organizationId }: AttendanceTableProps
   const fetchCheckIns = useCallback(async () => {
     try {
       setLoading(true);
-      
+
       // Build query filters
       const filters = [
-        Query.equal('organizationId', organizationId),
-        Query.orderDesc('timestamp'),
+        Query.equal("organizationId", organizationId),
+        Query.orderDesc("timestamp"),
         Query.limit(ITEMS_PER_PAGE),
-        Query.offset((page - 1) * ITEMS_PER_PAGE)
+        Query.offset((page - 1) * ITEMS_PER_PAGE),
       ];
-      
+
       // Add date range filter if set
       if (dateRange.from) {
         filters.push(
-          Query.greaterThanEqual('timestamp', dateRange.from.toISOString())
+          Query.greaterThanEqual("timestamp", dateRange.from.toISOString())
         );
       }
-      
+
       if (dateRange.to) {
         // Add one day to include the end date fully
         const endDate = new Date(dateRange.to);
         endDate.setDate(endDate.getDate() + 1);
-        filters.push(
-          Query.lessThan('timestamp', endDate.toISOString())
-        );
+        filters.push(Query.lessThan("timestamp", endDate.toISOString()));
       }
-      
+
       const response = await databases.listDocuments(
         DATABASE_ID!,
         CHECKINS_COLLECTION_ID!,
         filters
       );
-      
+
       setCheckIns(response.documents);
-      
+
       // Calculate total pages
       const totalResponse = await databases.listDocuments(
         DATABASE_ID!,
         CHECKINS_COLLECTION_ID!,
-        [Query.equal('organizationId', organizationId)]
+        [Query.equal("organizationId", organizationId)]
       );
-      
+
       setTotalPages(Math.ceil(totalResponse.total / ITEMS_PER_PAGE));
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to fetch check-ins';
-      console.error('Error fetching check-ins:', errorMessage);
-      toast.error('Failed to load check-in data');
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to fetch check-ins";
+      console.error("Error fetching check-ins:", errorMessage);
+      toast.error("Failed to load check-in data");
     } finally {
       setLoading(false);
     }
@@ -107,39 +109,43 @@ export default function AttendanceTable({ organizationId }: AttendanceTableProps
     const fetchData = async () => {
       try {
         setLoading(true);
-        
+
         // Fetch custom fields
         const fieldsResponse = await databases.listDocuments(
           DATABASE_ID!,
           CUSTOMFIELDS_COLLECTION_ID!,
           [
-            Query.equal('organizationId', organizationId),
-            Query.orderAsc('order')
+            Query.equal("organizationId", organizationId),
+            Query.orderAsc("order"),
           ]
         );
         setCustomFields(fieldsResponse.documents as unknown as CustomField[]);
-        
+
         // Fetch members for this organization
         const membersResponse = await databases.listDocuments(
           DATABASE_ID!,
           MEMBERS_COLLECTION_ID!,
-          [Query.equal('organizationId', organizationId)]
+          [Query.equal("organizationId", organizationId)]
         );
-        
+
         // Create a map of member IDs to member data for quick lookup
-        const membersMap = membersResponse.documents.reduce((acc, member) => {
-          acc[member.$id] = member;
-          return acc;
-        }, {} as Record<string, Record<string, unknown>>);
-        
+        const membersMap = membersResponse.documents.reduce(
+          (acc, member) => {
+            acc[member.$id] = member;
+            return acc;
+          },
+          {} as Record<string, Record<string, unknown>>
+        );
+
         setMembers(membersMap);
-        
+
         // Fetch check-ins with pagination and filters
         await fetchCheckIns();
       } catch (error: unknown) {
-        const errorMessage = error instanceof Error ? error.message : 'Failed to fetch data';
-        console.error('Error fetching data:', errorMessage);
-        toast.error('Failed to load attendance data');
+        const errorMessage =
+          error instanceof Error ? error.message : "Failed to fetch data";
+        console.error("Error fetching data:", errorMessage);
+        toast.error("Failed to load attendance data");
       } finally {
         setLoading(false);
       }
@@ -155,79 +161,80 @@ export default function AttendanceTable({ organizationId }: AttendanceTableProps
   const handleExportCSV = async () => {
     try {
       setExportLoading(true);
-      
+
       // Fetch all check-ins for export (potentially with date filters)
       const filters = [
-        Query.equal('organizationId', organizationId),
-        Query.orderDesc('timestamp'),
-        Query.limit(5000) // Set a reasonable limit
+        Query.equal("organizationId", organizationId),
+        Query.orderDesc("timestamp"),
+        Query.limit(5000), // Set a reasonable limit
       ];
-      
+
       if (dateRange.from) {
         filters.push(
-          Query.greaterThanEqual('timestamp', dateRange.from.toISOString())
+          Query.greaterThanEqual("timestamp", dateRange.from.toISOString())
         );
       }
-      
+
       if (dateRange.to) {
         const endDate = new Date(dateRange.to);
         endDate.setDate(endDate.getDate() + 1);
-        filters.push(
-          Query.lessThan('timestamp', endDate.toISOString())
-        );
+        filters.push(Query.lessThan("timestamp", endDate.toISOString()));
       }
-      
+
       const response = await databases.listDocuments(
         DATABASE_ID!,
         CHECKINS_COLLECTION_ID!,
         filters
       );
-      
+
       // Prepare CSV headers
       const headers = [
-        'Check-in ID',
-        'Date & Time',
-        'Member ID',
-        ...customFields.map(field => field.name)
+        "Check-in ID",
+        "Date & Time",
+        "Member ID",
+        ...customFields.map((field) => field.name),
       ];
-      
+
       // Prepare CSV rows
-      const rows = response.documents.map(checkIn => {
+      const rows = response.documents.map((checkIn) => {
         const row = [
           checkIn.$id,
-          new Date(checkIn.timestamp).toLocaleString(),
-          checkIn.memberId || 'Guest'
+          new Date(checkIn.timestamp as string).toLocaleString(),
+          checkIn.memberId || "Guest",
         ];
-        
+
         // Add custom field values
-        customFields.forEach(field => {
-          const value = checkIn.customFieldValues[field.$id] || '';
+        customFields.forEach((field) => {
+          const value = checkIn.customFieldValues[field.$id] || "";
           row.push(value);
         });
-        
+
         return row;
       });
-      
+
       // Combine headers and rows
       const csvContent = [
-        headers.join(','),
-        ...rows.map(row => row.join(','))
-      ].join('\n');
-      
+        headers.join(","),
+        ...rows.map((row) => row.join(",")),
+      ].join("\n");
+
       // Create download link
-      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
       const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.setAttribute('href', url);
-      link.setAttribute('download', `check-ins-export-${new Date().toISOString().slice(0, 10)}.csv`);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute(
+        "download",
+        `check-ins-export-${new Date().toISOString().slice(0, 10)}.csv`
+      );
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      
     } catch (error: unknown) {
-        const errorMessage = error instanceof Error ? error.message : 'Failed to export data';
-      console.error('Error exporting data:', errorMessage);
-      toast.error('Failed to export attendance data');
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to export data";
+      console.error("Error exporting data:", errorMessage);
+      toast.error("Failed to export attendance data");
     } finally {
       setExportLoading(false);
     }
@@ -237,7 +244,7 @@ export default function AttendanceTable({ organizationId }: AttendanceTableProps
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <h2 className="text-2xl font-bold">Attendance Records</h2>
-        
+
         <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
           <Popover>
             <PopoverTrigger asChild>
@@ -273,7 +280,7 @@ export default function AttendanceTable({ organizationId }: AttendanceTableProps
                   if (range) {
                     setDateRange({
                       from: range.from,
-                      to: range.to || undefined
+                      to: range.to || undefined,
                     });
                   } else {
                     setDateRange({ from: undefined, to: undefined });
@@ -283,9 +290,9 @@ export default function AttendanceTable({ organizationId }: AttendanceTableProps
               />
             </PopoverContent>
           </Popover>
-          
-          <Button 
-            variant="outline" 
+
+          <Button
+            variant="outline"
             onClick={handleExportCSV}
             disabled={exportLoading}
           >
@@ -298,7 +305,7 @@ export default function AttendanceTable({ organizationId }: AttendanceTableProps
           </Button>
         </div>
       </div>
-      
+
       <div className="border rounded-md">
         {loading ? (
           <div className="flex justify-center items-center p-8">
@@ -314,25 +321,77 @@ export default function AttendanceTable({ organizationId }: AttendanceTableProps
               <TableRow>
                 <TableHead>Date & Time</TableHead>
                 <TableHead>Member</TableHead>
-                {customFields.map(field => (
+                {customFields.map((field) => (
                   <TableHead key={field.$id}>{field.name}</TableHead>
                 ))}
               </TableRow>
             </TableHeader>
             <TableBody>
-              {checkIns.map(checkIn => (
+              {checkIns.map((checkIn) => (
                 <TableRow key={checkIn.$id as string}>
-                  <TableCell className="font-medium">
+                  <TableCell>
                     {new Date(checkIn.timestamp as string).toLocaleString()}
                   </TableCell>
-                  <TableCell>
-                    {(checkIn.memberId as string | undefined) && members[checkIn.memberId as string] 
-                      ? (members[checkIn.memberId as string].name as string) || (members[checkIn.memberId as string].email as string)
-                      : 'Guest'}
-                  </TableCell>
-                  {customFields.map(field => (
+                  {customFields.map((field) => (
                     <TableCell key={field.$id}>
-                      {(checkIn.customFieldValues as Record<string, string>)[field.$id] || '-'}
+                      {checkIn.customFieldValues &&
+                      (checkIn.customFieldValues as Record<string, unknown>)[
+                        field.$id
+                      ] !== undefined &&
+                      (checkIn.customFieldValues as Record<string, unknown>)[
+                        field.$id
+                      ] !== null
+                        ? typeof (
+                            checkIn.customFieldValues as Record<string, unknown>
+                          )[field.$id] === "object"
+                          ? JSON.stringify(
+                              (
+                                checkIn.customFieldValues as Record<
+                                  string,
+                                  unknown
+                                >
+                              )[field.$id] || {}
+                            )
+                          : String(
+                              (
+                                checkIn.customFieldValues as Record<
+                                  string,
+                                  unknown
+                                >
+                              )[field.$id]
+                            )
+                        : "-"}
+                    </TableCell>
+                  ))}
+                  {customFields.map((field) => (
+                    <TableCell key={field.$id}>
+                      {checkIn.customFieldValues &&
+                      (checkIn.customFieldValues as Record<string, unknown>)[
+                        field.$id
+                      ] !== undefined &&
+                      (checkIn.customFieldValues as Record<string, unknown>)[
+                        field.$id
+                      ] !== null
+                        ? typeof (
+                            checkIn.customFieldValues as Record<string, unknown>
+                          )[field.$id] === "object"
+                          ? JSON.stringify(
+                              (
+                                checkIn.customFieldValues as Record<
+                                  string,
+                                  unknown
+                                >
+                              )[field.$id] || {}
+                            )
+                          : String(
+                              (
+                                checkIn.customFieldValues as Record<
+                                  string,
+                                  unknown
+                                >
+                              )[field.$id]
+                            )
+                        : "-"}
                     </TableCell>
                   ))}
                 </TableRow>
@@ -341,7 +400,7 @@ export default function AttendanceTable({ organizationId }: AttendanceTableProps
           </Table>
         )}
       </div>
-      
+
       {totalPages > 1 && (
         <Pagination>
           <PaginationContent>
@@ -349,10 +408,12 @@ export default function AttendanceTable({ organizationId }: AttendanceTableProps
               {page === 1 || loading ? (
                 <PaginationPrevious className="pointer-events-none opacity-50" />
               ) : (
-                <PaginationPrevious onClick={() => setPage(p => Math.max(1, p - 1))} />
+                <PaginationPrevious
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                />
               )}
             </PaginationItem>
-            
+
             {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
               // Show pages around current page
               let pageNum;
@@ -365,7 +426,7 @@ export default function AttendanceTable({ organizationId }: AttendanceTableProps
               } else {
                 pageNum = page - 2 + i;
               }
-              
+
               return (
                 <PaginationItem key={pageNum}>
                   {loading ? (
@@ -386,12 +447,14 @@ export default function AttendanceTable({ organizationId }: AttendanceTableProps
                 </PaginationItem>
               );
             })}
-            
+
             <PaginationItem>
               {page === totalPages || loading ? (
                 <PaginationNext className="pointer-events-none opacity-50" />
               ) : (
-                <PaginationNext onClick={() => setPage(p => Math.min(totalPages, p + 1))} />
+                <PaginationNext
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                />
               )}
             </PaginationItem>
           </PaginationContent>

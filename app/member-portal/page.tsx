@@ -14,7 +14,15 @@ export default function MemberPortalRedirect() {
   useEffect(() => {
     const redirectToOrganization = async () => {
       try {
-        if (!user || !authLoaded) return;
+        // Don't proceed if auth isn't loaded or there's no user
+        if (!authLoaded) return;
+        if (!user) {
+          console.log("No user found, redirecting to login");
+          router.push('/member-login');
+          return;
+        }
+        
+        console.log("Looking up organizations for user:", user.email);
         
         // Find the user's organizations
         let orgId = null;
@@ -28,6 +36,7 @@ export default function MemberPortalRedirect() {
         
         if (orgMembersResponse.documents.length > 0) {
           orgId = orgMembersResponse.documents[0].organizationId;
+          console.log("Found organization via membership:", orgId);
         } else {
           // Try members collection
           const membersResponse = await databases.listDocuments(
@@ -38,13 +47,16 @@ export default function MemberPortalRedirect() {
           
           if (membersResponse.documents.length > 0) {
             orgId = membersResponse.documents[0].organizationId;
+            console.log("Found organization via email:", orgId);
           }
         }
         
         if (orgId) {
+          console.log("Redirecting to organization portal:", orgId);
           router.push(`/member-portal/${orgId}`);
         } else {
           // No organizations found - redirect to member-login with message
+          console.log("No organizations found for user");
           router.push('/member-login?message=no-organizations');
         }
       } catch (error: unknown) {
@@ -56,15 +68,13 @@ export default function MemberPortalRedirect() {
       }
     };
     
-    if (authLoaded) {
-      redirectToOrganization();
-    }
+    redirectToOrganization();
   }, [user, authLoaded, router]);
   
   return (
     <div className="flex justify-center items-center min-h-screen">
-      {isLoading && <Loader2 className="h-10 w-10 animate-spin text-primary" />}
-      {!isLoading && !authLoaded && <p>Redirecting to login...</p>}
+      <Loader2 className="h-10 w-10 animate-spin text-primary" />
+      <span className="ml-3 text-primary">Finding your membership...</span>
     </div>
   );
 }

@@ -52,18 +52,12 @@ export default function DashboardPage() {
     }
   }, [user, authLoading, redirectToOrganization]);
 
-  if (authLoading || loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
-  }
-
   return (
-    <div className="flex items-center justify-center min-h-screen">
-      <Loader2 className="h-8 w-8 animate-spin text-primary mr-2" />
-      <p>Redirecting to your organization dashboard...</p>
+    <div className="flex flex-col items-center justify-center min-h-[60vh] p-4 text-center">
+      <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
+      <p className="text-sm sm:text-base max-w-xs sm:max-w-md mx-auto">
+        Redirecting to your organization dashboard...
+      </p>
     </div>
   );
 }

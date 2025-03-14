@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
@@ -19,22 +19,34 @@ export default function RegistrationLinkGenerator({
   const [registrationCode, setRegistrationCode] = useState<string>('');
   const [copied, setCopied] = useState(false);
   const [loading, setLoading] = useState(true);
-  const fetchOrCreateRegistrationCode = async () => {
+  
+  // Use useCallback to prevent infinite loop with the useEffect dependency
+  const fetchOrCreateRegistrationCode = useCallback(async () => {
     try {
       setLoading(true);
+      console.log("Fetching registration code for organization:", organizationId);
+      console.log("Collection ID:", REGISTRATION_CODES_COLLECTION_ID);
+
+      if (!organizationId || !REGISTRATION_CODES_COLLECTION_ID) {
+        throw new Error("Missing required IDs");
+      }
 
       // Try to fetch existing registration code
       const response = await databases.listDocuments(
         DATABASE_ID,
-        REGISTRATION_CODES_COLLECTION_ID as string,
+        REGISTRATION_CODES_COLLECTION_ID,
         [Query.equal("organizationId", organizationId)]
       );
+
+      console.log("Registration code query response:", response);
 
       if (response.documents.length > 0) {
         // Use existing code
         setRegistrationCode(response.documents[0].code);
+        console.log("Using existing code:", response.documents[0].code);
       } else {
         // Create new registration code
+        console.log("No existing code found, generating new one");
         await generateNewCode();
       }
     } catch (error: unknown) {
@@ -47,13 +59,11 @@ export default function RegistrationLinkGenerator({
     } finally {
       setLoading(false);
     }
-  };
+  }, [organizationId]);
   
   useEffect(() => {
     fetchOrCreateRegistrationCode();
-  }, [organizationId, fetchOrCreateRegistrationCode]);
-  
-  
+  }, [fetchOrCreateRegistrationCode]);
   
   const generateNewCode = async () => {
     try {
@@ -63,23 +73,30 @@ export default function RegistrationLinkGenerator({
       const randomPart = Math.random().toString(36).substring(2, 8).toUpperCase();
       const orgPrefix = organizationName.substring(0, 3).toUpperCase();
       const newCode = `${orgPrefix}-${randomPart}`;
+      console.log("Generated new code:", newCode);
       
       // Delete any existing codes
-      const existingCodes = await databases.listDocuments(
-        DATABASE_ID,
-        REGISTRATION_CODES_COLLECTION_ID as string,
-        [Query.equal('organizationId', organizationId)]
-      );
-      
-      for (const doc of existingCodes.documents) {
-        await databases.deleteDocument(
+      try {
+        const existingCodes = await databases.listDocuments(
           DATABASE_ID,
           REGISTRATION_CODES_COLLECTION_ID as string,
-          doc.$id
+          [Query.equal('organizationId', organizationId)]
         );
+        
+        for (const doc of existingCodes.documents) {
+          await databases.deleteDocument(
+            DATABASE_ID,
+            REGISTRATION_CODES_COLLECTION_ID as string,
+            doc.$id
+          );
+        }
+      } catch (deleteError) {
+        console.error("Error deleting existing codes:", deleteError);
+        // Continue with creating new code even if deletion fails
       }
       
       // Create new registration code
+      console.log("Creating new code in database");
       await databases.createDocument(
         DATABASE_ID,
         REGISTRATION_CODES_COLLECTION_ID as string,

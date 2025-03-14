@@ -18,6 +18,7 @@ import { Input } from '@/components/ui/input';
 import { Loader2 } from 'lucide-react';
 import Header from '@/components/layout/Header';
 import { useAuth } from '@/lib/auth-context';
+import { useRouter } from 'next/navigation';
 
 const formSchema = z.object({
   email: z.string().email({
@@ -31,6 +32,7 @@ const formSchema = z.object({
 export default function LoginPage() {
   const { login } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const router = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -44,7 +46,12 @@ export default function LoginPage() {
     try {
       setIsSubmitting(true);
       console.log("Login attempt with:", values.email);
-      await login(values.email, values.password);
+      const success = await login(values.email, values.password);
+      
+      if (success) {
+        // Redirect to dashboard after successful login
+        router.push('/dashboard');
+      }
     } catch (error: unknown) {
       // Error is already handled in the login function
       console.error("Login submission error:", error);
@@ -57,16 +64,16 @@ export default function LoginPage() {
     <div className="flex min-h-screen flex-col">
       <Header />
       
-      <div className="flex-1 container max-w-md mx-auto py-10">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold">Welcome Back</h1>
-          <p className="text-muted-foreground mt-2">
+      <div className="flex-1 container px-4 sm:px-6 max-w-md mx-auto py-6 sm:py-10">
+        <div className="text-center mb-6 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold">Welcome Back</h1>
+          <p className="text-muted-foreground mt-2 text-sm sm:text-base">
             Log in to manage your organization
           </p>
         </div>
         
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 sm:space-y-6">
             <FormField
               control={form.control}
               name="email"
@@ -95,7 +102,7 @@ export default function LoginPage() {
               )}
             />
             
-            <Button type="submit" className="w-full" disabled={isSubmitting}>
+            <Button type="submit" className="w-full mt-2" disabled={isSubmitting}>
               {isSubmitting ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -109,7 +116,7 @@ export default function LoginPage() {
         </Form>
         
         <div className="text-center mt-6">
-          <p className="text-sm text-muted-foreground">
+          <p className="text-xs sm:text-sm text-muted-foreground">
             Don&apos;t have an account?{' '}
             <Link href="/register" className="text-primary hover:underline">
               Create an organization

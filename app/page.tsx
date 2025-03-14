@@ -10,22 +10,22 @@ export default function Home() {
      <Header />
 
       {/* Hero Section */}
-      <section className="flex-1 flex flex-col items-center justify-center text-center px-4 py-16 md:py-24 bg-gradient-to-b from-background to-muted/30">
-        <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-6">
+      <section className="flex-1 flex flex-col items-center justify-center text-center px-4 py-10 sm:py-16 md:py-24 bg-gradient-to-b from-background to-muted/30">
+        <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold tracking-tight mb-4 sm:mb-6 max-w-4xl">
           Streamline Your Check-in Process
         </h1>
-        <p className="text-xl text-muted-foreground max-w-3xl mb-10">
+        <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-sm sm:max-w-2xl md:max-w-3xl mb-6 sm:mb-10">
           A modern QR-based attendance system for organizations of all sizes.
           Track attendance, collect data, and manage members with ease.
         </p>
-        <div className="flex flex-col sm:flex-row gap-4">
-          <Link href="/register">
-            <Button size="lg" className="px-8">
+        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full max-w-xs sm:max-w-md">
+          <Link href="/register" className="w-full sm:w-auto">
+            <Button size="lg" className="w-full sm:w-auto px-4 sm:px-8">
               Get Started
             </Button>
           </Link>
-          <Link href="/demo">
-            <Button size="lg" variant="outline" className="px-8">
+          <Link href="/demo" className="w-full sm:w-auto">
+            <Button size="lg" variant="outline" className="w-full sm:w-auto px-4 sm:px-8">
               View Demo
             </Button>
           </Link>

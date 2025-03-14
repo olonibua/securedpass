@@ -132,17 +132,21 @@ export default function MemberPortalPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div className="container px-4 mx-auto py-6 sm:py-8 max-w-6xl">
+        <div className="flex items-center justify-center min-h-[50vh]">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
       </div>
     );
   }
 
   if (!organization || !memberDetails) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen">
-        <h1 className="text-2xl font-bold mb-2">Membership not found</h1>
-        <p className="text-muted-foreground">You don&apos;t have an active membership with this organization.</p>
+      <div className="container px-4 mx-auto py-6 sm:py-8 max-w-6xl">
+        <div className="flex flex-col items-center justify-center min-h-screen">
+          <h1 className="text-2xl font-bold mb-2">Membership not found</h1>
+          <p className="text-muted-foreground">You don&apos;t have an active membership with this organization.</p>
+        </div>
       </div>
     );
   }
@@ -152,114 +156,44 @@ export default function MemberPortalPage() {
     JSON.parse(memberDetails.customFields) : {};
 
   return (
-    <div className="container mx-auto space-y-6">
-      <div className="flex flex-col space-y-4 md:space-y-0 md:flex-row md:justify-between md:items-center">
+    <div className="container px-4 mx-auto py-6 sm:py-8 max-w-6xl">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold">{organization.name}</h1>
-          <p className="text-muted-foreground">{organization.description as string}</p>
+          <h1 className="text-2xl sm:text-3xl font-bold">{organization?.name || 'Member Portal'}</h1>
+          <p className="text-muted-foreground mt-1">Welcome, {memberDetails?.name || user?.name}</p>
         </div>
-        <div className="flex flex-col sm:flex-row gap-3">
-          <Button onClick={handleCheckIn} className="w-full sm:w-auto">Quick Check-in</Button>
-          <Button 
-            variant="outline"
-            onClick={() => router.push(`/member-portal/${organizationId}/plans`)}
+        {memberDetails?.status === 'active' && (
+          <Button
+            onClick={() => router.push(`/check-in/${organizationId}`)}
             className="w-full sm:w-auto"
           >
-            <CreditCard className="h-4 w-4 mr-2" />
-            Membership Plans
+            Check In Now
           </Button>
-        </div>
+        )}
       </div>
       
-      <Tabs defaultValue="membership" className="w-full">
-        <TabsList className="w-full grid grid-cols-3">
-          <TabsTrigger value="membership">Membership</TabsTrigger>
-          <TabsTrigger value="check-ins">Check-ins</TabsTrigger>
-          <TabsTrigger value="qr-code">QR Code</TabsTrigger>
+      {memberDetails?.status === 'inactive' && (
+        <Card className="bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-800 mb-6">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-amber-800 dark:text-amber-400 text-lg">Membership Inactive</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p>Your membership is currently inactive. Please contact the organization or update your membership plan.</p>
+            <Button variant="outline" className="mt-4" onClick={() => router.push(`/member-portal/${organizationId}/plans`)}>
+              View Membership Plans
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+    
+      <Tabs defaultValue="activity" className="mt-6">
+        <TabsList className="w-full sm:w-auto grid grid-cols-2 sm:flex sm:flex-row gap-2">
+          <TabsTrigger value="activity" className="flex-1 sm:flex-auto">Activity</TabsTrigger>
+          <TabsTrigger value="qr-code" className="flex-1 sm:flex-auto">QR Code</TabsTrigger>
         </TabsList>
         
-        <div className="mt-6">
-          <TabsContent value="membership" className="space-y-6">
-            {/* Member Info & Current Plan cards */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Membership card */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Your Membership</CardTitle>
-                  <CardDescription>Your membership details and status</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <p className="text-sm font-medium text-muted-foreground">Name</p>
-                      <p>{memberDetails.name}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-muted-foreground">Email</p>
-                      <p>{memberDetails.email}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-muted-foreground">Member Since</p>
-                      <p>{formatDate(memberDetails.createdAt)}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-muted-foreground">Membership Status</p>
-                      <p className="text-green-600 font-medium">Active</p>
-                    </div>
-                    
-                    {/* Display custom fields */}
-                    {Object.entries(customFields).map(([fieldId, value]) => (
-                      <div key={fieldId}>
-                        <p className="text-sm font-medium text-muted-foreground">{fieldId}</p>
-                        <p>{value as string}</p>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-              
-              {/* Current Plan card */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Current Plan</CardTitle>
-                  <CardDescription>Your subscription details</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  {membershipPlan ? (
-                    <div className="space-y-4">
-                      <div>
-                        <h3 className="text-lg font-semibold">{membershipPlan.name as string}</h3>
-                        <p className="text-muted-foreground">
-                          {formatPrice(membershipPlan.price as number, membershipPlan.interval as string)}
-                        </p>
-                      </div>
-                      <p>{membershipPlan.description as string}</p>
-                      {(membershipPlan.features as string[])?.length > 0 && (
-                        <div>
-                          <p className="font-medium mb-2">Features:</p>
-                          <ul className="list-disc pl-5 space-y-1">
-                            {(membershipPlan.features as string[]).map((feature: string, index: number) => (
-                              <li key={index}>{feature}</li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-                    </div>
-                  ) : (
-                    <div className="text-center py-6">
-                      <p className="text-muted-foreground mb-4">You don&apos;t have an active subscription plan</p>
-                      <Button onClick={() => router.push(`/member-portal/${organizationId}/plans`)}>
-                        View Available Plans
-                      </Button>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="check-ins">
-            {/* Recent Check-ins */}
+        <div className="mt-6 grid gap-6">
+          <TabsContent value="activity">
             <Card>
               <CardHeader>
                 <CardTitle>Recent Check-ins</CardTitle>
@@ -271,9 +205,9 @@ export default function MemberPortalPage() {
                 ) : (
                   <div className="space-y-4">
                     {recentCheckIns.map((checkIn) => (
-                      <div key={checkIn.$id} className="flex items-center justify-between border-b pb-3">
+                      <div key={checkIn.$id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b pb-3">
                         <div className="flex items-center">
-                          <CalendarDays className="h-5 w-5 mr-3 text-muted-foreground" />
+                          <CalendarDays className="h-5 w-5 mr-3 text-muted-foreground flex-shrink-0" />
                           <div>
                             <p className="font-medium">{formatDate(checkIn.timestamp)}</p>
                             <p className="text-sm text-muted-foreground">
@@ -281,7 +215,7 @@ export default function MemberPortalPage() {
                             </p>
                           </div>
                         </div>
-                        <span className="text-green-600 text-sm font-medium">Successful</span>
+                        <span className="text-green-600 text-sm font-medium mt-2 sm:mt-0">Successful</span>
                       </div>
                     ))}
                   </div>
@@ -291,7 +225,6 @@ export default function MemberPortalPage() {
           </TabsContent>
           
           <TabsContent value="qr-code">
-            {/* QR Code for Check-in */}
             <Card>
               <CardHeader>
                 <CardTitle>Quick Check-in</CardTitle>
