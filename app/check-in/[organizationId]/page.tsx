@@ -210,7 +210,9 @@ export default function CheckInPage() {
           <CardHeader>
             <CardTitle>Member Check-In</CardTitle>
             <CardDescription>
-              {memberInfo ? `Welcome back, ${memberInfo.name}!` : `Welcome, ${_user?.email}`}
+              {memberInfo
+                ? `Welcome back, ${memberInfo.name}!`
+                : `Welcome, ${_user?.email}`}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -239,7 +241,7 @@ export default function CheckInPage() {
                   Already Checked In Today
                 </h3>
                 <p className="text-muted-foreground">
-                  You've already checked in to {organization.name} today.
+                  You&apos;ve already checked in to {organization.name} today.
                 </p>
                 <Button
                   className="mt-6"
