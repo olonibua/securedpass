@@ -6,7 +6,7 @@ import { DATABASE_ID, databases, ORGANIZATIONS_COLLECTION_ID, CHECKINS_COLLECTIO
 import { toast } from 'sonner';
 import DynamicCheckInForm from '@/components/check-in/DynamicCheckInForm';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2, CheckCircle, UserCircle } from 'lucide-react';
+import { Loader2, CheckCircle, UserCircle, AlertCircle } from 'lucide-react';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/lib/auth-context';
@@ -24,6 +24,7 @@ export default function CheckInPage() {
   const [success, setSuccess] = useState(false);
   const [memberInfo, setMemberInfo] = useState<Models.Document | null>(null);
   const [isCheckingMember, setIsCheckingMember] = useState(true);
+  const [alreadyCheckedIn, setAlreadyCheckedIn] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -60,6 +61,25 @@ export default function CheckInPage() {
           if (membersResponse.documents.length > 0) {
             setMemberInfo(membersResponse.documents[0] as Models.Document);
             console.log("Member found:", membersResponse.documents[0].$id);
+            
+            // Check if already checked in today
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            const checkInsToday = await databases.listDocuments(
+              DATABASE_ID!,
+              CHECKINS_COLLECTION_ID!,
+              [
+                Query.equal("organizationId", organizationId),
+                Query.equal("memberId", membersResponse.documents[0].$id),
+                Query.greaterThanEqual("timestamp", today.toISOString()),
+                Query.limit(1)
+              ]
+            );
+            
+            if (checkInsToday.documents.length > 0) {
+              setAlreadyCheckedIn(true);
+            }
           }
         }
       } catch (error: unknown) {
@@ -203,6 +223,24 @@ export default function CheckInPage() {
                 </h3>
                 <p className="text-muted-foreground">
                   You&apos;ve been checked in to {organization.name}.
+                </p>
+                <Button
+                  className="mt-6"
+                  onClick={() =>
+                    router.push(`/member-portal/${organizationId}`)
+                  }
+                >
+                  Go to Member Dashboard
+                </Button>
+              </div>
+            ) : alreadyCheckedIn ? (
+              <div className="flex flex-col items-center justify-center py-8 text-center">
+                <AlertCircle className="h-16 w-16 text-amber-500 mb-4" />
+                <h3 className="text-xl font-semibold mb-2">
+                  Already Checked In Today
+                </h3>
+                <p className="text-muted-foreground">
+                  You've already checked in to {organization.name} today.
                 </p>
                 <Button
                   className="mt-6"

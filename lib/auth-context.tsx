@@ -74,9 +74,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = async () => {
     try {
       setLoading(true);
+      
+      // Check user role before logout to determine redirect location
+      let redirectPath = '/login';
+      if (user) {
+        const userRole = await checkUserRole(user.$id, user.email);
+        if (userRole === 'member') {
+          redirectPath = '/member-login';
+        }
+      }
+      
       await account.deleteSession('current');
       setUser(null);
-      router.push('/login');
+      router.push(redirectPath);
       toast.success('Logged out successfully');
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to log out';
