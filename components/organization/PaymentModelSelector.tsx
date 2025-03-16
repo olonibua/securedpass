@@ -120,11 +120,11 @@ export default function PaymentModelSelector({
       <CardHeader>
         <CardTitle className="flex justify-between items-center">
           <span>Payment Model</span>
-          {!isEditing && (
-            canChange ? (
-              <Button 
-                variant="outline" 
-                size="sm" 
+          {!isEditing &&
+            (canChange ? (
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={() => setIsEditing(true)}
               >
                 <PencilIcon className="h-4 w-4 mr-2" />
@@ -135,8 +135,7 @@ export default function PaymentModelSelector({
                 <Lock className="h-4 w-4 mr-1" />
                 <span>Locked for {daysUntilChange} more days</span>
               </div>
-            )
-          )}
+            ))}
         </CardTitle>
         <CardDescription>
           Choose how you want to pay for using our platform
@@ -146,39 +145,46 @@ export default function PaymentModelSelector({
         {!isEditing ? (
           <div className="space-y-4">
             {/* Current payment model indicator */}
-            <div className={`p-4 rounded-md border-2 ${
-              displayModel === 'subscription'
-                ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
-                : 'border-amber-500 bg-amber-50 dark:bg-amber-900/20'
-            }`}>
+            <div
+              className={`p-4 rounded-md border-2 ${
+                displayModel === "subscription"
+                  ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20"
+                  : "border-amber-500 bg-amber-50 dark:bg-amber-900/20"
+              }`}
+            >
               <div className="flex items-center">
-                <CheckCircle className={`h-5 w-5 mr-2 ${
-                  displayModel === 'subscription' ? 'text-blue-600' : 'text-amber-600'
-                }`} />
+                <CheckCircle
+                  className={`h-5 w-5 mr-2 ${
+                    displayModel === "subscription"
+                      ? "text-blue-600"
+                      : "text-amber-600"
+                  }`}
+                />
                 <h3 className="font-medium">
-                  {displayModel === 'subscription'
-                    ? 'Subscription Based'
-                    : 'Transaction Fee Based'}
+                  {displayModel === "subscription"
+                    ? "Subscription Based"
+                    : "Transaction Fee Based"}
                 </h3>
               </div>
               <p className="mt-2 text-sm">
-                {displayModel === 'subscription'
-                  ? 'You pay a fixed subscription fee and keep 100% of your member payments.'
-                  : `You pay no subscription fee, but we take a ${displayFeePercentage}% fee from each transaction.`
-                }
+                {displayModel === "subscription"
+                  ? "You pay a fixed subscription fee and keep 100% of your member payments."
+                  : `You pay no subscription fee, but we take a ${displayFeePercentage}% fee from each transaction.`}
               </p>
               {paymentModelLastChanged && (
                 <div className="mt-3 flex items-center text-xs text-muted-foreground">
                   <Calendar className="h-3 w-3 mr-1" />
-                  Last changed: {new Date(paymentModelLastChanged).toLocaleDateString()}
+                  Last changed:{" "}
+                  {new Date(paymentModelLastChanged).toLocaleDateString()}
                 </div>
               )}
               {!canChange && paymentModelLastChanged && (
                 <div className="mt-3 flex items-center text-xs bg-muted p-2 rounded">
                   <Lock className="h-3 w-3 mr-1" />
                   <span>
-                    Payment model changes are locked for {daysUntilChange} more days. 
-                    Organizations can only change payment models once every 30 days.
+                    Payment model changes are locked for {daysUntilChange} more
+                    days. Organizations can only change payment models once
+                    every 30 days.
                   </span>
                 </div>
               )}
@@ -202,7 +208,7 @@ export default function PaymentModelSelector({
                 </p>
               </div>
             </div>
-            
+
             <div className="flex items-start space-x-3 p-4 border rounded-md">
               <RadioGroupItem value="transaction_fee" id="transaction_fee" />
               <div className="grid gap-1.5 w-full">
@@ -210,13 +216,15 @@ export default function PaymentModelSelector({
                   Transaction Fee Based
                 </Label>
                 <p className="text-sm text-muted-foreground">
-                  No monthly subscription fee. Instead, we'll take a percentage of each transaction
-                  processed through our platform.
+                  No monthly subscription fee. Instead, we&apos;ll take a
+                  percentage of each transaction processed through our platform.
                 </p>
-                
-                {paymentModel === 'transaction_fee' && (
+
+                {paymentModel === "transaction_fee" && (
                   <div className="mt-3">
-                    <Label htmlFor="percentage">Transaction Fee Percentage</Label>
+                    <Label htmlFor="percentage">
+                      Transaction Fee Percentage
+                    </Label>
                     <div className="flex items-center mt-1">
                       <Input
                         id="percentage"
@@ -224,7 +232,9 @@ export default function PaymentModelSelector({
                         min="1"
                         max="20"
                         value={feePercentage}
-                        onChange={(e) => setFeePercentage(Number(e.target.value))}
+                        onChange={(e) =>
+                          setFeePercentage(Number(e.target.value))
+                        }
                         className="w-24"
                       />
                       <span className="ml-2">%</span>
@@ -236,29 +246,33 @@ export default function PaymentModelSelector({
                 )}
               </div>
             </div>
-            
+
             <div className="bg-amber-50 dark:bg-amber-900/20 p-3 rounded-md flex items-start">
               <AlertCircle className="h-5 w-5 text-amber-600 mr-2 flex-shrink-0 mt-0.5" />
               <p className="text-sm text-amber-800 dark:text-amber-200">
-                Changes to your payment model will lock it for 30 days. Choose carefully.
+                Changes to your payment model will lock it for 30 days. Choose
+                carefully.
               </p>
             </div>
           </RadioGroup>
         )}
       </CardContent>
-      
+
       {isEditing && (
         <CardFooter className="flex justify-between">
-          <Button variant="outline" onClick={() => {
-            setIsEditing(false);
-            // Reset to current values when canceled
-            setPaymentModel(displayModel);
-            setFeePercentage(displayFeePercentage);
-          }}>
+          <Button
+            variant="outline"
+            onClick={() => {
+              setIsEditing(false);
+              // Reset to current values when canceled
+              setPaymentModel(displayModel);
+              setFeePercentage(displayFeePercentage);
+            }}
+          >
             Cancel
           </Button>
           <Button onClick={handleSubmit} disabled={isSubmitting || !canChange}>
-            {isSubmitting ? 'Saving...' : 'Save Payment Model'}
+            {isSubmitting ? "Saving..." : "Save Payment Model"}
           </Button>
         </CardFooter>
       )}

@@ -58,20 +58,32 @@ export default function PaymentIntegration({
       <CardHeader>
         <CardTitle>Paystack Integration</CardTitle>
         <CardDescription>
-          Connect your Paystack account to accept payments directly from your members
+          Connect your Paystack account to accept payments directly from your
+          members
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="bg-muted p-4 rounded-md mb-4">
           <h3 className="font-medium mb-2">Setup Instructions:</h3>
           <ol className="list-decimal list-inside space-y-1 text-sm">
-            <li>Create a <a href="https://dashboard.paystack.com/#/signup" className="text-primary underline" target="_blank" rel="noopener">Paystack account</a> if you don't have one</li>
+            <li>
+              Create a{" "}
+              <a
+                href="https://dashboard.paystack.com/#/signup"
+                className="text-primary underline"
+                target="_blank"
+                rel="noopener"
+              >
+                Paystack account
+              </a>{" "}
+              if you don&apos;t have one
+            </li>
             <li>Activate your account and complete verification</li>
             <li>From your Paystack dashboard, get your API keys</li>
             <li>Enter your public and secret keys below</li>
           </ol>
         </div>
-        
+
         <div className="space-y-2">
           <Label htmlFor="public-key">Paystack Public Key</Label>
           <div className="flex">
@@ -85,7 +97,7 @@ export default function PaymentIntegration({
             />
           </div>
         </div>
-        
+
         <div className="space-y-2">
           <Label htmlFor="secret-key">Paystack Secret Key</Label>
           <div className="flex">
@@ -102,7 +114,7 @@ export default function PaymentIntegration({
             Your secret key will be encrypted and stored securely
           </p>
         </div>
-        
+
         {paystackIntegrated && (
           <div className="rounded-md bg-green-50 p-4 dark:bg-green-900/20">
             <div className="flex">
@@ -117,7 +129,11 @@ export default function PaymentIntegration({
       </CardContent>
       <CardFooter>
         <Button onClick={handleSubmit} disabled={isSubmitting}>
-          {isSubmitting ? 'Saving...' : paystackIntegrated ? 'Update Integration' : 'Connect Paystack'}
+          {isSubmitting
+            ? "Saving..."
+            : paystackIntegrated
+              ? "Update Integration"
+              : "Connect Paystack"}
         </Button>
       </CardFooter>
     </Card>

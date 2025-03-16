@@ -15,6 +15,9 @@ export interface Organization {
   organizationType: 'company' | 'membership';
   industry?: string;
   website?: string;
+  paymentModel?: 'subscription' | 'transaction_fee';
+  paystackPublicKey?: string;
+  transactionFeePercentage?: number;
 }
 
 // Custom Field
@@ -106,8 +109,9 @@ export interface MembershipPlan {
   description: string;
   price: number;
   interval: string;
-  features: string[];
+  features?: string | string[];
   isActive: boolean;
+  intervalDescription?: string;
 }
 
 // Subscription
