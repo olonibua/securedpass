@@ -90,7 +90,7 @@ export default function MembersTable({ organizationId }: MembersTableProps) {
 
   const filteredMembers = members.filter(member => 
     member.name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    member.email.toLowerCase().includes(searchTerm.toLowerCase())
+    (member.email || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
@@ -262,7 +262,7 @@ export default function MembersTable({ organizationId }: MembersTableProps) {
                     <TableCell>
                       <div className="flex items-center">
                         <Mail className="h-4 w-4 mr-2 text-muted-foreground" />
-                        {member.email}
+                        {member.email?.toLowerCase() || 'No email'}
                       </div>
                     </TableCell>
                     <TableCell>
