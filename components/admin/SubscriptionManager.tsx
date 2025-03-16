@@ -12,6 +12,8 @@ import { Organization } from '@/types';
 
 interface SubscriptionManagerProps {
   organizationId: string;
+  currentPlan?: 'free' | 'basic' | 'premium';
+  paymentModel?: 'subscription' | 'transaction_fee';
 }
 
 const PLANS = [
