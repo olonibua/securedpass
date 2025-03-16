@@ -1,133 +1,117 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
-import { useParams } from 'next/navigation';
-import { DATABASE_ID, ORGANIZATIONS_COLLECTION_ID, MEMBERS_COLLECTION_ID, MEMBERSHIP_PLANS_COLLECTION_ID, databases, Query } from '@/lib/appwrite';
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useParams, useRouter } from 'next/navigation';
+import { DATABASE_ID, ORGANIZATIONS_COLLECTION_ID, MEMBERS_COLLECTION_ID, MEMBERSHIP_PLANS_COLLECTION_ID, databases, Query, MEMBERSHIP_PURCHASES_COLLECTION_ID } from '@/lib/appwrite';
 import { toast } from 'sonner';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Loader2, Check, AlertCircle } from 'lucide-react';
-import { Organization } from '@/types';
 import { useAuth } from '@/lib/auth-context';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import MemberPayment from '@/components/member/MemberPayment';
+import { format, addMonths, addYears } from 'date-fns';
+import { Skeleton } from '@/components/ui/skeleton';
 
-interface MemberDetails {
-  $id: string;
-  email: string;
-  organizationId: string;
-  status: string;
-  planId: string;
-  createdAt: string;
+
+
+// Add proper interface for data state
+interface MemberDashboardData {
+  plans: any[];  // Or use a more specific type like MembershipPlan[]
+  organization: any | null;
+  memberDetails: any | null;
 }
-
-interface MembershipPlan {
-  $id: string;
-  name: string;
-  description: string;
-  price: number;
-    interval: string;
-  features: string[];
-  isActive: boolean;
-}
-
 
 export default function MemberPlansPage() {
   const { organizationId } = useParams();
+  const router = useRouter();
   const { user } = useAuth();
-  const [organization, setOrganization] = useState<Organization | null>(null);
-  const [memberDetails, setMemberDetails] = useState<MemberDetails | null >(null);
-  const [plans, setPlans] = useState<MembershipPlan[]>([]);
+  const [data, setData] = useState<MemberDashboardData>({
+    plans: [],
+    organization: null,
+    memberDetails: null,
+  });
   const [loading, setLoading] = useState(true);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [subscribing, setSubscribing] = useState<string | null>(null);
-
+  const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  // Use useMemo for derived state to avoid re-renders
+  const { plans, organization, memberDetails } = useMemo(() => data, [data]);
+  // Stable userId reference
+  const userId = useMemo(() => user?.$id, [user?.$id]);
   const fetchData = useCallback(async () => {
+    if (!userId || !organizationId) return;
     try {
       setLoading(true);
+      setError(null);
+      // Fetch all data in parallel
+      const [plansResponse, orgResponse, memberResponse] = await Promise.all([
+        databases.listDocuments(
+          DATABASE_ID,
+          MEMBERSHIP_PLANS_COLLECTION_ID as string,
+          [Query.equal('organizationId', organizationId as string)]
+        ),
+        databases.getDocument(
+          DATABASE_ID,
+          ORGANIZATIONS_COLLECTION_ID,
+          organizationId as string
+        ),
+        databases.listDocuments(
+          DATABASE_ID,
+          MEMBERS_COLLECTION_ID,
+          [
+            Query.equal('organizationId', organizationId as string),
+            Query.equal('userId', userId)
+          ]
+        )
+      ]);
       
-      // Fetch organization details
-      const org = await databases.getDocument(
-        DATABASE_ID!,
-        ORGANIZATIONS_COLLECTION_ID!,
-        organizationId as string
-      );
-      setOrganization(org as unknown as Organization);
-      
-      // Fetch member details
-      const memberResponse = await databases.listDocuments(
-        DATABASE_ID!,
-        MEMBERS_COLLECTION_ID!,
-        [
-          Query.equal('organizationId', organizationId as string),
-          Query.equal('email', user?.email || '')
-        ]
-      );
-      
-      if (memberResponse.documents.length > 0) {
-        setMemberDetails(memberResponse.documents[0] as unknown as MemberDetails);
-      }
-      
-      // Fetch all active plans for this organization
-      const plansResponse = await databases.listDocuments(
-        DATABASE_ID!,
-        MEMBERSHIP_PLANS_COLLECTION_ID!,
-        [
-          Query.equal('organizationId', organizationId as string),
-          Query.equal('isActive', true),
-          Query.orderAsc('price')
-        ]
-      );
-      
-      setPlans(plansResponse.documents as unknown as MembershipPlan[]);
-      
+      // Update all state at once to avoid multiple renders
+      setData({
+        plans: plansResponse.documents,
+        organization: orgResponse,
+        memberDetails: memberResponse.documents[0] || null
+      });
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to load data';
+      console.error("Error fetching data:", error);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to load data. Database collections may not be properly configured.';
       console.error("Error fetching data:", errorMessage);
-      toast.error('Failed to load organization data');
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
-  }, [organizationId, user]);
-
+  }, [userId, organizationId]);
+  
   useEffect(() => {
     if (user && organizationId) {
       fetchData();
     }
   }, [organizationId, user, fetchData]);
 
-  const handleSubscribe = async (planId: string) => {
-    try {
-      setSubscribing(planId);
-      
-      // Update member's plan in the database
-      await databases.updateDocument(
-        DATABASE_ID!,
-        MEMBERS_COLLECTION_ID!,
-        memberDetails?.$id || '',
-        {
-          planId: planId,
-          planStartDate: new Date().toISOString(),
-          planStatus: 'active'
-        }
-      );
-      
-      toast.success('Successfully subscribed to plan!');
-      
-      // Refresh data
-      fetchData();
-      
-    } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to subscribe';
-      console.error('Error subscribing to plan:', errorMessage);
-      toast.error('Failed to subscribe to plan');
-    } finally {
-      setSubscribing(null);
-    }
-  };
+ 
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div className="space-y-4">
+        <Skeleton className="h-12 w-3/4" />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <Skeleton className="h-[240px] w-full rounded-lg" />
+          <Skeleton className="h-[240px] w-full rounded-lg" />
+          <Skeleton className="h-[240px] w-full rounded-lg" />
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen p-4">
+        <AlertCircle className="h-12 w-12 text-destructive mb-4" />
+        <h1 className="text-2xl font-bold mb-2">Error</h1>
+        <p className="text-muted-foreground text-center max-w-md">{error}</p>
+        <Button onClick={fetchData} className="mt-4">Retry</Button>
       </div>
     );
   }
@@ -137,6 +121,25 @@ export default function MemberPlansPage() {
       <div className="flex flex-col items-center justify-center min-h-screen">
         <h1 className="text-2xl font-bold mb-2">Membership not found</h1>
         <p className="text-muted-foreground">You don&apos;t have an active membership with this organization.</p>
+      </div>
+    );
+  }
+
+  if (selectedPlanId) {
+    return (
+      <div className="max-w-3xl mx-auto py-8">
+        <Button 
+          variant="outline" 
+          onClick={() => setSelectedPlanId(null)}
+          className="mb-6"
+        >
+          ← Back to all plans
+        </Button>
+        
+        <MemberPayment 
+          organizationId={organizationId as string} 
+          planId={selectedPlanId as string} 
+        />
       </div>
     );
   }
@@ -162,9 +165,21 @@ export default function MemberPlansPage() {
         <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
           {plans.map((plan) => {
             const isCurrentPlan = plan.$id === memberDetails?.planId;
+            const hasActiveSubscription = memberDetails?.planId !== undefined;
             const features = plan.features ? 
               (typeof plan.features === 'string' ? (plan.features as string).split('\n') : plan.features) : 
               [];
+            
+            // Calculate expiry date if this is the current plan
+            let expiryDate = null;
+            if (isCurrentPlan && memberDetails?.planStartDate) {
+              const startDate = new Date(memberDetails.planStartDate);
+              if (plan.interval === 'monthly') {
+                expiryDate = addMonths(startDate, 1);
+              } else if (plan.interval === 'yearly') {
+                expiryDate = addYears(startDate, 1);
+              }
+            }
             
             return (
               <Card 
@@ -199,13 +214,44 @@ export default function MemberPlansPage() {
                 </CardContent>
                 <CardFooter>
                   {isCurrentPlan ? (
-                    <Button className="w-full" variant="outline" disabled>
-                      Current Plan
-                    </Button>
+                    <div className="w-full">
+                      <div className="px-3 py-2 bg-green-50 dark:bg-green-900/20 rounded-md border border-green-100 dark:border-green-800 mb-3">
+                        <p className="text-sm text-green-800 dark:text-green-300 font-medium">
+                          Your subscription is active
+                        </p>
+                        {expiryDate && (
+                          <p className="text-xs text-green-600 dark:text-green-400 mt-1">
+                            Renews on {format(expiryDate, 'PPP')}
+                          </p>
+                        )}
+                      </div>
+                      <Button
+                        variant="outline"
+                        className="w-full"
+                        onClick={() => router.push(`/member-portal/${organizationId}/subscription`)}
+                      >
+                        View Subscription
+                      </Button>
+                    </div>
+                  ) : hasActiveSubscription ? (
+                    <div className="w-full">
+                      <div className="px-3 py-2 bg-amber-50 dark:bg-amber-900/20 rounded-md border border-amber-100 dark:border-amber-800 mb-3">
+                        <p className="text-sm text-amber-800 dark:text-amber-300 font-medium">
+                          You already have an active subscription
+                        </p>
+                      </div>
+                      <Button
+                        variant="outline"
+                        className="w-full"
+                        disabled
+                      >
+                        Upgrade Not Available
+                      </Button>
+                    </div>
                   ) : (
-                    <Button 
-                      className="w-full" 
-                      onClick={() => handleSubscribe(plan.$id)}
+                    <Button
+                      className="w-full"
+                      onClick={() => setSelectedPlanId(plan.$id)}
                       disabled={subscribing === plan.$id}
                     >
                       {subscribing === plan.$id ? (
@@ -214,7 +260,7 @@ export default function MemberPlansPage() {
                           Processing...
                         </>
                       ) : (
-                        plan.interval === 'one-time' ? 'Purchase' : 'Subscribe'
+                        'Pay Now'
                       )}
                     </Button>
                   )}

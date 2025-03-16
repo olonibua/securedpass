@@ -11,7 +11,6 @@ import { Organization } from '@/types';
 import AttendanceTable from '@/components/dashboard/AttendanceTable';
 import QRCodeDisplay from '@/components/admin/QRCodeDisplay';
 import CustomFieldsManager from '@/components/admin/CustomFieldsManager';
-import SubscriptionManager from '@/components/admin/SubscriptionManager';
 import RegistrationLinkGenerator from '@/components/admin/RegistrationLinkGenerator';
 import { Badge } from '@/components/ui/badge';
 import { DATABASE_ID, ORGANIZATIONS_COLLECTION_ID } from '@/lib/appwrite';
@@ -251,10 +250,10 @@ export default function OrganizationDashboard() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <SubscriptionManager
+                {/* <SubscriptionManager
                   organizationId={organizationId as string}
                   currentPlan={organization.plan}
-                />
+                /> */}
               </CardContent>
             </Card>
           </div>

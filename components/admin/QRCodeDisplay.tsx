@@ -32,7 +32,7 @@ export default function QRCodeDisplay({ organizationId }: QRCodeDisplayProps) {
         }
 
         const data = await response.json();
-        console.log(data);
+        
         setQrCode(data.qrCodeDataUrl);
         setCheckInUrl(data.checkInUrl);
       } catch (error: unknown) {

@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { account, ORGANIZATIONS_COLLECTION_ID, ORGANIZATIONS_MEMBERS_COLLECTION_ID, MEMBERS_COLLECTION_ID, DATABASE_ID } from '@/lib/appwrite';
 import { Models } from 'appwrite';
@@ -23,6 +23,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<Models.User<Models.Preferences> | null>(null);
   const [loading, setLoading] = useState(true);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isLoaded, setIsLoaded] = useState(false);
   const router = useRouter();
 
@@ -135,15 +136,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const value: AuthContextType = {
+  // Add memoization to prevent unnecessary re-renders
+  const value = useMemo(() => ({
     user,
     loading,
-    isLoaded,
     login,
     logout,
     checkAuth,
     checkUserRole,
-  };
+    isLoaded: !loading 
+  }), [user, loading, login, logout, checkAuth, checkUserRole]);
 
   return (
     <AuthContext.Provider value={value}>

@@ -28,6 +28,16 @@ We're building a QR-based access and attendance system with dynamic custom field
 - ✅ Stripe checkout integration
 - ✅ Webhook handler for subscription events
 - ✅ Subscription expiry reminders via cron job
+- ✅ Dual payment model (subscription vs. transaction fee)
+  - Organization can choose between subscription or transaction fee model
+  - 30-day lock period after changing payment models
+  - UI dynamically updates based on selected model
+  - Transaction fee percentage customization (1-20%)
+- ✅ Member payment processing
+  - Transparently handles different organization payment models
+  - Routes payments correctly based on organization settings
+  - Calculates platform fees for transaction fee model
+  - Creates pending transfers for settlement
 
 ### UI Components
 - ✅ Check-in page
@@ -35,10 +45,14 @@ We're building a QR-based access and attendance system with dynamic custom field
 - ✅ QR code display
 - ✅ Subscription manager
 - ✅ Custom fields manager
+- ✅ Payment model selector
+- ✅ Payment settings information display
+- ✅ Member plan selection and payment UI
 
 ## In Progress
 - 🔄 Analytics dashboard
 - 🔄 Member management interface refinements
+- 🔄 Paystack integration for membership payments
 
 ## Pending
 - ⏳ Mobile optimization
@@ -53,6 +67,23 @@ We're building a QR-based access and attendance system with dynamic custom field
 3. Need to ensure consistent error handling across all components
 4. ⚠️ **DEPENDENCY CONFLICT**: There's a conflict between `react-day-picker` and `date-fns` versions. `react-day-picker@8.10.1` requires `date-fns@^2.28.0 || ^3.0.0` but the project is using `date-fns@^4.1.0`. Either downgrade `date-fns` to version 3.x or use `--force` flag during installation.
 5. ⚠️ **REACT VERSION COMPATIBILITY**: `react-day-picker` is not yet compatible with React 19. Consider using React 18 for better compatibility with third-party libraries.
+6. The payment settings page exists in two locations: `/dashboard/[organizationId]/payment` (current) and `/dashboard/[organizationId]/settings/payment` (legacy). The legacy route should be removed or redirected.
+7. ⚠️ **APPWRITE COLLECTIONS SETUP REQUIRED**: 
+   The following collections MUST be created in Appwrite before payments will work:
+   - `organizations` - Organization details
+   - `members` - Organization members
+   - `membership_plans` - Subscription plans
+   - `membership_purchases` - Member payments (MISSING - causing current error)
+   - `pending_transfers` - Funds tracking for transaction fee model
+
+8. ⚠️ **COLLECTION SCHEMA REQUIREMENTS**:
+   Each collection must have specific fields:
+   - `membership_purchases`: must include fields for organizationId, planId, userId, amount, status, paymentDate, transactionReference, and paymentModelUsed
+
+9. ⚠️ **PAYMENT INTEGRATION SETUP**:
+   For organizations using subscription model, payment will fail until:
+   - Organization has a valid Paystack Public Key stored in the database
+   - The key is stored in `paystackPublicKey` field of the organization record
 
 ## Next Steps
 1. Complete analytics for check-in patterns
@@ -60,6 +91,7 @@ We're building a QR-based access and attendance system with dynamic custom field
 3. Optimize for mobile devices
 4. Write tests for critical components
 5. Prepare for deployment
+6. Consolidate payment settings routes to a single location
 
 ## Organization Types
 The system now supports two distinct organization types:
@@ -75,6 +107,38 @@ The system now supports two distinct organization types:
 - Members have their own accounts and member portal
 - Suitable for gyms, clubs, and membership-based services
 
+## Payment Models
+
+The system supports two distinct payment models for membership organizations:
+
+### Direct Subscription Model
+- Organization pays a subscription fee to use the platform
+- Organization receives 100% of member payments directly
+- Organization connects their own Paystack account
+- Best for organizations with high transaction volumes
+
+### Transaction Fee Model
+- Organization pays no subscription fee
+- Platform takes a percentage fee from each member payment
+- Platform handles payment processing and transfers remaining funds
+- Best for organizations with lower transaction volumes or seasonal businesses
+- Organizations can customize fee percentage within allowed range (1-20%)
+- Organizations must provide bank details for settlement
+
+## Member Payment Flow
+The system handles member payments differently based on the organization's payment model:
+
+### For Organizations Using Subscription Model
+- Members pay directly to the organization's Paystack account
+- Platform doesn't handle money transfer or take fees from member payments
+- Organization is responsible for managing their Paystack account and payouts
+
+### For Organizations Using Transaction Fee Model
+- Members pay to the platform's Paystack account
+- Platform calculates and retains the transaction fee
+- Platform creates pending transfers to send remaining funds to organization
+- Organization receives periodic settlements to their bank account
+
 ## Dependencies
 All required dependencies have been installed:
 - next, react, react-dom
@@ -87,6 +151,7 @@ All required dependencies have been installed:
 - qrcode
 - shadcn/ui components
 - sonner (toast notifications)
+- react-paystack
 
 ## Environment Variables
 The following environment variables need to be configured:
@@ -101,38 +166,8 @@ The following environment variables need to be configured:
 - STRIPE_BASIC_PRICE_ID
 - STRIPE_PREMIUM_PRICE_ID
 - RESEND_API_KEY
-- CRON_SECRET_KEY 
-
-## Code Standards
-
-### Type Definitions
-- No duplicate type definitions across files
-- Always export interfaces used across multiple files
-
-### Code Quality
-- **No undefined types**: Never use `(error)` as a catch block of a try statement or any other error emitting component in code
-- **Always define error types**: All catch blocks must use `(error: unknown)` and properly type-check the error
-- **Error handling pattern**: Always follow this pattern:
-  ```typescript
-  catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : 'Default error message';
-    console.error("Descriptive context:", errorMessage);
-    // Additional error handling as needed
-  }
-  ```
-- **No unused variables**: All declared variables must be used or prefixed with underscore
-- **Proper error handling**: Include try/catch blocks for async operations
-- **Type safety**: Use proper TypeScript types for all variables and function parameters
-- **⚠️ WARNING: No unused state variables**: Don't declare state variables (useState) without using them in the component. If you declare `setIsLoading`, you must use it in the UI (e.g., showing a loading indicator). Unused state variables cause errors during Vercel deployment.
-- **⚠️ WARNING: Avoid using `any` type**: Never use the `any` type as it defeats TypeScript's type checking. Instead:
-  ```typescript
-  // ❌ Bad
-  const data: any = response.data;
-  
-  // ✅ Good
-  const data: Record<string, unknown> = response.data;
-  // Or use more specific types like:
-  const data: CustomType = response.data;
-  ```
-
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+- CRON_SECRET_KEY
+- PAYSTACK_SECRET_KEY
+- NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY
+- PLATFORM_PAYSTACK_SECRET_KEY
+- NEXT_PUBLIC_PLATFORM_PAYSTACK_PUBLIC_KEY

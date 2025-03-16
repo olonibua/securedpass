@@ -2,10 +2,10 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { CHECKINS_COLLECTION_ID, DATABASE_ID, databases, MEMBERS_COLLECTION_ID, ORGANIZATIONS_COLLECTION_ID, MEMBERSHIP_PLANS_COLLECTION_ID, Query } from '@/lib/appwrite';
+import { CHECKINS_COLLECTION_ID, DATABASE_ID, databases, MEMBERS_COLLECTION_ID, ORGANIZATIONS_COLLECTION_ID, MEMBERSHIP_PLANS_COLLECTION_ID, MEMBERSHIP_PURCHASES_COLLECTION_ID, Query } from '@/lib/appwrite';
 import { toast } from 'sonner';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, } from '@/components/ui/card';
-import { Loader2, CalendarDays, QrCode, Check } from 'lucide-react';
+import { Loader2, CalendarDays, QrCode, Check, UserCircle, CreditCard } from 'lucide-react';
 import { Organization, CheckIn } from '@/types';
 import { useAuth } from '@/lib/auth-context';     
 import { Button } from '@/components/ui/button';
@@ -22,6 +22,7 @@ interface MemberDetails {
   planId?: string;
   customFields?: string;
   status: 'active' | 'inactive';
+  lastCheckIn?: string;
 }
 
 interface MembershipPlan {
@@ -31,6 +32,18 @@ interface MembershipPlan {
   price: number;
   interval: 'monthly' | 'yearly' | 'one-time';
   features: string[];
+}
+
+interface MembershipPurchase {
+  $id: string;
+  organizationId: string;
+  planId: string;
+  userId: string;
+  amount: number;
+  status: 'completed' | 'pending' | 'failed';
+  paymentDate: string;
+  transactionReference: string;
+  paymentModelUsed: 'subscription' | 'transaction_fee';
 }
 
 export default function MemberPortalPage() {
@@ -43,8 +56,9 @@ export default function MemberPortalPage() {
 
   const [membershipPlan, setMembershipPlan] = useState<MembershipPlan | null>(null);
   const [loading, setLoading] = useState(true);
-
-
+  const [recentPurchases, setRecentPurchases] = useState<MembershipPurchase[]>([]);
+  const [hasActiveMembership, setHasActiveMembership] = useState(false);
+  
   const fetchData = useCallback(async () => {
   try {
     setLoading(true);
@@ -100,6 +114,30 @@ export default function MemberPortalPage() {
       );
 
       setRecentCheckIns(checkInsResponse.documents as unknown as CheckIn[]);
+
+      // Fetch recent purchases
+      const purchasesResponse = await databases.listDocuments(
+        DATABASE_ID!,
+        MEMBERSHIP_PURCHASES_COLLECTION_ID!,
+        [
+          Query.equal("userId", user?.$id || ""),
+          Query.equal("organizationId", organizationId as string),
+          Query.orderDesc("paymentDate"),
+          Query.limit(5),
+        ]
+      );
+      
+      const purchases = purchasesResponse.documents as unknown as MembershipPurchase[];
+      setRecentPurchases(purchases);
+      
+      // Set active membership status based on completed purchases
+      // In a real app, you'd check if the subscription is still valid based on plan intervals
+      setHasActiveMembership(purchases.some(p => p.status === 'completed'));
+      
+      // Update member status if needed
+      if (hasActiveMembership && memberData.status !== 'active') {
+        // Optional: Update member status to active in database
+      }
     }
   } catch (error: unknown) {
     const errorMessage =
@@ -151,26 +189,26 @@ export default function MemberPortalPage() {
           <h1 className="text-2xl sm:text-3xl font-bold">{organization?.name || 'Member Portal'}</h1>
           <p className="text-muted-foreground mt-1">Welcome, {memberDetails?.name || user?.name}</p>
         </div>
-        {memberDetails?.status === 'active' && (
-          <Button
-            onClick={() => router.push(`/check-in/${organizationId}`)}
-            className="w-full sm:w-auto"
-          >
-            Check In Now
-          </Button>
-        )}
+      
       </div>
       
-      {memberDetails?.status === 'inactive' && (
-        <Card className="bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-800 mb-6">
+      {memberDetails && (
+        <Card className={`mb-6 ${hasActiveMembership ? 'bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800' : 'bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-800'}`}>
           <CardHeader className="pb-2">
-            <CardTitle className="text-amber-800 dark:text-amber-400 text-lg">Membership Inactive</CardTitle>
+            <CardTitle className={`${hasActiveMembership ? 'text-green-800 dark:text-green-400' : 'text-amber-800 dark:text-amber-400'} text-lg`}>
+              {hasActiveMembership ? 'Active Membership' : 'Membership Inactive'}
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <p>Your membership is currently inactive. Please contact the organization or update your membership plan.</p>
-            <Button variant="outline" className="mt-4" onClick={() => router.push(`/member-portal/${organizationId}/plans`)}>
-              View Membership Plans
-            </Button>
+            <p>{hasActiveMembership 
+              ? 'Your membership is active. Enjoy full access to all features and benefits.' 
+              : 'Your membership is currently inactive. Please contact the organization or update your membership plan.'}
+            </p>
+            {!hasActiveMembership && (
+              <Button variant="outline" className="mt-4" onClick={() => router.push(`/member-portal/${organizationId}/plans`)}>
+                View Membership Plans
+              </Button>
+            )}
           </CardContent>
         </Card>
       )}
@@ -204,6 +242,88 @@ export default function MemberPortalPage() {
                 </ul>
               </div>
             )}
+          </CardContent>
+        </Card>
+      )}
+    
+      {memberDetails && (
+        <Card className="mb-6">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg flex items-center">
+              <UserCircle className="mr-2 h-5 w-5" />
+              Member Details
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-2 sm:grid-cols-2">
+              <div>
+                <h3 className="text-sm font-medium text-muted-foreground">Member ID</h3>
+                <p>{memberDetails.$id}</p>
+              </div>
+              <div>
+                <h3 className="text-sm font-medium text-muted-foreground">Email</h3>
+                <p>{memberDetails.email}</p>
+              </div>
+              <div>
+                <h3 className="text-sm font-medium text-muted-foreground">Status</h3>
+                <p className={memberDetails.status === 'active' ? 'text-green-600' : 'text-red-600'}>
+                  {memberDetails.status === 'active' ? 'Active' : 'Inactive'}
+                </p>
+              </div>
+              <div>
+                <h3 className="text-sm font-medium text-muted-foreground">Joined</h3>
+                <p>{formatDate(memberDetails.createdAt)}</p>
+              </div>
+              {memberDetails.lastCheckIn && (
+                <div>
+                  <h3 className="text-sm font-medium text-muted-foreground">Last Check-in</h3>
+                  <p>{formatDate(memberDetails.lastCheckIn)}</p>
+                </div>
+              )}
+            </div>
+
+            {memberDetails.customFields && (
+              <div className="mt-4 pt-4 border-t">
+                <h3 className="text-sm font-medium mb-2">Additional Information</h3>
+                <div className="grid gap-2 sm:grid-cols-2">
+                  {Object.entries(JSON.parse(memberDetails.customFields)).map(([key, value]) => (
+                    <div key={key}>
+                      <h4 className="text-sm font-medium text-muted-foreground">{key}</h4>
+                      <p>{String(value)}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+    
+      {recentPurchases.length > 0 && (
+        <Card className="mb-6">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg flex items-center">
+              <CreditCard className="h-5 w-5 mr-2" />
+              Recent Payments
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {recentPurchases.map((purchase) => (
+                <div key={purchase.$id} className="flex justify-between items-center p-3 border rounded-md">
+                  <div>
+                    <p className="font-medium">Payment - {formatDate(purchase.paymentDate)}</p>
+                    <p className="text-sm text-muted-foreground">Ref: {purchase.transactionReference}</p>
+                  </div>
+                  <div className="flex items-center">
+                    <Badge variant={purchase.status === 'completed' ? 'default' : 'outline'}>
+                      {purchase.status}
+                    </Badge>
+                    <span className="ml-3 font-semibold">₦{purchase.amount.toLocaleString()}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
           </CardContent>
         </Card>
       )}

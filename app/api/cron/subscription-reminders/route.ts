@@ -13,20 +13,17 @@ export async function GET(request: NextRequest) {
     if (authHeader !== `Bearer ${process.env.CRON_SECRET_KEY}`) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
-    
     // Get current date
     const now = new Date();
-    
     // Calculate dates for 30, 14, 7, 3, and 1 day reminders
     const reminderDays = [30, 14, 7, 3, 1];
     const reminderPromises = reminderDays.map(async (days) => {
       // Calculate the date that's 'days' days from now
       const targetDate = new Date(now);
       targetDate.setDate(targetDate.getDate() + days);
-      
       // Format dates for comparison (YYYY-MM-DD)
       const targetDateStr = targetDate.toISOString().split('T')[0];
-      
+
       // Find organizations with subscriptions expiring on the target date
       const expiringOrgs = await databases.listDocuments(
         DATABASE_ID!,

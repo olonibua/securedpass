@@ -9,9 +9,11 @@ import { DATABASE_ID, CUSTOMFIELDS_COLLECTION_ID, ORGANIZATIONS_COLLECTION_ID,  
 import { toast } from 'sonner';
 import { useAuth } from '@/lib/auth-context';
 import { Organization } from '@/types';
+
 interface SubscriptionManagerProps {
   organizationId: string;
-  currentPlan: 'free' | 'basic' | 'premium';
+  currentPlan?: string;
+  paymentModel?: 'subscription' | 'transaction_fee';
 }
 
 const PLANS = [
@@ -71,7 +73,9 @@ const PLANS = [
 ];
 
 export default function SubscriptionManager({ 
-  organizationId, 
+  organizationId,
+  currentPlan,
+  paymentModel = 'subscription'
 }: SubscriptionManagerProps) {
   const [organization, setOrganization] = useState<Organization | null>(null);
   const [loading, setLoading] = useState(true);
@@ -237,7 +241,7 @@ export default function SubscriptionManager({
       <div>
         <h2 className="text-2xl font-bold">Subscription Management</h2>
         <p className="text-muted-foreground">
-          Manage your organization&apos;s subscription plan and billing.
+          Manage your organization&apos;s subscription plan and billi.
         </p>
       </div>
       

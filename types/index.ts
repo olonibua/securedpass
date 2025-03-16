@@ -121,3 +121,6 @@ export interface Subscription {
   endDate?: string;
   createdAt: string;
 }
+
+// Add this to your existing types/index.ts file:
+export type PaymentModel = 'subscription' | 'transaction_fee';

@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { DATABASE_ID, databases, ORGANIZATIONS_COLLECTION_ID, CHECKINS_COLLECTION_ID, MEMBERS_COLLECTION_ID, Query } from '@/lib/appwrite';
 import { toast } from 'sonner';
-import DynamicCheckInForm from '@/components/check-in/DynamicCheckInForm';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2, CheckCircle, UserCircle, AlertCircle } from 'lucide-react';
 import Image from 'next/image';
@@ -298,7 +297,7 @@ export default function CheckInPage() {
           <CardDescription>
             {success 
               ? 'Check-in successful! Thank you.'
-              : 'Please fill out the form below to check in'}
+              : 'Sign in to check in'}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -317,10 +316,7 @@ export default function CheckInPage() {
                   Already a member? <Button variant="link" className="p-0 h-auto" onClick={() => router.push(`/member-login?redirect=/check-in/${organizationId}`)}>Sign in</Button>
                 </p>
               </div>
-              <DynamicCheckInForm 
-                organizationId={organizationId} 
-                onSubmit={handleMemberCheckIn} 
-              />
+              
             </>
           )}
         </CardContent>

@@ -48,23 +48,18 @@ export const SubscriptionReminderEmail = ({
                   className="mx-auto mb-4"
                 />
               )}
-              
               <Heading className="text-xl font-bold text-center text-gray-800 mb-6">
                 Subscription Expiry Reminder
               </Heading>
-              
               <Text className="text-gray-700 mb-4">
                 Hello {ownerName},
               </Text>
-              
               <Text className="text-gray-700 mb-4">
                 This is a friendly reminder that your subscription for <strong>{organizationName}</strong> will expire in <strong>{daysRemaining} days</strong> on <strong>{expiryDate}</strong>.
               </Text>
-              
               <Text className="text-gray-700 mb-4">
                 To ensure uninterrupted service and access to all features, please renew your subscription before the expiry date.
               </Text>
-              
               <Section className="text-center my-8">
                 <Button
                   href={renewalLink}
@@ -73,19 +68,16 @@ export const SubscriptionReminderEmail = ({
                   Renew Subscription
                 </Button>
               </Section>
-              
               <Text className="text-gray-700 mb-4">
                 If your subscription expires, your organization will be downgraded to the Free plan with limited features and capacity.
               </Text>
-              
               <Text className="text-gray-700 mb-4">
                 If you have any questions or need assistance, please don&apos;t hesitate to contact our support team.
               </Text>
-              
               <Text className="text-gray-700 mb-4">
                 Thank you for using our service!
               </Text>
-              
+
               <Text className="text-gray-500 text-sm text-center mt-8">
                 © {new Date().getFullYear()} QR Check-in System. All rights reserved.
               </Text>
