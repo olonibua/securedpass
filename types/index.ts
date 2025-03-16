@@ -37,14 +37,22 @@ export interface CustomField {
 // Member
 export interface Member {
   $id: string;
-  organizationId: string;
-  email: string;
+  organizationId?: string;
+  email?: string;
   name?: string;
-  profileData: Record<string, string>;
-  active: boolean;
+  profileData?: any;
+  active?: boolean;
   lastCheckIn?: string;
   createdAt: string;
   updatedAt: string;
+  hasActiveSubscription?: boolean;
+  latestPayment?: any;
+  subscriptionType?: string;
+  expiryDate?: Date | null;
+  planName?: string;
+  status?: string;
+  planId?: string;
+  planStartDate?: string;
 }
 
 // Check-in

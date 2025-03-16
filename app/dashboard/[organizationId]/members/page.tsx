@@ -4,8 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import { databases, DATABASE_ID, MEMBERS_COLLECTION_ID, Query, MEMBERSHIP_PURCHASES_COLLECTION_ID, MEMBERSHIP_PLANS_COLLECTION_ID } from '@/lib/appwrite';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2, User, Plus, Search, CreditCard, Check, AlertCircle, Calendar } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Loader2, User, Search, CreditCard, Check, AlertCircle, Calendar } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 import { formatDate } from '@/lib/utils';
@@ -13,11 +12,11 @@ import { Badge } from '@/components/ui/badge';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { addMonths, addYears, format } from 'date-fns';
-
+import { Member } from '@/types';
 export default function MembersPage() {
   const { organizationId } = useParams();
   const [loading, setLoading] = useState(true);
-  const [members, setMembers] = useState<any[]>([]);
+  const [members, setMembers] = useState<Member[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState('all'); // 'all' or 'subscribed'
   
@@ -107,7 +106,15 @@ export default function MembersPage() {
         })
       );
       
-      setMembers(membersWithSubscriptionStatus);
+      // Map Appwrite document properties to match Member interface
+      const mappedMembers = membersWithSubscriptionStatus.map(member => ({
+        ...member,
+        createdAt: member.$createdAt,
+        updatedAt: member.$updatedAt,
+        // ...other property mappings as needed
+      }));
+
+      setMembers(mappedMembers as Member[]);
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to load members';
       console.error('Error loading members:', errorMessage);
@@ -246,11 +253,11 @@ export default function MembersPage() {
                       </td>
                       <td className="p-2 py-3">
                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                          member.status === 'active' 
+                          (member as any).status === 'active' 
                             ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' 
                             : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
                         }`}>
-                          {member.status || 'Unknown'}
+                          {(member as any).status || 'Unknown'}
                         </span>
                       </td>
                       <td className="p-2 py-3">{formatDate(member.createdAt)}</td>

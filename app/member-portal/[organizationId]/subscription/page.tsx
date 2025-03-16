@@ -61,7 +61,9 @@ export default function SubscriptionHistoryPage() {
               ...purchase,
               planName: planResponse.name
             };
-          } catch (error) {
+          } catch (error: unknown) {
+            const errorMessage = error instanceof Error ? error.message : 'Failed to fetch plan details';
+            console.error("Error fetching plan details:", errorMessage);
             return {
               ...purchase,
               planName: 'Unknown Plan'
@@ -71,8 +73,9 @@ export default function SubscriptionHistoryPage() {
       );
       
       setSubscriptions(purchasesWithPlans);
-    } catch (error) {
-      console.error("Error fetching subscription history:", error);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to fetch subscription history';
+      console.error("Error fetching subscription history:", errorMessage);
       toast.error("Failed to load subscription history");
     } finally {
       setLoading(false);
@@ -94,19 +97,26 @@ export default function SubscriptionHistoryPage() {
   return (
     <div className="container px-4 mx-auto py-6 sm:py-8 max-w-6xl">
       <h1 className="text-2xl font-bold mb-6">Subscription History</h1>
-      
+
       <Card>
         <CardHeader>
           <CardTitle>Your Payment History</CardTitle>
-          <CardDescription>View all your past payments and subscription details</CardDescription>
+          <CardDescription>
+            View all your past payments and subscription details
+          </CardDescription>
         </CardHeader>
         <CardContent>
           {subscriptions.length > 0 ? (
             <div className="space-y-4">
               {subscriptions.map((subscription) => (
-                <div key={subscription.$id} className="p-4 border rounded-lg flex justify-between items-center">
+                <div
+                  key={subscription.$id}
+                  className="p-4 border rounded-lg flex justify-between items-center"
+                >
                   <div>
-                    <div className="font-semibold mb-1">{subscription.planName}</div>
+                    <div className="font-semibold mb-1">
+                      {subscription.planName}
+                    </div>
                     <div className="text-sm text-muted-foreground">
                       Paid on {formatDate(subscription.paymentDate)}
                     </div>
@@ -115,12 +125,22 @@ export default function SubscriptionHistoryPage() {
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className="font-bold mb-1">₦{subscription.amount.toLocaleString()}</div>
-                    <Badge 
-                      variant={subscription.status === 'completed' ? 'default' : 'destructive'}
-                      className={subscription.status === 'completed' ? 'bg-green-500' : ''}
+                    <div className="font-bold mb-1">
+                      ₦{subscription.amount.toLocaleString()}
+                    </div>
+                    <Badge
+                      variant={
+                        subscription.status === "completed"
+                          ? "default"
+                          : "destructive"
+                      }
+                      className={
+                        subscription.status === "completed"
+                          ? "bg-green-500"
+                          : ""
+                      }
                     >
-                      {subscription.status === 'completed' ? (
+                      {subscription.status === "completed" ? (
                         <CheckCircle className="h-3 w-3 mr-1" />
                       ) : (
                         <AlertCircle className="h-3 w-3 mr-1" />
@@ -134,8 +154,12 @@ export default function SubscriptionHistoryPage() {
           ) : (
             <div className="text-center py-10">
               <CreditCard className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-              <h3 className="text-lg font-medium mb-2">No subscription history</h3>
-              <p className="text-muted-foreground">You haven't made any payments yet.</p>
+              <h3 className="text-lg font-medium mb-2">
+                No subscription history
+              </h3>
+              <p className="text-muted-foreground">
+                You haven&apos;t made any payments yet.
+              </p>
             </div>
           )}
         </CardContent>

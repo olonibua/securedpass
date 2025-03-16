@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { DATABASE_ID, ORGANIZATIONS_COLLECTION_ID, MEMBERS_COLLECTION_ID, MEMBERSHIP_PLANS_COLLECTION_ID, databases, Query, MEMBERSHIP_PURCHASES_COLLECTION_ID } from '@/lib/appwrite';
+import { DATABASE_ID, ORGANIZATIONS_COLLECTION_ID, MEMBERS_COLLECTION_ID, MEMBERSHIP_PLANS_COLLECTION_ID, databases, Query } from '@/lib/appwrite';
 import { toast } from 'sonner';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Loader2, Check, AlertCircle } from 'lucide-react';
@@ -12,14 +12,14 @@ import { Badge } from '@/components/ui/badge';
 import MemberPayment from '@/components/member/MemberPayment';
 import { format, addMonths, addYears } from 'date-fns';
 import { Skeleton } from '@/components/ui/skeleton';
-
+import { MembershipPlan, Organization, Member } from '@/types';
 
 
 // Add proper interface for data state
 interface MemberDashboardData {
-  plans: any[];  // Or use a more specific type like MembershipPlan[]
-  organization: any | null;
-  memberDetails: any | null;
+  plans: MembershipPlan[];
+  organization: Organization | null;
+  memberDetails: Member | null;
 }
 
 export default function MemberPlansPage() {
@@ -69,9 +69,9 @@ export default function MemberPlansPage() {
       
       // Update all state at once to avoid multiple renders
       setData({
-        plans: plansResponse.documents,
-        organization: orgResponse,
-        memberDetails: memberResponse.documents[0] || null
+        plans: plansResponse.documents as unknown as MembershipPlan[],
+        organization: orgResponse as unknown as Organization,
+        memberDetails: memberResponse.documents[0] as unknown as Member
       });
     } catch (error: unknown) {
       console.error("Error fetching data:", error);

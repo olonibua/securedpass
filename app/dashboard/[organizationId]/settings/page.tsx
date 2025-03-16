@@ -10,13 +10,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
+import { Organization } from '@/types';
 
 export default function SettingsPage() {
   const { organizationId } = useParams();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [organization, setOrganization] = useState<any>(null);
+  const [organization, setOrganization] = useState<Organization | null>(null);
   const [formValues, setFormValues] = useState({
     name: '',
     description: '',
@@ -34,7 +35,7 @@ export default function SettingsPage() {
         organizationId as string
       );
       
-      setOrganization(response);
+      setOrganization(response as unknown as Organization);
       setFormValues({
         name: response.name || '',
         description: response.description || '',
@@ -103,29 +104,33 @@ export default function SettingsPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Settings</h1>
-        <p className="text-muted-foreground">Manage your organization settings</p>
+        <p className="text-muted-foreground">
+          Manage your organization settings
+        </p>
       </div>
-      
+
       <form onSubmit={handleSubmit}>
         <Card>
           <CardHeader>
             <CardTitle>Organization Information</CardTitle>
-            <CardDescription>Update your organization's basic information</CardDescription>
+            <CardDescription>
+              Update your organization&apos;s basic information
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="name">Organization Name</Label>
-              <Input 
+              <Input
                 id="name"
                 name="name"
                 value={formValues.name}
                 onChange={handleInputChange}
               />
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="description">Description</Label>
-              <Textarea 
+              <Textarea
                 id="description"
                 name="description"
                 value={formValues.description}
@@ -133,10 +138,10 @@ export default function SettingsPage() {
                 rows={4}
               />
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="contactEmail">Contact Email</Label>
-              <Input 
+              <Input
                 id="contactEmail"
                 name="contactEmail"
                 type="email"
@@ -144,10 +149,10 @@ export default function SettingsPage() {
                 onChange={handleInputChange}
               />
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="website">Website</Label>
-              <Input 
+              <Input
                 id="website"
                 name="website"
                 value={formValues.website}

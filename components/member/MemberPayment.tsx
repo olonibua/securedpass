@@ -160,7 +160,7 @@ export default function MemberPayment({ organizationId, planId }: MemberPaymentP
               )}
             </div>
             <p className="text-sm text-muted-foreground mt-1">
-              {(plan as any).intervalDescription || "One-time payment"}
+              {(plan as MembershipPlan).intervalDescription || "One-time payment"}
             </p>
           </div>
 

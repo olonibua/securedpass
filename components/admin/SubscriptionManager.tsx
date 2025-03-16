@@ -12,8 +12,6 @@ import { Organization } from '@/types';
 
 interface SubscriptionManagerProps {
   organizationId: string;
-  currentPlan?: string;
-  paymentModel?: 'subscription' | 'transaction_fee';
 }
 
 const PLANS = [
@@ -74,8 +72,6 @@ const PLANS = [
 
 export default function SubscriptionManager({ 
   organizationId,
-  currentPlan,
-  paymentModel = 'subscription'
 }: SubscriptionManagerProps) {
   const [organization, setOrganization] = useState<Organization | null>(null);
   const [loading, setLoading] = useState(true);

@@ -11,12 +11,13 @@ import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import SubscriptionManager from '@/components/admin/SubscriptionManager';
+import { Organization } from '@/types';
 
 export default function PaymentSettingsPage() {
   const params = useParams();
   const organizationId = params.organizationId as string;
   
-  const [organization, setOrganization] = useState<any>(null);
+  const [organization, setOrganization] = useState<Organization | null>(null);
   const [loading, setLoading] = useState(true);
   
   useEffect(() => {
@@ -28,7 +29,7 @@ export default function PaymentSettingsPage() {
           ORGANIZATIONS_COLLECTION_ID,
           organizationId
         );
-        setOrganization(org);
+        setOrganization(org as unknown as Organization);
       } catch (error: unknown) {
         const errorMessage = error instanceof Error ? error.message : 'Failed to load organization data';
         console.error('Error loading organization:', errorMessage);
@@ -67,49 +68,51 @@ export default function PaymentSettingsPage() {
           Configure how you pay for our platform and how your members pay you
         </p>
       </div>
-      
-      <PaymentSettingsInfo 
-        paymentModel={organization.paymentModel || 'subscription'}
+
+      <PaymentSettingsInfo
+        paymentModel={organization.paymentModel || "subscription"}
         transactionFeePercentage={organization.transactionFeePercentage || 5}
       />
-      
+
       <Tabs defaultValue="model" className="w-full">
         <TabsList className="mb-4">
           <TabsTrigger value="model">Payment Model</TabsTrigger>
-          {organization.paymentModel === 'subscription' && (
+          {organization.paymentModel === "subscription" && (
             <TabsTrigger value="subscription">Subscription</TabsTrigger>
           )}
-          {organization.paymentModel === 'subscription' && (
+          {organization.paymentModel === "subscription" && (
             <TabsTrigger value="integration">Payment Integration</TabsTrigger>
           )}
-          {organization.paymentModel === 'transaction_fee' && (
+          {organization.paymentModel === "transaction_fee" && (
             <TabsTrigger value="bank">Bank Details</TabsTrigger>
           )}
         </TabsList>
-        
+
         <TabsContent value="model">
-          <PaymentModelSelector 
+          <PaymentModelSelector
             organizationId={organizationId}
-            currentModel={organization.paymentModel || 'subscription'}
-            transactionFeePercentage={organization.transactionFeePercentage || 5}
+            currentModel={organization.paymentModel || "subscription"}
+            transactionFeePercentage={
+              organization.transactionFeePercentage || 5
+            }
           />
         </TabsContent>
-        
+
         <TabsContent value="subscription">
-            <SubscriptionManager
-              organizationId={organizationId}
-              currentPlan={organization.plan || 'free'}
-              paymentModel={organization.paymentModel || 'subscription'}
-            />
+          <SubscriptionManager
+            organizationId={organizationId}
+            currentPlan={organization.plan || "free"}
+            paymentModel={organization.paymentModel || "subscription"}
+          />
         </TabsContent>
-        
+
         <TabsContent value="integration">
-          <PaymentIntegration 
+          <PaymentIntegration
             organizationId={organizationId}
             paystackIntegrated={Boolean(organization.paystackPublicKey)}
           />
         </TabsContent>
-        
+
         <TabsContent value="bank">
           <Card>
             <CardHeader>
@@ -120,8 +123,10 @@ export default function PaymentSettingsPage() {
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground">
-                Since you've chosen the Transaction Fee model, we need your bank account details to transfer your funds.
-                Please contact our support team at support@securedpass.com to set up your settlement account.
+                Since you&apos;ve chosen the Transaction Fee model, we need your
+                bank account details to transfer your funds. Please contact our
+                support team at support@securedpass.com to set up your
+                settlement account.
               </p>
             </CardContent>
           </Card>

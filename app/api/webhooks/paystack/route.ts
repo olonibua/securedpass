@@ -20,7 +20,6 @@ export async function POST(request: NextRequest) {
       .digest('hex');
     
     let verified = hash === signature;
-    let event;
     
     // Parse request body
     const payload = JSON.parse(body);
