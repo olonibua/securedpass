@@ -253,11 +253,11 @@ export default function MembersPage() {
                       </td>
                       <td className="p-2 py-3">
                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                          (member as any).status === 'active' 
+                          (member as Member).status === 'active' 
                             ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' 
                             : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
                         }`}>
-                          {(member as any).status || 'Unknown'}
+                          {(member as Member).status || 'Unknown'}
                         </span>
                       </td>
                       <td className="p-2 py-3">{formatDate(member.createdAt)}</td>
