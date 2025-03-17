@@ -16,7 +16,6 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Loader2 } from 'lucide-react';
-import Header from '@/components/layout/Header';
 import { useAuth } from '@/lib/auth-context';
 import { useRouter } from 'next/navigation';
 

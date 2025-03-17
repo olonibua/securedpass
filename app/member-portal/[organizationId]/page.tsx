@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { CHECKINS_COLLECTION_ID, DATABASE_ID, databases, MEMBERS_COLLECTION_ID, ORGANIZATIONS_COLLECTION_ID, MEMBERSHIP_PLANS_COLLECTION_ID, MEMBERSHIP_PURCHASES_COLLECTION_ID, Query } from '@/lib/appwrite';
 import { toast } from 'sonner';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, } from '@/components/ui/card';
-import { Loader2, CalendarDays, QrCode, Check, UserCircle, CreditCard } from 'lucide-react';
+import { CalendarDays, QrCode, Check, UserCircle, CreditCard } from 'lucide-react';
 import { Organization, CheckIn } from '@/types';
 import { useAuth } from '@/lib/auth-context';     
 import { Button } from '@/components/ui/button';

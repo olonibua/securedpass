@@ -5,12 +5,13 @@ import { databases, DATABASE_ID, ORGANIZATIONS_COLLECTION_ID, SUBSCRIPTION_PAUSE
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { Loader2, Calendar as CalendarIcon, Pause, Play } from 'lucide-react';
 import { format } from 'date-fns';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
+import { SubscriptionPause } from '@/types';
 
 interface SubscriptionPauseManagerProps {
   userId: string;
@@ -20,7 +21,7 @@ interface SubscriptionPauseManagerProps {
 
 export default function SubscriptionPauseManager({ userId, organizationId, subscriptionId }: SubscriptionPauseManagerProps) {
   const [loading, setLoading] = useState(true);
-  const [pauseHistory, setPauseHistory] = useState<any[]>([]);
+  const [pauseHistory, setPauseHistory] = useState<SubscriptionPause[]>([]);
   const [pausesRemaining, setPausesRemaining] = useState(0);
   const [maxPauses, setMaxPauses] = useState(0);
   const [maxDuration, setMaxDuration] = useState(30);
@@ -67,12 +68,13 @@ export default function SubscriptionPauseManager({ userId, organizationId, subsc
           ]
         );
         
-        setPauseHistory(pauses.documents);
+        setPauseHistory(pauses.documents.map((pause: unknown) => pause as SubscriptionPause));
         
         // Check if subscription is currently paused
-        const activePauses = pauses.documents.filter((pause: any) => {
-          const endDate = new Date(pause.endDate);
-          return endDate >= now && pause.status === 'active';
+        const activePauses = pauses.documents.filter((pause: unknown) => {
+          const typedPause = pause as SubscriptionPause;
+          const endDate = new Date(typedPause.endDate);
+          return endDate >= now && typedPause.status === 'active';
         });
         
         setIsPaused(activePauses.length > 0);
@@ -214,11 +216,11 @@ export default function SubscriptionPauseManager({ userId, organizationId, subsc
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center">
-          <Pause className="h-5 w-5 mr-2" /> 
+          <Pause className="h-5 w-5 mr-2" />
           Subscription Pauses
         </CardTitle>
         <CardDescription>
-          Pause your subscription when you're away
+          Pause your subscription when you&apos;re away
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -227,12 +229,12 @@ export default function SubscriptionPauseManager({ userId, organizationId, subsc
             <div>
               <p className="font-medium">Subscription Status</p>
               <p className="text-sm text-muted-foreground">
-                {isPaused ? 'Currently paused' : 'Active'}
+                {isPaused ? "Currently paused" : "Active"}
               </p>
             </div>
             {isPaused ? (
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 size="sm"
                 onClick={handleResumeSubscription}
                 disabled={submitting}
@@ -247,8 +249,8 @@ export default function SubscriptionPauseManager({ userId, organizationId, subsc
             ) : (
               <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
                 <DialogTrigger asChild>
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     size="sm"
                     disabled={pausesRemaining === 0 || submitting}
                   >
@@ -260,11 +262,11 @@ export default function SubscriptionPauseManager({ userId, organizationId, subsc
                   <DialogHeader>
                     <DialogTitle>Pause Your Subscription</DialogTitle>
                     <DialogDescription>
-                      Select when you want to pause your subscription. 
-                      You can pause for up to {maxDuration} days.
+                      Select when you want to pause your subscription. You can
+                      pause for up to {maxDuration} days.
                     </DialogDescription>
                   </DialogHeader>
-                  
+
                   <div className="grid gap-4 py-4">
                     <div className="space-y-2">
                       <h3 className="text-sm font-medium">Start Date</h3>
@@ -275,7 +277,9 @@ export default function SubscriptionPauseManager({ userId, organizationId, subsc
                             className="w-full justify-start text-left font-normal"
                           >
                             <CalendarIcon className="mr-2 h-4 w-4" />
-                            {startDate ? format(startDate, 'PPP') : "Select start date"}
+                            {startDate
+                              ? format(startDate, "PPP")
+                              : "Select start date"}
                           </Button>
                         </PopoverTrigger>
                         <PopoverContent className="w-auto p-0" align="start">
@@ -289,7 +293,7 @@ export default function SubscriptionPauseManager({ userId, organizationId, subsc
                         </PopoverContent>
                       </Popover>
                     </div>
-                    
+
                     <div className="space-y-2">
                       <h3 className="text-sm font-medium">End Date</h3>
                       <Popover>
@@ -303,7 +307,9 @@ export default function SubscriptionPauseManager({ userId, organizationId, subsc
                             disabled={!startDate}
                           >
                             <CalendarIcon className="mr-2 h-4 w-4" />
-                            {endDate ? format(endDate, 'PPP') : "Select end date"}
+                            {endDate
+                              ? format(endDate, "PPP")
+                              : "Select end date"}
                           </Button>
                         </PopoverTrigger>
                         <PopoverContent className="w-auto p-0" align="start">
@@ -323,16 +329,19 @@ export default function SubscriptionPauseManager({ userId, organizationId, subsc
                       </Popover>
                     </div>
                   </div>
-                  
+
                   <DialogFooter>
-                    <Button onClick={handlePauseSubscription} disabled={submitting || !startDate || !endDate}>
+                    <Button
+                      onClick={handlePauseSubscription}
+                      disabled={submitting || !startDate || !endDate}
+                    >
                       {submitting ? (
                         <>
                           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                           Processing...
                         </>
                       ) : (
-                        'Pause Subscription'
+                        "Pause Subscription"
                       )}
                     </Button>
                   </DialogFooter>
@@ -340,34 +349,46 @@ export default function SubscriptionPauseManager({ userId, organizationId, subsc
               </Dialog>
             )}
           </div>
-          
+
           <div className="rounded-md bg-muted p-3">
             <p className="text-sm">
-              <span className="font-medium">Pauses remaining this month:</span> {pausesRemaining} of {maxPauses}
+              <span className="font-medium">Pauses remaining this month:</span>{" "}
+              {pausesRemaining} of {maxPauses}
             </p>
             <p className="text-sm mt-1">
-              <span className="font-medium">Maximum pause duration:</span> {maxDuration} days
+              <span className="font-medium">Maximum pause duration:</span>{" "}
+              {maxDuration} days
             </p>
           </div>
-          
+
           {pauseHistory.length > 0 && (
             <div className="mt-4">
               <h3 className="text-sm font-medium mb-2">Recent Pause History</h3>
               <div className="space-y-2">
                 {pauseHistory.slice(0, 3).map((pause) => (
-                  <div key={pause.$id} className="text-sm p-2 border rounded-md">
+                  <div
+                    key={pause.$id}
+                    className="text-sm p-2 border rounded-md"
+                  >
                     <div className="flex justify-between">
                       <span>
-                        {format(new Date(pause.startDate), 'PP')} - {format(new Date(pause.endDate), 'PP')}
+                        {format(new Date(pause.startDate), "PP")} -{" "}
+                        {format(new Date(pause.endDate), "PP")}
                       </span>
-                      <span className={cn(
-                        "px-2 py-0.5 rounded-full text-xs",
-                        pause.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
-                      )}>
-                        {pause.status === 'active' ? 'Active' : 'Completed'}
+                      <span
+                        className={cn(
+                          "px-2 py-0.5 rounded-full text-xs",
+                          pause.status === "active"
+                            ? "bg-green-100 text-green-800"
+                            : "bg-gray-100 text-gray-800"
+                        )}
+                      >
+                        {pause.status === "active" ? "Active" : "Completed"}
                       </span>
                     </div>
-                    <p className="text-muted-foreground mt-1">Duration: {pause.duration} days</p>
+                    <p className="text-muted-foreground mt-1">
+                      Duration: {pause.duration} days
+                    </p>
                   </div>
                 ))}
               </div>

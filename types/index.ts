@@ -37,22 +37,17 @@ export interface CustomField {
 // Member
 export interface Member {
   $id: string;
-  organizationId?: string;
-  email?: string;
+  userId: string;
+  organizationId: string;
+  status: string;
+  email: string;
   name?: string;
-  profileData?: any;
   active?: boolean;
   lastCheckIn?: string;
-  createdAt: string;
-  updatedAt: string;
-  hasActiveSubscription?: boolean;
-  latestPayment?: any;
-  subscriptionType?: string;
-  expiryDate?: Date | null;
-  planName?: string;
-  status?: string;
   planId?: string;
   planStartDate?: string;
+  subscriptionId?: string;
+  // Add any other fields from your members collection
 }
 
 // Check-in
@@ -131,6 +126,19 @@ export interface Subscription {
   status: string;
   startDate: string;
   endDate?: string;
+  createdAt: string;
+}
+
+// Subscription Pause
+export interface SubscriptionPause {
+  $id: string;
+  userId: string;
+  organizationId: string;
+  subscriptionId: string;
+  startDate: string;
+  endDate: string;
+  duration: number;
+  status: string; // 'active' | 'resumed'
   createdAt: string;
 }
 

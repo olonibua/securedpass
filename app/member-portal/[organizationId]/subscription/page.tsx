@@ -29,16 +29,19 @@ export default function SubscriptionHistoryPage() {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [subscriptions, setSubscriptions] = useState<MembershipPurchase[]>([]);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [organization, setOrganization] = useState<any>(null);
-  const [currentSubscriptionId, setCurrentSubscriptionId] = useState<string | null>(null);
+  const [currentSubscriptionId, setCurrentSubscriptionId] = useState<
+    string | null
+  >(null);
   const [allowPauses, setAllowPauses] = useState(false);
 
   const fetchSubscriptions = useCallback(async () => {
     if (!user || !organizationId) return;
-    
+
     try {
       setLoading(true);
-      
+
       // Fetch all membership purchases for this user and organization
       const purchasesResponse = await databases.listDocuments(
         DATABASE_ID!,
@@ -49,9 +52,10 @@ export default function SubscriptionHistoryPage() {
           Query.orderDesc("paymentDate"),
         ]
       );
-      
-      const purchases = purchasesResponse.documents as unknown as MembershipPurchase[];
-      
+
+      const purchases =
+        purchasesResponse.documents as unknown as MembershipPurchase[];
+
       // Fetch plan details for each purchase
       const purchasesWithPlans = await Promise.all(
         purchases.map(async (purchase) => {
@@ -63,54 +67,61 @@ export default function SubscriptionHistoryPage() {
             );
             return {
               ...purchase,
-              planName: planResponse.name
+              planName: planResponse.name,
             };
           } catch (error: unknown) {
-            const errorMessage = error instanceof Error ? error.message : 'Failed to fetch plan details';
+            const errorMessage =
+              error instanceof Error
+                ? error.message
+                : "Failed to fetch plan details";
             console.error("Error fetching plan details:", errorMessage);
             return {
               ...purchase,
-              planName: 'Unknown Plan'
+              planName: "Unknown Plan",
             };
           }
         })
       );
-      
+
       setSubscriptions(purchasesWithPlans);
-      
+
       // Set current subscription ID if there is an active subscription
-      const activeSubscription = purchasesWithPlans.find(sub => 
-        sub.status === 'completed' && 
-        new Date(sub.paymentDate) > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) // Within last 30 days
+      const activeSubscription = purchasesWithPlans.find(
+        (sub) =>
+          sub.status === "completed" &&
+          new Date(sub.paymentDate) >
+            new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) // Within last 30 days
       );
-      
+
       if (activeSubscription) {
         setCurrentSubscriptionId(activeSubscription.$id);
       }
-      
+
       // Fetch organization to check pause settings
       const organizationResponse = await databases.getDocument(
         DATABASE_ID!,
         ORGANIZATIONS_COLLECTION_ID!,
         organizationId as string
       );
-      
+
       setOrganization(organizationResponse);
       setAllowPauses(organizationResponse.allowSubscriptionPauses || false);
-      
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to fetch subscription history';
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Failed to fetch subscription history";
       console.error("Error fetching subscription history:", errorMessage);
       toast.error("Failed to load subscription history");
     } finally {
       setLoading(false);
     }
   }, [user, organizationId]);
-  
+
   useEffect(() => {
     fetchSubscriptions();
   }, [fetchSubscriptions]);
-  
+
   if (loading) {
     return (
       <div className="container py-8 flex justify-center">
@@ -118,7 +129,7 @@ export default function SubscriptionHistoryPage() {
       </div>
     );
   }
-  
+
   return (
     <div className="container px-4 mx-auto py-6 sm:py-8 max-w-6xl">
       <h1 className="text-2xl font-bold mb-6">Subscription Management</h1>
@@ -126,13 +137,13 @@ export default function SubscriptionHistoryPage() {
       <div className="grid gap-6 md:grid-cols-2">
         {/* Subscription Pause Manager - only show if organization allows pauses and user has active subscription */}
         {allowPauses && currentSubscriptionId && (
-          <SubscriptionPauseManager 
-            userId={user?.$id || ''}
+          <SubscriptionPauseManager
+            userId={user?.$id || ""}
             organizationId={organizationId as string}
             subscriptionId={currentSubscriptionId}
           />
         )}
-        
+
         {/* Subscription History Card */}
         <Card className="md:col-span-2">
           <CardHeader>

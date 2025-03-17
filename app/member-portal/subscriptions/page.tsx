@@ -7,12 +7,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
 import SubscriptionPauseManager from '@/components/member/SubscriptionPauseManager';
+import { Organization, Member } from '@/types';
 
 export default function MemberSubscriptionsPage() {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
-  const [membership, setMembership] = useState<any>(null);
-  const [organization, setOrganization] = useState<any>(null);
+  const [membership, setMembership] = useState<Member | null>(null);
+  const [organization, setOrganization] = useState<Organization | null>(null);
   
   useEffect(() => {
     const fetchData = async () => {
@@ -32,7 +33,7 @@ export default function MemberSubscriptionsPage() {
           throw new Error('Member record not found');
         }
         
-        const member = memberResponse.documents[0];
+        const member = memberResponse.documents[0] as unknown as Member;
         setMembership(member);
         
         // Get organization
@@ -42,7 +43,7 @@ export default function MemberSubscriptionsPage() {
           member.organizationId
         );
         
-        setOrganization(organization);
+        setOrganization(organization as unknown as Organization);
       } catch (error: unknown) {
         const errorMessage = error instanceof Error ? error.message : 'Failed to load subscription data';
         console.error('Error fetching member subscription data:', errorMessage);

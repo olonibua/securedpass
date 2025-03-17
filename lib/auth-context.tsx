@@ -33,8 +33,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       localStorage.removeItem('appwrite-auth-user-id');
       // Redirect to home page instead of login page
       router.push('/');
-    } catch (error: unknown) {
-      console.error('Logout error:', error);
+    } catch {
+      console.error('Logout error:');
     }
   };
 
@@ -43,7 +43,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const currentUser = await account.get();
       setUser(currentUser);
       return true;
-    } catch (error: unknown) {
+    } catch {
       setUser(null);
       return false;
     } finally {

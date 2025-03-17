@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import { useParams } from 'next/navigation';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import SubscriptionPauseSettings from '@/components/organization/SubscriptionPauseSettings';
@@ -15,21 +14,23 @@ export default function SettingsPage() {
   return (
     <div className="container mx-auto py-6">
       <h1 className="text-2xl font-bold mb-6">Settings</h1>
-      <p className="text-muted-foreground mb-6">Manage your organization settings</p>
-      
+      <p className="text-muted-foreground mb-6">
+        Manage your organization settings
+      </p>
+
       <Tabs defaultValue="organization" className="w-full">
         <TabsList className="mb-6">
           <TabsTrigger value="organization">Organization</TabsTrigger>
           <TabsTrigger value="members">Members</TabsTrigger>
           <TabsTrigger value="billing">Billing</TabsTrigger>
         </TabsList>
-        
+
         <TabsContent value="organization">
           <Card>
             <CardHeader>
               <CardTitle>Organization Information</CardTitle>
               <CardDescription>
-                Update your organization's basic information
+                Update your organization&apos;s basic information
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -45,25 +46,27 @@ export default function SettingsPage() {
             </CardContent>
           </Card>
         </TabsContent>
-        
+
         <TabsContent value="members">
-          <SubscriptionPauseSettings organizationId={organizationId as string} />
-          
+          <SubscriptionPauseSettings
+            organizationId={organizationId as string}
+          />
+
           {/* You can add other member-related settings below */}
           <Card className="mt-6">
             <CardHeader>
               <CardTitle>Member Management</CardTitle>
-              <CardDescription>
-                Configure other member settings
-              </CardDescription>
+              <CardDescription>Configure other member settings</CardDescription>
             </CardHeader>
             <CardContent>
               {/* Other member settings would go here */}
-              <p className="text-muted-foreground">Additional member settings will appear here</p>
+              <p className="text-muted-foreground">
+                Additional member settings will appear here
+              </p>
             </CardContent>
           </Card>
         </TabsContent>
-        
+
         <TabsContent value="billing">
           {/* Your existing billing settings */}
           <Card>
@@ -75,7 +78,9 @@ export default function SettingsPage() {
             </CardHeader>
             <CardContent>
               {/* Billing content */}
-              <p className="text-muted-foreground">Your billing settings appear here</p>
+              <p className="text-muted-foreground">
+                Your billing settings appear here
+              </p>
             </CardContent>
           </Card>
         </TabsContent>
