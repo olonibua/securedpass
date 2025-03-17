@@ -15,6 +15,7 @@ import {
   CreditCard,
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
+import { toast } from 'sonner';
 
 export default function DashboardLayout({
   children,
@@ -58,6 +59,18 @@ export default function DashboardLayout({
     if (path === '/dashboard') return `/dashboard/${organizationId}`;
     return `/dashboard/${organizationId}${path.replace('/dashboard', '')}`;
   }, [organizationId]);
+
+  const handleSignOut = async () => {
+    try {
+      // Use the centralized logout function from auth context
+      // which will redirect to home page
+      await logout();
+      toast.success('Signed out successfully');
+    } catch (error) {
+      console.error('Error signing out:', error);
+      toast.error('Failed to sign out');
+    }
+  };
 
   if (loading) {
     return (
@@ -164,7 +177,7 @@ export default function DashboardLayout({
             <Button
               variant="ghost"
               className="w-full justify-start text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950"
-              onClick={logout}
+              onClick={handleSignOut}
             >
               <LogOut className="mr-2 h-4 w-4" />
               Sign out

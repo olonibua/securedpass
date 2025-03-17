@@ -13,6 +13,7 @@ import { formatDate } from '@/lib/utils';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import CheckInHistory from '@/components/member/CheckInHistory';
 import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface MemberDetails {
   $id: string;
@@ -162,8 +163,30 @@ export default function MemberPortalPage() {
   if (loading) {
     return (
       <div className="container px-4 mx-auto py-6 sm:py-8 max-w-6xl">
-        <div className="flex items-center justify-center min-h-[50vh]">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        {/* Header skeleton */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+          <div>
+            <Skeleton className="h-8 w-48 mb-2" />
+            <Skeleton className="h-4 w-36" />
+          </div>
+        </div>
+        
+        {/* Membership status skeleton */}
+        <Skeleton className="w-full h-24 mb-6" />
+        
+        {/* Membership plan skeleton */}
+        <Skeleton className="w-full h-48 mb-6" />
+        
+        {/* Member details skeleton */}
+        <Skeleton className="w-full h-64 mb-6" />
+        
+        {/* Recent payments skeleton */}
+        <Skeleton className="w-full h-48 mb-6" />
+        
+        {/* Activity tabs skeleton */}
+        <div className="mt-6">
+          <Skeleton className="w-full h-8 mb-4" />
+          <Skeleton className="w-full h-64" />
         </div>
       </div>
     );

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { databases, account, ID, Query, DATABASE_ID, REGISTRATION_CODES_COLLECTION_ID, ORGANIZATIONS_COLLECTION_ID, MEMBERS_COLLECTION_ID, ORGANIZATIONS_MEMBERS_COLLECTION_ID } from '@/lib/appwrite';
+import { databases, account, ID, Query, DATABASE_ID, REGISTRATION_CODES_COLLECTION_ID, ORGANIZATIONS_COLLECTION_ID, MEMBERS_COLLECTION_ID, ORGANIZATIONS_MEMBERS_COLLECTION_ID, CUSTOMFIELDS_COLLECTION_ID } from '@/lib/appwrite';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, } from '@/components/ui/card';
@@ -19,90 +19,178 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from '@/components/ui/select';
+import { Skeleton } from '@/components/ui/skeleton';
+import { CustomField } from '@/types';
 
-// Add this interface near the top of the file, after the imports
+// Complete the interface definition
 interface Organization {
   $id: string;
   name: string;
-  // Add other organization properties as needed
+  type?: string;
 }
-
-const formSchema = z.object({
-  name: z.string().min(2, { message: "Name must be at least 2 characters" }),
-  email: z.string().email({ message: "Please enter a valid email address" }),
-  password: z.string().min(8, { message: "Password must be at least 8 characters" }),
-});
 
 export default function OrganizationRegistrationPage() {
   const { code } = useParams();
   const router = useRouter();
+  
+  console.log("REGISTER PAGE - Component rendering with code:", code);
+  
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [organization, setOrganization] = useState<Organization | null>(null);
-  
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      name: "",
-      email: "",
-      password: "",
-    },
-  });
+  const [customFields, setCustomFields] = useState<CustomField[]>([]);
   
   useEffect(() => {
-    const verifyRegistrationCode = async () => {
+    const fetchData = async () => {
       try {
         setLoading(true);
         
-        // Find the registration code
+        // Fetch registration code
         const codeResponse = await databases.listDocuments(
           DATABASE_ID,
           REGISTRATION_CODES_COLLECTION_ID as string,
-          [Query.equal('code', code as string)]
+          [Query.equal('code', Array.isArray(code) ? code[0] : (code || ''))]
         );
         
         if (codeResponse.documents.length === 0) {
-          toast.error('Invalid registration code');
-          router.push('/');
-          return;
+          throw new Error('Invalid registration code');
         }
         
-        const registrationCode = codeResponse.documents[0];
+        const organizationId = codeResponse.documents[0].organizationId;
+        console.log("REGISTER PAGE - Found organization ID from code:", organizationId);
         
-        // Get the organization details
-        const org = await databases.getDocument(
+        // Fetch organization details
+        const orgResponse = await databases.getDocument(
           DATABASE_ID,
-          ORGANIZATIONS_COLLECTION_ID as string,
-          registrationCode.organizationId
+          ORGANIZATIONS_COLLECTION_ID,
+          organizationId
         );
         
-        setOrganization(org as unknown as Organization);
+        setOrganization(orgResponse as unknown as Organization);
+        
+        // Log details about what we're about to query
+        console.log("REGISTER PAGE - About to fetch custom fields with:", {
+          databaseId: DATABASE_ID,
+          collectionId: CUSTOMFIELDS_COLLECTION_ID,
+          organizationId
+        });
+        
+        // Use exactly the same query pattern that works in CustomFieldsManager
+        const fieldsResponse = await databases.listDocuments(
+          DATABASE_ID,
+          CUSTOMFIELDS_COLLECTION_ID,
+          [
+            Query.equal('organizationId', organizationId),
+            Query.orderAsc('order')
+          ]
+        );
+        
+        console.log("REGISTER PAGE - Custom fields response:", fieldsResponse);
+        
+        // Set the custom fields
+        setCustomFields(fieldsResponse.documents as unknown as CustomField[]);
+        console.log("REGISTER PAGE - Setting custom fields:", fieldsResponse.documents);
+        
       } catch (error: unknown) {
-        const errorMessage = error instanceof Error ? error.message : 'Failed to verify registration code';
-        console.error('Error verifying registration code:', errorMessage);
-        toast.error('Invalid registration code');
-        router.push('/');
+        const errorMessage = error instanceof Error ? error.message : 'Failed to load registration page';
+        console.error('REGISTER PAGE - Error:', errorMessage);
+        toast.error(errorMessage);
       } finally {
         setLoading(false);
       }
     };
     
-    verifyRegistrationCode();
+    fetchData();
   }, [code, router]);
   
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+  // Build the form schema based on custom fields
+  const buildFormSchema = () => {
+    const schemaMap: Record<string, z.ZodTypeAny> = {
+      // Always include name and email fields
+      name: z.string().min(2, { message: 'Name must be at least 2 characters' }),
+      email: z.string().email({ message: 'Invalid email address' }),
+      password: z.string().min(8, { message: 'Password must be at least 8 characters' }),
+    };
+    
+    // Add custom fields to schema
+    customFields.forEach(field => {
+      let validator: z.ZodTypeAny;
+      
+      switch (field.type) {
+        case 'email':
+          validator = z.string().email({ message: 'Invalid email address' });
+          break;
+        case 'number':
+          validator = z.string().refine(val => !isNaN(Number(val)), {
+            message: 'Must be a valid number',
+          });
+          break;
+        case 'phone':
+          validator = z.string().min(5, { message: 'Phone number is too short' });
+          break;
+        case 'date':
+          validator = z.string().refine(val => !isNaN(Date.parse(val)), {
+            message: 'Invalid date format',
+          });
+          break;
+        case 'select':
+          validator = z.string().min(1, { message: 'Please select an option' });
+          break;
+        default:
+          validator = z.string();
+      }
+      
+      if (field.required) {
+        if (validator instanceof z.ZodString) {
+          validator = validator.min(1, { message: 'This field is required' });
+        } else {
+          validator = z.string().min(1, { message: 'This field is required' });
+        }
+      } else {
+        validator = validator.optional();
+      }
+      
+      schemaMap[field.$id] = validator;
+    });
+    
+    return z.object(schemaMap);
+  };
+
+  const form = useForm<z.infer<ReturnType<typeof buildFormSchema>>>({
+    resolver: zodResolver(buildFormSchema()),
+    defaultValues: {
+      name: '',
+      email: '',
+      password: '',
+    },
+  });
+
+  const handleSubmit = async (data: Record<string, unknown>) => {
     try {
       setSubmitting(true);
       
-      // Create user account
+      // Extract custom field data
+      const customFieldsData: Record<string, unknown> = {};
+      customFields.forEach(field => {
+        customFieldsData[field.$id] = data[field.$id];
+      });
+      
+      // Create user
       const newUser = await account.create(
         ID.unique(),
-        values.email,
-        values.password,
-        values.name
+        data.email as string,
+        data.password as string,
+        data.name as string
       );
       
-      // Create organization member
+      // Create member
       await databases.createDocument(
         DATABASE_ID,
         MEMBERS_COLLECTION_ID,
@@ -110,10 +198,11 @@ export default function OrganizationRegistrationPage() {
         {
           userId: newUser.$id,
           organizationId: organization?.$id,
-          name: values.name,
-          email: values.email,
+          name: data.name as string,
+          email: data.email as string,
           status: 'active',
-          createdAt: new Date().toISOString()
+          createdAt: new Date().toISOString(),
+          customFields: JSON.stringify(customFieldsData)
         }
       );
       
@@ -130,11 +219,8 @@ export default function OrganizationRegistrationPage() {
         }
       );
       
-      // Log the user in
-      await account.createEmailPasswordSession(values.email, values.password);
-      
-      toast.success('Registration successful!');
-      router.push('/dashboard');
+      toast.success('Registration successful! Please log in with your credentials.');
+      router.push('/member-login');
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to register';
       console.error('Error during registration:', errorMessage);
@@ -146,8 +232,34 @@ export default function OrganizationRegistrationPage() {
   
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div className="container max-w-md mx-auto py-10">
+        <Card>
+          <CardHeader>
+            <Skeleton className="h-8 w-3/4 mb-2" />
+            <Skeleton className="h-4 w-full" />
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full mb-2" />
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+  
+  if (!organization) {
+    return (
+      <div className="container max-w-md mx-auto py-10">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-center text-destructive">Invalid Registration Link</CardTitle>
+            <CardDescription className="text-center">
+              This registration link is invalid or has expired.
+            </CardDescription>
+          </CardHeader>
+        </Card>
       </div>
     );
   }
@@ -156,22 +268,22 @@ export default function OrganizationRegistrationPage() {
     <div className="container max-w-md mx-auto py-10">
       <Card>
         <CardHeader>
-          <CardTitle>Register for {organization?.name}</CardTitle>
+          <CardTitle>Register for {organization.name}</CardTitle>
           <CardDescription>
             Create your account to join this organization
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
               <FormField
                 control={form.control}
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Full Name</FormLabel>
+                    <FormLabel>Full Name *</FormLabel>
                     <FormControl>
-                      <Input placeholder="John Doe" {...field} />
+                      <Input {...field} placeholder="Enter your name" disabled={submitting} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -183,9 +295,9 @@ export default function OrganizationRegistrationPage() {
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Email</FormLabel>
+                    <FormLabel>Email Address *</FormLabel>
                     <FormControl>
-                      <Input type="email" placeholder="john@example.com" {...field} />
+                      <Input {...field} type="email" placeholder="Enter your email" disabled={submitting} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -197,14 +309,70 @@ export default function OrganizationRegistrationPage() {
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Password</FormLabel>
+                    <FormLabel>Password *</FormLabel>
                     <FormControl>
-                      <Input type="password" placeholder="••••••••" {...field} />
+                      <Input {...field} type="password" placeholder="Create a password" disabled={submitting} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
+              
+              {/* Dynamic custom fields */}
+              {customFields.map((field) => (
+                <FormField
+                  key={field.$id}
+                  control={form.control}
+                  name={field.$id}
+                  render={({ field: formField }) => (
+                    <FormItem>
+                      <FormLabel>
+                        {field.name}
+                        {field.required && ' *'}
+                      </FormLabel>
+                      <FormControl>
+                        {field.type === 'select' ? (
+                          <Select
+                            onValueChange={formField.onChange}
+                            defaultValue={formField.value}
+                            disabled={submitting}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder={field.placeholder || `Select ${field.name}`} />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {field.options?.map((option) => (
+                                <SelectItem key={option} value={option}>
+                                  {option}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        ) : field.type === 'date' ? (
+                          <Input
+                            {...formField}
+                            type="date"
+                            placeholder={field.placeholder}
+                            disabled={submitting}
+                          />
+                        ) : (
+                          <Input
+                            {...formField}
+                            type={
+                              field.type === 'email' ? 'email' :
+                              field.type === 'number' ? 'number' :
+                              field.type === 'phone' ? 'tel' : 'text'
+                            }
+                            placeholder={field.placeholder || `Enter ${field.name}`}
+                            disabled={submitting}
+                          />
+                        )}
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              ))}
               
               <Button type="submit" className="w-full" disabled={submitting}>
                 {submitting ? (

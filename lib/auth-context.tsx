@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useState, useEffect, ReactNode, useMemo } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { account, ORGANIZATIONS_COLLECTION_ID, ORGANIZATIONS_MEMBERS_COLLECTION_ID, MEMBERS_COLLECTION_ID, DATABASE_ID } from '@/lib/appwrite';
 import { Models } from 'appwrite';
@@ -23,36 +23,41 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<Models.User<Models.Preferences> | null>(null);
   const [loading, setLoading] = useState(true);
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [isLoaded, setIsLoaded] = useState(false);
   const router = useRouter();
 
-  // Define checkAuth outside useEffect so it's available for the context value
-  const checkAuth = async (): Promise<boolean> => {
+  const logout = async () => {
+    try {
+      await account.deleteSession('current');
+      setUser(null);
+      // Clear any local storage data to prevent reconnection
+      localStorage.removeItem('appwrite-auth-user-id');
+      // Redirect to home page instead of login page
+      router.push('/');
+    } catch (error: unknown) {
+      console.error('Logout error:', error);
+    }
+  };
+
+  const checkAuth = useCallback(async (): Promise<boolean> => {
     try {
       const currentUser = await account.get();
       setUser(currentUser);
       return true;
-    } catch (error) {
-      console.error('Not authenticated:', error);
+    } catch (error: unknown) {
       setUser(null);
       return false;
     } finally {
       setLoading(false);
-      setIsLoaded(true);
     }
-  };
+  }, []);
 
+  // Initial auth check
   useEffect(() => {
-    // Initial auth check
-    checkAuth();
-    
-    // Optional polling interval - Increase to 5 minutes to reduce reloads
-    const authCheckInterval = setInterval(checkAuth, 300000); // Changed from 60000 (1 min) to 300000 (5 min)
-    
-    return () => {
-      clearInterval(authCheckInterval);
+    const initAuth = async () => {
+      await checkAuth();
     };
+    
+    initAuth();
   }, []);
 
   const login = async (email: string, password: string) => {
@@ -67,32 +72,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       console.error("Login error:", errorMessage);
       toast.error('Login failed. Please check your credentials.');
       return false;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const logout = async () => {
-    try {
-      setLoading(true);
-      
-      // Check user role before logout to determine redirect location
-      let redirectPath = '/login';
-      if (user) {
-        const userRole = await checkUserRole(user.$id, user.email);
-        if (userRole === 'member') {
-          redirectPath = '/member-login';
-        }
-      }
-      
-      await account.deleteSession('current');
-      setUser(null);
-      router.push(redirectPath);
-      toast.success('Logged out successfully');
-    } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to log out';
-      console.error("Logout error:", errorMessage);
-      toast.error('Failed to log out');
     } finally {
       setLoading(false);
     }

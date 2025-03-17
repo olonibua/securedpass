@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname, useRouter, useParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { 
   Home, 
@@ -15,12 +15,16 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/lib/auth-context';
-import { databases, Query, DATABASE_ID, ORGANIZATIONS_MEMBERS_COLLECTION_ID, MEMBERS_COLLECTION_ID } from '@/lib/appwrite';
-
+import { databases, Query, DATABASE_ID, ORGANIZATIONS_MEMBERS_COLLECTION_ID, MEMBERS_COLLECTION_ID, ORGANIZATIONS_COLLECTION_ID } from '@/lib/appwrite';
 
 interface MemberSidebarProps {
   organizationId?: string;
   onSignOut: () => void;
+}
+
+interface Organization {
+  $id: string;
+  name: string;
 }
 
 export default function MemberSidebar({ organizationId, onSignOut }: MemberSidebarProps) {
@@ -30,6 +34,7 @@ export default function MemberSidebar({ organizationId, onSignOut }: MemberSideb
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [userOrganizations, setUserOrganizations] = useState<{ id: string, name: string }[]>([]);
   const [loading, setLoading] = useState(true);
+  const [organizations, setOrganizations] = useState<Organization[]>([]);
 
   // Use useCallback to prevent recreation of this function on every render
   const fetchUserOrganizations = useCallback(async () => {
@@ -53,7 +58,7 @@ export default function MemberSidebar({ organizationId, onSignOut }: MemberSideb
         const orgPromises = orgMembersResponse.documents.map(async (doc) => {
           const orgResponse = await databases.getDocument(
             DATABASE_ID,
-            'organizations',
+            ORGANIZATIONS_COLLECTION_ID,
             doc.organizationId
           );
           return { id: orgResponse.$id, name: orgResponse.name };
@@ -72,7 +77,7 @@ export default function MemberSidebar({ organizationId, onSignOut }: MemberSideb
           const orgPromises = membersResponse.documents.map(async (doc) => {
             const orgResponse = await databases.getDocument(
               DATABASE_ID,
-              'organizations',
+              ORGANIZATIONS_COLLECTION_ID,
               doc.organizationId
             );
             return { id: orgResponse.$id, name: orgResponse.name };
@@ -104,14 +109,56 @@ export default function MemberSidebar({ organizationId, onSignOut }: MemberSideb
     }
   }, [organizationId, userOrganizations, router, loading, authLoaded]);
   
- ;
+  useEffect(() => {
+    const fetchOrganizations = async () => {
+      if (!user) return;
+      
+      try {
+        // Check if the collection exists before trying to fetch from it
+        if (!DATABASE_ID || !ORGANIZATIONS_COLLECTION_ID) {
+          console.log("Database ID or Collection ID is missing");
+          setLoading(false);
+          return;
+        }
+        
+        setLoading(true); // Set loading only when actually fetching
+        
+        try {
+          const response = await databases.listDocuments(
+            DATABASE_ID,
+            ORGANIZATIONS_COLLECTION_ID
+          );
+          
+          // Map documents to ensure they match the Organization interface
+          setOrganizations(response.documents.map(doc => ({
+            $id: doc.$id,
+            name: doc.name || 'Unknown Organization'
+          })));
+        } catch (error: unknown) {
+          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+          console.error("Error fetching organizations:", errorMessage);
+          setOrganizations([]);
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    // Only fetch when user changes, not on every render
+    if (user) {
+      fetchOrganizations();
+    }
+  }, [user, DATABASE_ID, ORGANIZATIONS_COLLECTION_ID]); // Remove loading from dependencies
+
+  // Don't render anything if we're still loading or missing data
+  if (loading || !user) {
+    return null;
+  }
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
- 
-  
   const sidebarContent = (
     <>
       <div className="p-6">
@@ -128,7 +175,6 @@ export default function MemberSidebar({ organizationId, onSignOut }: MemberSideb
         ) : (
           // Show actual navigation when loaded
           <>
-            
             {/* Always show dashboard link for current organization */}
             {organizationId && (
               <Link 

@@ -32,14 +32,18 @@ export default function MemberPlansPage() {
     memberDetails: null,
   });
   const [loading, setLoading] = useState(true);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [subscribing, setSubscribing] = useState<string | null>(null);
   const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   // Use useMemo for derived state to avoid re-renders
   const { plans, organization, memberDetails } = useMemo(() => data, [data]);
   // Stable userId reference
   const userId = useMemo(() => user?.$id, [user?.$id]);
+  
+  // Check if member has an active subscription
+  const hasActiveSubscription = useMemo(() => {
+    return memberDetails?.planId !== undefined && memberDetails?.planId !== null;
+  }, [memberDetails]);
+
   const fetchData = useCallback(async () => {
     if (!userId || !organizationId) return;
     try {
@@ -90,7 +94,13 @@ export default function MemberPlansPage() {
     }
   }, [organizationId, user, fetchData]);
 
- 
+  const handleSelectPlan = (planId: string) => {
+    if (hasActiveSubscription) {
+      toast.error("You already have an active subscription. Please manage your current subscription first.");
+      return;
+    }
+    setSelectedPlanId(planId);
+  };
 
   if (loading) {
     return (
@@ -144,12 +154,41 @@ export default function MemberPlansPage() {
     );
   }
 
+  // Add global subscription notice at the top if member has an active subscription
+  const renderSubscriptionNotice = () => {
+    if (hasActiveSubscription) {
+      const currentPlan = plans.find(plan => plan.$id === memberDetails.planId);
+      return (
+        <div className="mb-6 p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
+          <h3 className="font-medium text-amber-800 dark:text-amber-300 mb-1">
+            You have an active subscription
+          </h3>
+          <p className="text-sm text-amber-700 dark:text-amber-400">
+            You are currently subscribed to {currentPlan?.name || "a membership plan"}. 
+            To change plans, please cancel your current subscription first.
+          </p>
+          <Button
+            variant="outline" 
+            size="sm"
+            className="mt-2 bg-white dark:bg-transparent"
+            onClick={() => router.push(`/member-portal/${organizationId}/subscription`)}
+          >
+            Manage Subscription
+          </Button>
+        </div>
+      );
+    }
+    return null;
+  };
+
   return (
     <div className="container mx-auto py-4 md:py-6 space-y-6">
       <div>
         <h1 className="text-2xl md:text-3xl font-bold">{organization.name} Membership Plans</h1>
         <p className="text-muted-foreground">Choose a membership plan that works for you</p>
       </div>
+      
+      {renderSubscriptionNotice()}
       
       {plans.length === 0 ? (
         <Card>
@@ -165,7 +204,6 @@ export default function MemberPlansPage() {
         <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
           {plans.map((plan) => {
             const isCurrentPlan = plan.$id === memberDetails?.planId;
-            const hasActiveSubscription = memberDetails?.planId !== undefined;
             const features = plan.features ? 
               (typeof plan.features === 'string' ? (plan.features as string).split('\n') : plan.features) : 
               [];
@@ -245,23 +283,16 @@ export default function MemberPlansPage() {
                         className="w-full"
                         disabled
                       >
-                        Upgrade Not Available
+                        Change Plan Not Available
                       </Button>
                     </div>
                   ) : (
                     <Button
                       className="w-full"
-                      onClick={() => setSelectedPlanId(plan.$id)}
-                      disabled={subscribing === plan.$id}
+                      onClick={() => handleSelectPlan(plan.$id)}
+                      disabled={hasActiveSubscription}
                     >
-                      {subscribing === plan.$id ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Processing...
-                        </>
-                      ) : (
-                        'Pay Now'
-                      )}
+                      Pay Now
                     </Button>
                   )}
                 </CardFooter>

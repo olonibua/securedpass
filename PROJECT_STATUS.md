@@ -38,6 +38,11 @@ We're building a QR-based access and attendance system with dynamic custom field
   - Routes payments correctly based on organization settings
   - Calculates platform fees for transaction fee model
   - Creates pending transfers for settlement
+- ✅ Subscription pause management
+  - Organizations can enable/disable subscription pausing
+  - Configurable maximum pauses per month
+  - Configurable maximum pause duration
+  - Members can pause and resume subscriptions as allowed
 
 ### UI Components
 - ✅ Check-in page
@@ -48,6 +53,7 @@ We're building a QR-based access and attendance system with dynamic custom field
 - ✅ Payment model selector
 - ✅ Payment settings information display
 - ✅ Member plan selection and payment UI
+- ✅ Subscription pause manager
 
 ## In Progress
 - 🔄 Analytics dashboard
@@ -103,8 +109,10 @@ The system now supports two distinct organization types:
 - Suitable for companies, schools, and events
 
 ### Membership Organization
-- Users can register themselves as members
-- Members have their own accounts and member portal
+- Users can register themselves as members using organization-specific registration links
+- Each member belongs to exactly one organization
+- Members have their own accounts and access only their organization's member portal
+- Organization ID is used only to identify which organization the member belongs to
 - Suitable for gyms, clubs, and membership-based services
 
 ## Payment Models
@@ -179,6 +187,7 @@ The following environment variables need to be configured:
 - Always export interfaces used across multiple files
 
 ### Code Quality
+- **Always use &apos; instead of &quot; for strings**
 - **No undefined types**: Never use `(error)` as a catch block of a try statement or any other error emitting component in code
 - **Always define error types**: All catch blocks must use `(error: unknown)` and properly type-check the error
 - **Error handling pattern**: Always follow this pattern:

@@ -62,7 +62,6 @@ export default function LoginPage() {
 
   return (
     <div className="flex min-h-screen flex-col">
-      <Header />
       
       <div className="flex-1 container px-4 sm:px-6 max-w-md mx-auto py-6 sm:py-10">
         <div className="text-center mb-6 sm:mb-8">

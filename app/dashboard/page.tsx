@@ -4,8 +4,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { databases, Query, DATABASE_ID, ORGANIZATIONS_COLLECTION_ID } from '@/lib/appwrite';
 import { toast } from 'sonner';
-import { Loader2 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function DashboardPage() {
   const { user, loading: authLoading } = useAuth();
@@ -57,9 +57,33 @@ export default function DashboardPage() {
   }, [user, authLoading, redirectToOrganization]);
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[60vh] p-4 text-center">
-      <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
-      <p className="text-sm sm:text-base max-w-xs sm:max-w-md mx-auto">
+    <div className="container mx-auto p-4 max-w-7xl">
+      {/* Dashboard header skeleton */}
+      <div className="mb-8">
+        <Skeleton className="h-10 w-64 mb-2" />
+        <Skeleton className="h-5 w-96" />
+      </div>
+      
+      {/* Stats row skeleton */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <Skeleton className="h-28 rounded-lg" />
+        <Skeleton className="h-28 rounded-lg" />
+        <Skeleton className="h-28 rounded-lg" />
+      </div>
+      
+      {/* Main content skeleton */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <Skeleton className="h-8 w-48 mb-4" />
+          <Skeleton className="h-64 rounded-lg" />
+        </div>
+        <div>
+          <Skeleton className="h-8 w-48 mb-4" />
+          <Skeleton className="h-64 rounded-lg" />
+        </div>
+      </div>
+      
+      <p className="text-sm text-muted-foreground mt-8 text-center">
         Redirecting to your organization dashboard...
       </p>
     </div>

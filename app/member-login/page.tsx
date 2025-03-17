@@ -20,6 +20,7 @@ import { Loader2 } from 'lucide-react';
 import { account, DATABASE_ID, MEMBERS_COLLECTION_ID, ORGANIZATIONS_MEMBERS_COLLECTION_ID, databases } from '@/lib/appwrite';
 import { toast } from 'sonner';
 import { Query } from 'appwrite';
+import { useAuth } from '@/lib/auth-context';
 
 const formSchema = z.object({
   email: z.string().email({ message: 'Please enter a valid email address' }),
@@ -31,6 +32,7 @@ type FormValues = z.infer<typeof formSchema>;
 export default function SignInPage() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const { checkAuth } = useAuth();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -76,11 +78,25 @@ export default function SignInPage() {
         // Continue with member login
         toast.success('Signed in successfully');
         
-        // If we found an organization member record, redirect to that organization
-        if (orgMemberCheck.documents.length > 0) {
+        // Force update the auth context with the latest user
+        await checkAuth();
+        
+        // Get stored redirect path
+        const storedRedirect = typeof window !== 'undefined' 
+          ? sessionStorage.getItem('memberPortalRedirect') 
+          : null;
+
+        // Clear stored path
+        if (typeof window !== 'undefined') {
+          sessionStorage.removeItem('memberPortalRedirect');
+        }
+
+        // Use stored path or default
+        if (storedRedirect) {
+          router.push(storedRedirect);
+        } else if (orgMemberCheck.documents.length > 0) {
           router.push(`/member-portal/${orgMemberCheck.documents[0].organizationId}`);
         } else {
-          // Otherwise go to member portal dashboard
           router.push('/member-portal');
         }
       }

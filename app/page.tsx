@@ -1,13 +1,11 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import Header from "@/components/layout/Header";
 
 export default function Home() {
   return (
     <div className="flex flex-col min-h-screen">
       {/* Header */}
-     <Header />
 
       {/* Hero Section */}
       <section className="flex-1 flex flex-col items-center justify-center text-center px-4 py-10 sm:py-16 md:py-24 bg-gradient-to-b from-background to-muted/30">

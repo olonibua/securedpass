@@ -52,3 +52,6 @@ export const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY || '';
 export const PLATFORM_PAYSTACK_SECRET_KEY = process.env.PLATFORM_PAYSTACK_SECRET_KEY || '';
 export const PLATFORM_PAYSTACK_PUBLIC_KEY = process.env.PLATFORM_PAYSTACK_PUBLIC_KEY || '';
 
+// Add to the existing constants in appwrite.ts
+export const SUBSCRIPTION_PAUSES_COLLECTION_ID = process.env.NEXT_PUBLIC_APPWRITE_SUBSCRIPTION_PAUSES_COLLECTION_ID || '';
+
