@@ -132,14 +132,22 @@ export default function MembershipPlans({
               </CardHeader>
               <CardContent>
                 <p className="text-sm mb-4">{plan.description}</p>
-                {plan.features.length > 0 && (
+                {(plan.features?.length || 0) > 0 && (
                   <ul className="space-y-2">
-                    {plan.features.map((feature: string, index: number) => (
-                      <li key={index} className="text-sm flex items-start">
-                        <Check className="h-4 w-4 mr-2 text-green-500" />
-                        {feature}
-                      </li>
-                    ))}
+                    {typeof plan.features === 'string' 
+                      ? plan.features.split(',').map((feature: string, index: number) => (
+                          <li key={index} className="text-sm flex items-start">
+                            <Check className="h-4 w-4 mr-2 text-green-500" />
+                            {feature.trim()}
+                          </li>
+                        ))
+                      : plan.features?.map((feature: string, index: number) => (
+                          <li key={index} className="text-sm flex items-start">
+                            <Check className="h-4 w-4 mr-2 text-green-500" />
+                            {feature}
+                          </li>
+                        ))
+                    }
                   </ul>
                 )}
               </CardContent>
