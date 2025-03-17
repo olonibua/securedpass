@@ -10,7 +10,7 @@ import { toast } from 'sonner';
 import { formatDate } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import SubscriptionPauseManager from '@/components/member/SubscriptionPauseManager';
-
+import { Organization } from '@/types';
 interface MembershipPurchase {
   $id: string;
   organizationId: string;
@@ -30,7 +30,7 @@ export default function SubscriptionHistoryPage() {
   const [loading, setLoading] = useState(true);
   const [subscriptions, setSubscriptions] = useState<MembershipPurchase[]>([]);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [organization, setOrganization] = useState<any>(null);
+  const [organization, setOrganization] = useState<Organization | null>(null);
   const [currentSubscriptionId, setCurrentSubscriptionId] = useState<
     string | null
   >(null);
@@ -104,7 +104,7 @@ export default function SubscriptionHistoryPage() {
         organizationId as string
       );
 
-      setOrganization(organizationResponse);
+      setOrganization(organizationResponse as unknown as Organization);
       setAllowPauses(organizationResponse.allowSubscriptionPauses || false);
     } catch (error: unknown) {
       const errorMessage =

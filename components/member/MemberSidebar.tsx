@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import { usePathname, useRouter, useParams } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { 
   Home, 
@@ -32,26 +32,29 @@ export default function MemberSidebar({ organizationId, onSignOut }: MemberSideb
   const router = useRouter();
   const { user, isLoaded: authLoaded } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [userOrganizations, setUserOrganizations] = useState<{ id: string, name: string }[]>([]);
+  const [userOrganizations, setUserOrganizations] = useState<
+    { id: string; name: string }[]
+  >([]);
   const [loading, setLoading] = useState(true);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [organizations, setOrganizations] = useState<Organization[]>([]);
 
   // Use useCallback to prevent recreation of this function on every render
   const fetchUserOrganizations = useCallback(async () => {
     try {
       if (!user?.$id || !authLoaded) return;
-      
+
       setLoading(true);
-      
+
       // Check organizations_members first
       const orgMembersResponse = await databases.listDocuments(
         DATABASE_ID,
         ORGANIZATIONS_MEMBERS_COLLECTION_ID,
-        [Query.equal('userId', user.$id)]
+        [Query.equal("userId", user.$id)]
       );
-      
-      let orgs: { id: string, name: string }[] = [];
-      
+
+      let orgs: { id: string; name: string }[] = [];
+
       // If found in organizations_members
       if (orgMembersResponse.documents.length > 0) {
         // Get organization details for each membership
@@ -63,16 +66,16 @@ export default function MemberSidebar({ organizationId, onSignOut }: MemberSideb
           );
           return { id: orgResponse.$id, name: orgResponse.name };
         });
-        
+
         orgs = await Promise.all(orgPromises);
       } else {
         // Try members collection
         const membersResponse = await databases.listDocuments(
           DATABASE_ID,
           MEMBERS_COLLECTION_ID,
-          [Query.equal('email', user.email)]
+          [Query.equal("email", user.email)]
         );
-        
+
         if (membersResponse.documents.length > 0) {
           const orgPromises = membersResponse.documents.map(async (doc) => {
             const orgResponse = await databases.getDocument(
@@ -82,37 +85,45 @@ export default function MemberSidebar({ organizationId, onSignOut }: MemberSideb
             );
             return { id: orgResponse.$id, name: orgResponse.name };
           });
-          
+
           orgs = await Promise.all(orgPromises);
         }
       }
-      
+
       setUserOrganizations(orgs);
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to fetch organizations';
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Failed to fetch organizations";
       console.error("Error fetching organizations:", errorMessage);
     } finally {
       setLoading(false);
     }
   }, [user, authLoaded]);
-  
+
   useEffect(() => {
     if (authLoaded) {
       fetchUserOrganizations();
     }
   }, [fetchUserOrganizations, authLoaded]);
-  
+
   // Choose the first organization as default if organizationId isn't provided
   useEffect(() => {
-    if (!organizationId && userOrganizations.length > 0 && !loading && authLoaded) {
+    if (
+      !organizationId &&
+      userOrganizations.length > 0 &&
+      !loading &&
+      authLoaded
+    ) {
       router.push(`/member-portal/${userOrganizations[0].id}`);
     }
   }, [organizationId, userOrganizations, router, loading, authLoaded]);
-  
+
   useEffect(() => {
     const fetchOrganizations = async () => {
       if (!user) return;
-      
+
       try {
         // Check if the collection exists before trying to fetch from it
         if (!DATABASE_ID || !ORGANIZATIONS_COLLECTION_ID) {
@@ -120,22 +131,25 @@ export default function MemberSidebar({ organizationId, onSignOut }: MemberSideb
           setLoading(false);
           return;
         }
-        
+
         setLoading(true); // Set loading only when actually fetching
-        
+
         try {
           const response = await databases.listDocuments(
             DATABASE_ID,
             ORGANIZATIONS_COLLECTION_ID
           );
-          
+
           // Map documents to ensure they match the Organization interface
-          setOrganizations(response.documents.map(doc => ({
-            $id: doc.$id,
-            name: doc.name || 'Unknown Organization'
-          })));
+          setOrganizations(
+            response.documents.map((doc) => ({
+              $id: doc.$id,
+              name: doc.name || "Unknown Organization",
+            }))
+          );
         } catch (error: unknown) {
-          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+          const errorMessage =
+            error instanceof Error ? error.message : "Unknown error";
           console.error("Error fetching organizations:", errorMessage);
           setOrganizations([]);
         }
@@ -170,17 +184,21 @@ export default function MemberSidebar({ organizationId, onSignOut }: MemberSideb
           // Show loading UI while loading
           <div className="flex items-center justify-center py-8">
             <Loader2 className="h-5 w-5 animate-spin text-primary" />
-            <span className="ml-2 text-sm text-muted-foreground">Loading...</span>
+            <span className="ml-2 text-sm text-muted-foreground">
+              Loading...
+            </span>
           </div>
         ) : (
           // Show actual navigation when loaded
           <>
             {/* Always show dashboard link for current organization */}
             {organizationId && (
-              <Link 
+              <Link
                 href={`/member-portal/${organizationId}`}
                 className={`flex items-center px-3 py-2 rounded-md text-sm ${
-                  pathname === `/member-portal/${organizationId}` ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'
+                  pathname === `/member-portal/${organizationId}`
+                    ? "bg-primary text-primary-foreground"
+                    : "hover:bg-muted"
                 }`}
               >
                 <Home className="mr-2 h-4 w-4" />
@@ -190,36 +208,42 @@ export default function MemberSidebar({ organizationId, onSignOut }: MemberSideb
 
             {/* Subscription link */}
             {organizationId && (
-              <Link 
+              <Link
                 href={`/member-portal/${organizationId}/subscription`}
                 className={`flex items-center px-3 py-2 rounded-md text-sm ${
-                  pathname?.includes('/subscription') ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'
+                  pathname?.includes("/subscription")
+                    ? "bg-primary text-primary-foreground"
+                    : "hover:bg-muted"
                 }`}
               >
                 <CreditCard className="mr-2 h-4 w-4" />
                 Subscription
               </Link>
             )}
-            
+
             {/* Membership Plans link */}
             {organizationId && (
-              <Link 
+              <Link
                 href={`/member-portal/${organizationId}/plans`}
                 className={`flex items-center px-3 py-2 rounded-md text-sm ${
-                  pathname?.includes('/plans') ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'
+                  pathname?.includes("/plans")
+                    ? "bg-primary text-primary-foreground"
+                    : "hover:bg-muted"
                 }`}
               >
                 <CreditCard className="mr-2 h-4 w-4" />
                 Membership Plans
               </Link>
             )}
-            
+
             {/* User settings */}
             {organizationId && (
-              <Link 
+              <Link
                 href={`/member-portal/${organizationId}/settings`}
                 className={`flex items-center px-3 py-2 rounded-md text-sm ${
-                  pathname?.includes('/settings') ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'
+                  pathname?.includes("/settings")
+                    ? "bg-primary text-primary-foreground"
+                    : "hover:bg-muted"
                 }`}
               >
                 <Settings className="mr-2 h-4 w-4" />
@@ -252,30 +276,34 @@ export default function MemberSidebar({ organizationId, onSignOut }: MemberSideb
       </div>
     </>
   );
-  
+
   return (
     <>
       {/* Mobile menu button - only visible on small screens */}
       <div className="md:hidden fixed top-4 left-4 z-50">
-        <Button 
-          variant="outline" 
-          size="icon" 
+        <Button
+          variant="outline"
+          size="icon"
           onClick={toggleMobileMenu}
           className="rounded-full shadow-md"
         >
-          {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          {isMobileMenuOpen ? (
+            <X className="h-5 w-5" />
+          ) : (
+            <Menu className="h-5 w-5" />
+          )}
         </Button>
       </div>
-      
+
       {/* Desktop sidebar - hidden on mobile */}
       <div className="hidden md:flex h-screen border-r flex-col w-64 bg-background shadow-sm">
         {sidebarContent}
       </div>
-      
+
       {/* Mobile sidebar - animated slide-in */}
       <AnimatePresence>
         {isMobileMenuOpen && (
-          <motion.div 
+          <motion.div
             className="md:hidden fixed inset-0 z-40 bg-background/80 backdrop-blur-sm"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -291,10 +319,10 @@ export default function MemberSidebar({ organizationId, onSignOut }: MemberSideb
             >
               {sidebarContent}
             </motion.div>
-            
+
             {/* Close when clicking outside */}
-            <div 
-              className="fixed inset-0 z-[-1]" 
+            <div
+              className="fixed inset-0 z-[-1]"
               onClick={() => setIsMobileMenuOpen(false)}
             />
           </motion.div>
