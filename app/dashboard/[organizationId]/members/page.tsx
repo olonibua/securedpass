@@ -114,7 +114,7 @@ export default function MembersPage() {
         // ...other property mappings as needed
       }));
 
-      setMembers(mappedMembers as Member[]);
+      setMembers(mappedMembers as unknown as Member[]);
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to load members';
       console.error('Error loading members:', errorMessage);
@@ -260,7 +260,7 @@ export default function MembersPage() {
                           {(member as Member).status || 'Unknown'}
                         </span>
                       </td>
-                      <td className="p-2 py-3">{formatDate(member.createdAt)}</td>
+                      <td className="p-2 py-3">{member.createdAt ? formatDate(member.createdAt) : '-'}</td>
                       
                     </tr>
                   ))}

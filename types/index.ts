@@ -44,10 +44,16 @@ export interface Member {
   name?: string;
   active?: boolean;
   lastCheckIn?: string;
+  hasActiveSubscription?: boolean;
+  subscriptionType?: string;
+  expiryDate?: Date | null;
+  planName?: string;
+  latestPayment?: unknown;
   planId?: string;
   planStartDate?: string;
   subscriptionId?: string;
-  // Add any other fields from your members collection
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 // Check-in
