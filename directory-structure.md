@@ -14,7 +14,13 @@
   - page.tsx
   - globals.css
   - /login
-    - page.tsx
+    - page.tsx  # Unified login (organization owners & admins)
+  - /member-login
+    - page.tsx  # Separate login for members
+  - /forgot-password
+    - page.tsx  # Password recovery request
+  - /reset-password
+    - page.tsx  # Password reset form
   - /register
     - page.tsx
   - /dashboard

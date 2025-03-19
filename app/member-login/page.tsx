@@ -17,10 +17,12 @@ import {
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2 } from 'lucide-react';
-import { account, DATABASE_ID, MEMBERS_COLLECTION_ID, ORGANIZATIONS_MEMBERS_COLLECTION_ID, databases } from '@/lib/appwrite';
+import { account, DATABASE_ID, MEMBERS_COLLECTION_ID, ORGANIZATIONS_MEMBERS_COLLECTION_ID, databases, ADMINISTRATORS_COLLECTION_ID } from '@/lib/appwrite';
 import { toast } from 'sonner';
 import { Query } from 'appwrite';
 import { useAuth } from '@/lib/auth-context';
+import Header from '@/components/layout/Header';
+import Link from 'next/link';
 
 const formSchema = z.object({
   email: z.string().email({ message: 'Please enter a valid email address' }),
@@ -68,10 +70,25 @@ export default function SignInPage() {
         );
         
         // If no member records found, this user is likely an admin, not a member
-        if (memberCheck.documents.length === 0 && orgMemberCheck.documents.length === 0) {
-          // Sign them out
+        if (memberCheck.documents.length === 0) {
+          // Check if they're an admin
+          const adminCheck = await databases.listDocuments(
+            DATABASE_ID!,
+            ADMINISTRATORS_COLLECTION_ID!,
+            [Query.equal("userId", user.$id)]
+          );
+          
+          if (adminCheck.documents.length > 0) {
+            // This is an admin trying to use the member login
+            await account.deleteSession('current');
+            toast.error('This account is registered as an administrator. Please use the admin login.');
+            router.push('/admin-login');
+            return;
+          }
+          
+          // Not a member or admin
           await account.deleteSession('current');
-          toast.error('This account does not have member access. Please use the admin login.');
+          toast.error('This account does not have member access.');
           return;
         }
         
@@ -110,71 +127,84 @@ export default function SignInPage() {
   };
 
   return (
-    <div className="container max-w-md mx-auto py-10">
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-center">Sign In</CardTitle>
-          <CardDescription className="text-center">
-            Sign in to access your membership portal
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email</FormLabel>
-                    <FormControl>
-                      <Input 
-                        {...field} 
-                        type="email" 
-                        placeholder="Enter your email" 
-                        disabled={loading} 
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Password</FormLabel>
-                    <FormControl>
-                      <Input 
-                        {...field} 
-                        type="password" 
-                        placeholder="Enter your password" 
-                        disabled={loading} 
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Signing in...
-                  </>
-                ) : (
-                  "Sign In"
-                )}
-              </Button>
-              
-              
-            </form>
-          </Form>
-        </CardContent>
-      </Card>
-    </div>
+    <>
+      <Header />
+      <div className="container max-w-md mx-auto py-10">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-center">Sign In</CardTitle>
+            <CardDescription className="text-center">
+              Sign in to access your membership portal
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Form {...form}>
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="space-y-6"
+              >
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Email</FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          type="email"
+                          placeholder="Enter your email"
+                          disabled={loading}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Password</FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          type="password"
+                          placeholder="Enter your password"
+                          disabled={loading}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <div className="flex justify-end">
+                  <Link
+                    href="/forgot-password"
+                    className="text-sm text-primary hover:underline"
+                  >
+                    Forgot password?
+                  </Link>
+                </div>
+
+                <Button type="submit" className="w-full" disabled={loading}>
+                  {loading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Signing in...
+                    </>
+                  ) : (
+                    "Sign In"
+                  )}
+                </Button>
+              </form>
+            </Form>
+          </CardContent>
+        </Card>
+      </div>
+    </>
   );
 } 

@@ -160,6 +160,22 @@ export default function Home() {
           </div>
         </div>
       </footer>
+
+      <div className="mt-4 flex space-x-4">
+        <Link 
+          href="/member-login" 
+          className="text-blue-600 hover:underline"
+        >
+          Member Login
+        </Link>
+        <span>|</span>
+        <Link 
+          href="/admin-login" 
+          className="text-blue-600 hover:underline"
+        >
+          Administrator Login
+        </Link>
+      </div>
     </div>
   );
 }

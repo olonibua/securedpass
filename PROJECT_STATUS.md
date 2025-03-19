@@ -11,11 +11,21 @@ We're building a QR-based access and attendance system with dynamic custom field
 - ✅ Stripe integration for subscription management
 - ✅ Resend email service integration
 - ✅ TypeScript type definitions for core entities
+- ✅ Password recovery and reset system for all user types
+
+### Authentication & User Management
+- ✅ Unified login system for organization owners and administrators
+- ✅ Separate member login portal
+- ✅ Forgot password workflow with email recovery
+- ✅ Password reset functionality with security validation
+- ✅ Role-based access control and redirection
 
 ### Organization Management
 - ✅ Organization creation with type selection (company vs. membership)
 - ✅ Member portal for organization members
 - ✅ Company member management with registration ID generation
+- ✅ Administrator management system
+- ✅ Admin activity logging and monitoring
 
 ### Check-in System
 - ✅ Dynamic custom fields management
@@ -72,13 +82,12 @@ We're building a QR-based access and attendance system with dynamic custom field
 - ⏳ Comprehensive testing
 
 ## Known Issues
-1. Need to update all instances of `databases.Query` to `Query` after updating the appwrite.ts file
-2. Some components are using `toast` from 'sonner' while others use '@/components/ui/use-toast'
-3. Need to ensure consistent error handling across all components
-4. ⚠️ **DEPENDENCY CONFLICT**: There's a conflict between `react-day-picker` and `date-fns` versions. `react-day-picker@8.10.1` requires `date-fns@^2.28.0 || ^3.0.0` but the project is using `date-fns@^4.1.0`. Either downgrade `date-fns` to version 3.x or use `--force` flag during installation.
-5. ⚠️ **REACT VERSION COMPATIBILITY**: `react-day-picker` is not yet compatible with React 19. Consider using React 18 for better compatibility with third-party libraries.
-6. The payment settings page exists in two locations: `/dashboard/[organizationId]/payment` (current) and `/dashboard/[organizationId]/settings/payment` (legacy). The legacy route should be removed or redirected.
-7. ⚠️ **APPWRITE COLLECTIONS SETUP REQUIRED**: 
+1. Some components are using `toast` from 'sonner' while others use '@/components/ui/use-toast'
+2. Need to ensure consistent error handling across all components
+3. ⚠️ **DEPENDENCY CONFLICT**: There's a conflict between `react-day-picker` and `date-fns` versions. `react-day-picker@8.10.1` requires `date-fns@^2.28.0 || ^3.0.0` but the project is using `date-fns@^4.1.0`. Either downgrade `date-fns` to version 3.x or use `--force` flag during installation.
+4. ⚠️ **REACT VERSION COMPATIBILITY**: `react-day-picker` is not yet compatible with React 19. Consider using React 18 for better compatibility with third-party libraries.
+5. The payment settings page exists in two locations: `/dashboard/[organizationId]/payment` (current) and `/dashboard/[organizationId]/settings/payment` (legacy). The legacy route should be removed or redirected.
+6. ⚠️ **APPWRITE COLLECTIONS SETUP REQUIRED**: 
    The following collections MUST be created in Appwrite before payments will work:
    - `organizations` - Organization details
    - `members` - Organization members
@@ -86,11 +95,11 @@ We're building a QR-based access and attendance system with dynamic custom field
    - `membership_purchases` - Member payments (MISSING - causing current error)
    - `pending_transfers` - Funds tracking for transaction fee model
 
-8. ⚠️ **COLLECTION SCHEMA REQUIREMENTS**:
+7. ⚠️ **COLLECTION SCHEMA REQUIREMENTS**:
    Each collection must have specific fields:
    - `membership_purchases`: must include fields for organizationId, planId, userId, amount, status, paymentDate, transactionReference, and paymentModelUsed
 
-9. ⚠️ **PAYMENT INTEGRATION SETUP**:
+8. ⚠️ **PAYMENT INTEGRATION SETUP**:
    For organizations using subscription model, payment will fail until:
    - Organization has a valid Paystack Public Key stored in the database
    - The key is stored in `paystackPublicKey` field of the organization record

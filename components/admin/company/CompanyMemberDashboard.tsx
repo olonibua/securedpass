@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { databases, DATABASE_ID, MEMBERS_COLLECTION_ID, CUSTOMFIELDS_COLLECTION_ID, Query } from '@/lib/appwrite';
+import { databases, DATABASE_ID, MEMBERS_COLLECTION_ID, CUSTOMFIELDS_COLLECTION_ID, Query, USER_PREFERENCES_COLLECTION_ID, ORGANIZATIONS_COLLECTION_ID } from '@/lib/appwrite';
 import { Member, CustomField } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -29,6 +29,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useAuth } from '@/lib/auth-context';
 
 interface CompanyMemberDashboardProps {
   organizationId: string;
@@ -46,6 +47,7 @@ interface ColumnSetting {
 }
 
 export default function CompanyMemberDashboard({ organizationId }: CompanyMemberDashboardProps) {
+  const { user } = useAuth();
   const [members, setMembers] = useState<Member[]>([]);
   const [customFields, setCustomFields] = useState<CustomField[]>([]);
   const [loading, setLoading] = useState(true);
@@ -123,6 +125,97 @@ export default function CompanyMemberDashboard({ organizationId }: CompanyMember
   useEffect(() => {
     fetchMembers();
   }, [fetchMembers]);
+
+  // Load column settings from organization document
+  useEffect(() => {
+    const loadColumnSettings = async () => {
+      try {
+        const organization = await databases.getDocument(
+          DATABASE_ID,
+          ORGANIZATIONS_COLLECTION_ID,
+          organizationId
+        );
+        
+        if (organization.columnSettings) {
+          try {
+            const compactSettings = JSON.parse(organization.columnSettings);
+            
+            // Convert back from compact format to full settings
+            if (Array.isArray(compactSettings)) {
+              const fullSettings = columnSettings.map(col => {
+                const saved = compactSettings.find(s => s.id === col.id);
+                return {
+                  ...col,
+                  visible: saved ? saved.v === 1 : col.visible
+                };
+              });
+              
+              setColumnSettings(fullSettings);
+            }
+          } catch (e) {
+            console.error('Error parsing column settings:', e);
+          }
+        }
+      } catch (error: unknown) {
+        console.error('Error loading organization:', error);
+        // Fall back to localStorage
+        const localSettings = localStorage.getItem(`columnSettings-${organizationId}`);
+        if (localSettings) {
+          try {
+            setColumnSettings(JSON.parse(localSettings));
+          } catch (e) {
+            // Use default settings if parsing fails
+          }
+        }
+      }
+    };
+    
+    loadColumnSettings();
+  }, [organizationId]);
+  
+  // Save column settings to organization document
+  const toggleColumn = (columnId: string) => {
+    setColumnSettings(prev => {
+      const newSettings = prev.map(col => 
+        col.id === columnId ? { ...col, visible: !col.visible } : col
+      );
+      
+      // Save to localStorage as backup
+      try {
+        localStorage.setItem(`columnSettings-${organizationId}`, JSON.stringify(newSettings));
+      } catch (e) {
+        // Ignore localStorage errors
+      }
+      
+      // Save to organization document
+      saveColumnSettingsToOrganization(newSettings);
+      
+      return newSettings;
+    });
+  };
+  
+  // Function to save settings to organization document
+  const saveColumnSettingsToOrganization = async (settings: ColumnSetting[]) => {
+    try {
+      // Store only the essential information - which columns are visible
+      const compactSettings = settings.map(col => ({
+        id: col.id,
+        v: col.visible ? 1 : 0 // Compress 'visible' to 'v' with 1/0 instead of true/false
+      }));
+      
+      await databases.updateDocument(
+        DATABASE_ID,
+        ORGANIZATIONS_COLLECTION_ID,
+        organizationId,
+        { 
+          columnSettings: JSON.stringify(compactSettings)
+        }
+      );
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to save column settings';
+      console.error('Error saving column settings to organization:', errorMessage);
+    }
+  };
 
   const copyMemberId = (id: string) => {
     navigator.clipboard.writeText(id);
@@ -206,15 +299,6 @@ export default function CompanyMemberDashboard({ organizationId }: CompanyMember
           </div>
         </CardContent>
       </Card>
-    );
-  };
-
-  // Toggle column visibility
-  const toggleColumn = (columnId: string) => {
-    setColumnSettings(prev => 
-      prev.map(col => 
-        col.id === columnId ? { ...col, visible: !col.visible } : col
-      )
     );
   };
 

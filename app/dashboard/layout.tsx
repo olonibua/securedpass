@@ -81,15 +81,7 @@ export default function DashboardLayout({
   }
 
   if (!user) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-screen">
-        <h1 className="text-2xl font-bold mb-4">Access Denied</h1>
-        <p className="text-muted-foreground mb-6">Please sign in to access the dashboard</p>
-        <Link href="/login">
-          <Button>Sign In</Button>
-        </Link>
-      </div>
-    );
+    router.push('/');
   }
 
   return (
@@ -115,7 +107,7 @@ export default function DashboardLayout({
         <div className="flex flex-col h-full">
           <div className="p-4 border-b">
             <Link
-              href={getOrgPath("/dashboard")}
+              href={getOrgPath("/")}
               className="flex items-center gap-2"
             >
               <span className="text-xl font-bold">SecuredPass</span>
@@ -150,6 +142,15 @@ export default function DashboardLayout({
               >
                 <CalendarDays className="mr-2 h-4 w-4" />
                 Check-ins
+              </Button>
+            </Link>
+            <Link href={getOrgPath("/dashboard/administrators")}>
+              <Button
+                variant={isActive("/dashboard/administrators") ? "default" : "ghost"}
+                className="w-full justify-start"
+              >
+                <Users className="mr-2 h-4 w-4" />
+                Administrators
               </Button>
             </Link>
             <Link href={getOrgPath("/dashboard/payment")}>
