@@ -260,7 +260,6 @@ export default function CompanyMemberDashboard({ organizationId }: CompanyMember
   }
 
   // Get visible columns
-  const visibleColumns = columnSettings.filter(col => col.visible);
 
   return (
     <div className="space-y-6">
@@ -531,7 +530,7 @@ export default function CompanyMemberDashboard({ organizationId }: CompanyMember
           <AlertDialogHeader>
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete {memberToDelete?.name}'s account and cannot be undone.
+              This will permanently delete {memberToDelete?.name}&apos;s account and cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

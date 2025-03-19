@@ -4,7 +4,6 @@ import "./globals.css";
 import { Geist, Geist_Mono, Inter } from "next/font/google";
 import { Toaster } from 'sonner';
 import { AuthProvider } from '@/lib/auth-context';
-import Header from "@/components/layout/Header";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -36,7 +35,6 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${inter.className} ${geistSans.variable} ${geistMono.variable}`}>
         <AuthProvider>
-          {/* <Header /> */}
           {children}
           <Toaster position="top-right" />
         </AuthProvider>

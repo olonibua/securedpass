@@ -76,7 +76,7 @@ export default function CheckInPage() {
   ) : (
     <MembershipCheckIn 
       organization={organization}
-      user={_user}
+      user={_user as unknown as Models.Document}
       authLoaded={authLoaded}
     />
   );

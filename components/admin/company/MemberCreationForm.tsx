@@ -3,7 +3,7 @@ import { databases, DATABASE_ID, MEMBERS_COLLECTION_ID, ID, Query } from '@/lib/
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
-import { Loader2, X } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { CustomField } from '@/types';
 import { 
   Select, 

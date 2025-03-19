@@ -1,12 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
-import { databases, DATABASE_ID, ORGANIZATIONS_COLLECTION_ID, Query } from '@/lib/appwrite';
+import { databases, DATABASE_ID, ORGANIZATIONS_COLLECTION_ID } from '@/lib/appwrite';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Loader2, CheckCircle, CreditCard, Info } from 'lucide-react';
 import { toast } from 'sonner';
 import { Organization } from '@/types';
-import { useAuth } from '@/lib/auth-context';
 
 interface CompanyPaymentInfoProps {
   organizationId: string;
@@ -15,8 +14,8 @@ interface CompanyPaymentInfoProps {
 
 export default function CompanyPaymentInfo({ organizationId, currentPlan = 'free' }: CompanyPaymentInfoProps) {
   const [loading, setLoading] = useState(true);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [organization, setOrganization] = useState<Organization | null>(null);
-  const { user } = useAuth();
   
   const fetchOrganizationDetails = useCallback(async () => {
     try {

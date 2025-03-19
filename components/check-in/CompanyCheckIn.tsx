@@ -1,17 +1,17 @@
 'use client';
 
 import { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Loader2, CheckCircle } from 'lucide-react';
 import Image from 'next/image';
 import { DATABASE_ID, databases, MEMBERS_COLLECTION_ID, CHECKINS_COLLECTION_ID, Query } from '@/lib/appwrite';
-import { ID } from 'appwrite';
+import { ID, Models } from 'appwrite';
 
 interface CompanyCheckInProps {
-  organization: any; // Replace with proper type
+  organization: Models.Document; // Replace with proper type
 }
 
 export default function CompanyCheckIn({ organization }: CompanyCheckInProps) {

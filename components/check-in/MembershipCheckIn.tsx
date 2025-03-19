@@ -10,8 +10,8 @@ import { DATABASE_ID, databases, MEMBERS_COLLECTION_ID, CHECKINS_COLLECTION_ID, 
 import { ID, Models } from 'appwrite';
 
 interface MembershipCheckInProps {
-  organization: any; // Replace with proper type
-  user: any;
+  organization: Models.Document; // Replace with proper type
+  user: Models.Document;
   authLoaded: boolean;
 }
 
