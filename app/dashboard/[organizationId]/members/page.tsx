@@ -23,26 +23,40 @@ export default function MembersPage() {
   const fetchMembers = useCallback(async () => {
     try {
       setLoading(true);
+      console.log("Fetching members for organization:", organizationId);
       
+      // Make sure organizationId is a string
+      const orgId = organizationId as string;
+      
+      // Add more specific query constraints
       const response = await databases.listDocuments(
         DATABASE_ID!,
         MEMBERS_COLLECTION_ID!,
         [
-          Query.equal('organizationId', organizationId as string),
+          Query.equal('organizationId', orgId),
           Query.limit(100)
         ]
       );
       
+      console.log(`Found ${response.documents.length} members for organization ${orgId}`);
+      
+      // Apply a strict filter to ensure only members from this organization
+      const filteredMembers = response.documents.filter(member => 
+        member.organizationId === orgId
+      );
+      
+      console.log(`After strict filtering: ${filteredMembers.length} members belong to this organization`);
+      
       // For each member, check if they have an active subscription
       const membersWithSubscriptionStatus = await Promise.all(
-        response.documents.map(async (member) => {
+        filteredMembers.map(async (member) => {
           try {
             const purchasesResponse = await databases.listDocuments(
               DATABASE_ID!,
               MEMBERSHIP_PURCHASES_COLLECTION_ID!,
               [
                 Query.equal("userId", member.userId || ""),
-                Query.equal("organizationId", organizationId as string),
+                Query.equal("organizationId", orgId),
                 Query.orderDesc("paymentDate"),
                 Query.limit(1),
               ]

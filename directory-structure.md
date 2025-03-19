@@ -25,7 +25,11 @@
         - page.tsx
       - /members
         - page.tsx
+      - /company-members
+        - page.tsx
       - /payment
+        - page.tsx
+      - /company-payment
         - page.tsx
       - /settings
         - page.tsx
@@ -56,6 +60,9 @@
     - /membership
       - /register
         - route.ts
+    - /checkout
+      - /session
+        - route.ts
 
 ## /components
 - /ui (shadcn components)
@@ -77,6 +84,18 @@
   - PaymentIntegration.tsx
   - PaymentSettingsInfo.tsx
   - SubscriptionManager.tsx
+- /admin
+  - /membership
+    - MembershipManager.tsx
+    - MembershipPlanManager.tsx
+  - /company
+    - MemberCreationForm.tsx
+    - CompanyMemberDashboard.tsx
+    - CompanyMemberManager.tsx
+    - CompanyPaymentInfo.tsx
+- /member
+  - MemberSidebar.tsx
+  - SubscriptionPauseManager.tsx
 
 ## /lib (Utilities)
 - appwrite.ts

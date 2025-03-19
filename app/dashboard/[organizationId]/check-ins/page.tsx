@@ -56,23 +56,40 @@ export default function CheckInsPage() {
   // Group check-ins by day
   useEffect(() => {
     if (checkIns.length > 0) {
+      console.log("Raw check-ins data:", checkIns); // Add debugging
       const grouped: Record<string, CheckIn[]> = {};
       
       // Group check-ins by date
       checkIns.forEach(checkIn => {
-        const date = new Date(checkIn.timestamp);
-        const dateString = date.toISOString().split('T')[0]; // YYYY-MM-DD
-        
-        if (!grouped[dateString]) {
-          grouped[dateString] = [];
+        // Ensure we have a valid timestamp
+        if (!checkIn.timestamp) {
+          console.error("Check-in missing timestamp:", checkIn);
+          return; // Skip this check-in
         }
         
-        grouped[dateString].push(checkIn);
+        try {
+          const date = new Date(checkIn.timestamp);
+          if (isNaN(date.getTime())) {
+            console.error("Invalid timestamp:", checkIn.timestamp);
+            return; // Skip this check-in
+          }
+          
+          const dateString = date.toISOString().split('T')[0]; // YYYY-MM-DD
+          
+          if (!grouped[dateString]) {
+            grouped[dateString] = [];
+          }
+          
+          grouped[dateString].push(checkIn);
+        } catch (error) {
+          console.error("Error processing timestamp:", error, checkIn);
+        }
       });
       
       // Convert to array and sort by date (newest first)
       const result: DailyCheckIns[] = Object.keys(grouped).map(date => {
         const displayDate = new Date(date);
+        console.log("Processing date:", date, "->", displayDate.toLocaleDateString());
         return {
           date,
           formattedDate: displayDate.toLocaleDateString('en-US', { 
@@ -85,6 +102,7 @@ export default function CheckInsPage() {
         };
       }).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
       
+      console.log("Processed daily check-ins:", result); // Add debugging
       setDailyCheckIns(result);
       
       // Automatically open today's section

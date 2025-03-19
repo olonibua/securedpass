@@ -15,6 +15,7 @@ We're building a QR-based access and attendance system with dynamic custom field
 ### Organization Management
 - ✅ Organization creation with type selection (company vs. membership)
 - ✅ Member portal for organization members
+- ✅ Company member management with registration ID generation
 
 ### Check-in System
 - ✅ Dynamic custom fields management
@@ -22,6 +23,7 @@ We're building a QR-based access and attendance system with dynamic custom field
 - ✅ Check-in form with dynamic fields
 - ✅ Check-in API endpoint
 - ✅ Email confirmation for check-ins
+- ✅ Support for both membership-based and company-based check-ins
 
 ### Subscription Management
 - ✅ Subscription plans configuration
@@ -54,6 +56,8 @@ We're building a QR-based access and attendance system with dynamic custom field
 - ✅ Payment settings information display
 - ✅ Member plan selection and payment UI
 - ✅ Subscription pause manager
+- ✅ Company member registration form
+- ✅ Company member dashboard
 
 ## In Progress
 - 🔄 Analytics dashboard
@@ -105,8 +109,14 @@ The system now supports two distinct organization types:
 ### Company/Organization
 - Organization manages its own members directly
 - Members don't need accounts to check in
-- Organization admin registers members
+- Organization admin registers members with generated member IDs
+- Members use their provided ID to check in via QR code
 - Suitable for companies, schools, and events
+- **Payment Model**: Company organizations automatically use the Direct Subscription Model
+  - Fixed monthly subscription plans: Free, Basic ($29/mo), Premium ($99/mo)
+  - Each plan includes different member limits and feature sets
+  - No transaction fees on check-ins
+  - All features available based on subscription tier
 
 ### Membership Organization
 - Users can register themselves as members using organization-specific registration links
@@ -114,6 +124,9 @@ The system now supports two distinct organization types:
 - Members have their own accounts and access only their organization's member portal
 - Organization ID is used only to identify which organization the member belongs to
 - Suitable for gyms, clubs, and membership-based services
+- **Payment Model Options**: Membership organizations can choose between:
+  - Direct Subscription Model
+  - Transaction Fee Model
 
 ## Payment Models
 

@@ -14,11 +14,11 @@ import CustomFieldsManager from '@/components/admin/CustomFieldsManager';
 import RegistrationLinkGenerator from '@/components/admin/RegistrationLinkGenerator';
 import { Badge } from '@/components/ui/badge';
 import { DATABASE_ID, ORGANIZATIONS_COLLECTION_ID } from '@/lib/appwrite';
-import CompanyMemberManager from '@/components/admin/CompanyMemberManager';
 import MembershipManager from '@/components/admin/MembershipManager';
 import MembershipPlanManager from '@/components/admin/MembershipPlanManager';
 import { useAuth } from '@/lib/auth-context';
 import { Button } from '@/components/ui/button';
+import CompanyMemberDashboard from '@/components/admin/company/CompanyMemberDashboard';
 
 export default function OrganizationDashboard() {
   const { organizationId } = useParams();
@@ -158,9 +158,9 @@ export default function OrganizationDashboard() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <CompanyMemberManager
-                  organizationId={organizationId as string}
-                />
+                
+                <CompanyMemberDashboard organizationId={organizationId as string} />
+
               </CardContent>
             </Card>
           ) : (

@@ -18,6 +18,7 @@ export interface Organization {
   paymentModel?: 'subscription' | 'transaction_fee';
   paystackPublicKey?: string;
   transactionFeePercentage?: number;
+  type?: 'company' | 'membership';
 }
 
 // Custom Field
@@ -25,6 +26,7 @@ export interface CustomField {
   $id: string;
   organizationId: string;
   name: string;
+  label: string;
   type: "text" | "number" | "email" | "phone" | "date" | "select";
   required: boolean;
   options?: string[];
@@ -37,7 +39,7 @@ export interface CustomField {
 // Member
 export interface Member {
   $id: string;
-  userId: string;
+  userId?: string; // Optional for company members
   organizationId: string;
   status: string;
   email: string;
@@ -54,6 +56,12 @@ export interface Member {
   subscriptionId?: string;
   createdAt?: string;
   updatedAt?: string;
+  // Company-specific fields
+  memberId?: string;  // Unique registration ID for company members
+  phone?: string;
+  type?: 'company' | 'membership';
+  customFields?: string; // JSON string of custom field values
+  paymentStatus?: 'paid' | 'unpaid' | 'pending';
 }
 
 // Check-in

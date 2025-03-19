@@ -36,7 +36,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${inter.className} ${geistSans.variable} ${geistMono.variable}`}>
         <AuthProvider>
-          <Header />
+          {/* <Header /> */}
           {children}
           <Toaster position="top-right" />
         </AuthProvider>
