@@ -127,7 +127,6 @@ export default function MemberSidebar({ organizationId, onSignOut }: MemberSideb
       try {
         // Check if the collection exists before trying to fetch from it
         if (!DATABASE_ID || !ORGANIZATIONS_COLLECTION_ID) {
-          console.log("Database ID or Collection ID is missing");
           setLoading(false);
           return;
         }

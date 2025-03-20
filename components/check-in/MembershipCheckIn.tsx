@@ -43,7 +43,6 @@ export default function MembershipCheckIn({ organization, user, authLoaded }: Me
         
         if (membersResponse.documents.length > 0) {
           setMemberInfo(membersResponse.documents[0]);
-          console.log("Member found:", membersResponse.documents[0].$id);
           
           // Check if already checked in today
           const today = new Date();

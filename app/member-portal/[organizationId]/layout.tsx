@@ -35,7 +35,6 @@ export default function MemberPortalLayout({
     const checkAccess = async () => {
       if (!authLoading && initialAuthCheckDone) {
         if (!user) {
-          console.log("No user found, redirecting to login");
           router.push('/member-login');
           return;
         }
@@ -51,7 +50,6 @@ export default function MemberPortalLayout({
           );
           
           if (memberCheck.documents.length === 0) {
-            console.log("User is not a member of this organization");
             router.push('/member-login');
             return;
           }

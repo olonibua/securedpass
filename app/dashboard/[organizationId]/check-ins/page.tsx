@@ -56,7 +56,6 @@ export default function CheckInsPage() {
   // Group check-ins by day
   useEffect(() => {
     if (checkIns.length > 0) {
-      console.log("Raw check-ins data:", checkIns); // Add debugging
       const grouped: Record<string, CheckIn[]> = {};
       
       // Group check-ins by date
@@ -89,7 +88,6 @@ export default function CheckInsPage() {
       // Convert to array and sort by date (newest first)
       const result: DailyCheckIns[] = Object.keys(grouped).map(date => {
         const displayDate = new Date(date);
-        console.log("Processing date:", date, "->", displayDate.toLocaleDateString());
         return {
           date,
           formattedDate: displayDate.toLocaleDateString('en-US', { 
@@ -102,7 +100,6 @@ export default function CheckInsPage() {
         };
       }).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
       
-      console.log("Processed daily check-ins:", result); // Add debugging
       setDailyCheckIns(result);
       
       // Automatically open today's section

@@ -74,7 +74,6 @@ export default function MembershipPlanManager({ organizationId }: MembershipPlan
         throw new Error("Membership plans collection ID is not defined");
       }
       
-      console.log("Fetching membership plans for org:", organizationId);
       
       const response = await databases.listDocuments(
         DATABASE_ID,
@@ -85,7 +84,6 @@ export default function MembershipPlanManager({ organizationId }: MembershipPlan
         ]
       );
       
-      console.log("Received plans:", response.documents.length);
       setPlans(response.documents);
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to fetch membership plans';

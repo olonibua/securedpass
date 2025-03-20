@@ -78,59 +78,103 @@ export default function RegisterPage() {
     },
   });
 
-  // Function to check if account fields are valid with feedback
-  const isAccountFormValid = () => {
+ 
+
+  const handleNextTab = () => {
+    // Get form values
     const { name, email, password, confirmPassword } = form.getValues();
     
-    // Check each field and provide specific feedback
+    // Validate each field and show appropriate errors with toast notifications
+    let hasError = false;
+    let errorMessage = "";
+    
     if (!name || name.length < 2) {
+      form.setError('name', { message: 'Name must be at least 2 characters' });
+      hasError = true;
+      errorMessage = "Name must be at least 2 characters";
+    }
+    else if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      form.setError('email', { message: 'Please enter a valid email address' });
+      hasError = true;
+      errorMessage = "Please enter a valid email address";
+    }
+    else if (!password || password.length < 8) {
+      form.setError('password', { message: 'Password must be at least 8 characters' });
+      hasError = true;
+      errorMessage = "Password must be at least 8 characters";
+    }
+    else if (password !== confirmPassword) {
+      form.setError('confirmPassword', { message: "Passwords don't match" });
+      hasError = true;
+      errorMessage = "Passwords don't match";
+    }
+    
+    // If errors, show toast and don't proceed
+    if (hasError) {
+      toast.error(errorMessage || "Please complete all required fields correctly");
+      return;
+    }
+    
+    // If no errors, proceed to next tab
+    setActiveTab("organization");
+    toast.success("Account details saved successfully");
+  };
+
+  const isOrganizationFormValid = () => {
+    const { organizationName, plan, organizationType } = form.getValues();
+    
+    // Check required fields
+    if (!organizationName || organizationName.length < 2) {
       return false;
     }
     
-    if (!email || !email.match(/^\S+@\S+\.\S+$/)) {
+    if (!plan) {
       return false;
     }
     
-    if (!password || password.length < 8) {
-      return false;
-    }
-    
-    if (password !== confirmPassword) {
+    if (!organizationType) {
       return false;
     }
     
     return true;
   };
 
-  const handleNextTab = () => {
-    // Validate with detailed feedback
-    const { name, email, password, confirmPassword } = form.getValues();
+  // Add a function to handle the validation when submitting the organization form
+  const handleSubmitValidation = () => {
+    const { organizationName, plan, organizationType } = form.getValues();
+    let hasError = false;
+    let errorMessage = "";
     
-    if (!name || name.length < 2) {
-      toast.error("Name must be at least 2 characters");
-      return;
+    if (!organizationName || organizationName.length < 2) {
+      form.setError('organizationName', { message: 'Organization name must be at least 2 characters' });
+      hasError = true;
+      errorMessage = "Organization name must be at least 2 characters";
+    }
+    else if (!plan) {
+      form.setError('plan', { message: 'Please select a subscription plan' });
+      hasError = true;
+      errorMessage = "Please select a subscription plan";
+    }
+    else if (!organizationType) {
+      form.setError('organizationType', { message: 'Please select an organization type' });
+      hasError = true;
+      errorMessage = "Please select an organization type";
     }
     
-    if (!email || !email.match(/^\S+@\S+\.\S+$/)) {
-      toast.error("Please enter a valid email address");
-      return;
+    if (hasError) {
+      toast.error(errorMessage || "Please complete all required organization details");
+      return false;
     }
     
-    if (!password || password.length < 8) {
-      toast.error("Password must be at least 8 characters");
-      return;
-    }
-    
-    if (password !== confirmPassword) {
-      toast.error("Passwords don't match");
-      return;
-    }
-    
-    // If we get here, all validations passed
-    setActiveTab("organization");
+    return true;
   };
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    // First validate before proceeding
+    if (!handleSubmitValidation()) {
+      return;
+    }
+    
     try {
       setIsSubmitting(true);
       
@@ -177,23 +221,67 @@ export default function RegisterPage() {
     }
   };
 
+  // Add this function to handle tab changes with validation
+  const handleTabChange = (value: string) => {
+    // Only perform validation when trying to switch to organization tab
+    if (value === "organization") {
+      // Check if account information is valid
+      const { name, email, password, confirmPassword } = form.getValues();
+      
+      let hasError = false;
+      let errorMessage = "";
+      
+      if (!name || name.length < 2) {
+        form.setError('name', { message: 'Name must be at least 2 characters' });
+        hasError = true;
+        errorMessage = "Name must be at least 2 characters";
+      }
+      else if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        form.setError('email', { message: 'Please enter a valid email address' });
+        hasError = true;
+        errorMessage = "Please enter a valid email address";
+      }
+      else if (!password || password.length < 8) {
+        form.setError('password', { message: 'Password must be at least 8 characters' });
+        hasError = true;
+        errorMessage = "Password must be at least 8 characters";
+      }
+      else if (password !== confirmPassword) {
+        form.setError('confirmPassword', { message: "Passwords don't match" });
+        hasError = true;
+        errorMessage = "Passwords don't match";
+      }
+      
+      if (hasError) {
+        toast.error(errorMessage || "Please complete all required fields correctly");
+        return; // Don't change tabs
+      }
+      
+      // If validation passes, show success and allow tab change
+      toast.success("Account details saved successfully");
+    }
+    
+    // Set the active tab if validation passed or going back to account tab
+    setActiveTab(value);
+  };
+
   return (
     <div className="flex min-h-screen flex-col">
       <Header />
 
-      <div className="flex-1 container max-w-md mx-auto py-10">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold">Create Your Organization</h1>
-          <p className="text-muted-foreground mt-2">
+      <div className="flex-1 container max-w-md mx-auto px-4 py-28  md:py-40">
+        <div className="text-center mb-6 sm:mb-8">
+          <h1 className="text-xl sm:text-3xl font-bold">Create Your Organization</h1>
+          <p className="text-sm sm:text-base text-muted-foreground mt-2">
             Set up your organization and admin account
           </p>
         </div>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 sm:space-y-8">
             <Tabs
               value={activeTab}
-              onValueChange={setActiveTab}
+              onValueChange={handleTabChange}
               className="w-full"
             >
               <TabsList className="grid w-full grid-cols-2">
@@ -209,7 +297,7 @@ export default function RegisterPage() {
                     <FormItem>
                       <FormLabel>Your Name</FormLabel>
                       <FormControl>
-                        <Input placeholder="Enter your name" {...field} />
+                        <Input placeholder="Enter your name" {...field} className="text-sm sm:text-base h-10" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -227,6 +315,7 @@ export default function RegisterPage() {
                           type="email"
                           placeholder="Enter your email"
                           {...field}
+                          className="text-sm sm:text-base h-10"
                         />
                       </FormControl>
                       <FormMessage />
@@ -245,6 +334,7 @@ export default function RegisterPage() {
                           type="password"
                           placeholder="Create a password"
                           {...field}
+                          className="text-sm sm:text-base h-10"
                         />
                       </FormControl>
                       <FormMessage />
@@ -263,6 +353,7 @@ export default function RegisterPage() {
                           type="password"
                           placeholder="Confirm your password"
                           {...field}
+                          className="text-sm sm:text-base h-10"
                         />
                       </FormControl>
                       <FormMessage />
@@ -272,9 +363,8 @@ export default function RegisterPage() {
 
                 <Button
                   type="button"
-                  className="w-full mt-6"
+                  className="w-full h-10 mt-6"
                   onClick={handleNextTab}
-                  disabled={!isAccountFormValid()}
                 >
                   Next: Organization Details
                 </Button>
@@ -291,6 +381,7 @@ export default function RegisterPage() {
                         <Input
                           placeholder="Enter organization name"
                           {...field}
+                          className="text-sm sm:text-base h-10"
                         />
                       </FormControl>
                       <FormMessage />
@@ -309,7 +400,7 @@ export default function RegisterPage() {
                         defaultValue={field.value}
                       >
                         <FormControl>
-                          <SelectTrigger>
+                          <SelectTrigger className="text-sm sm:text-base h-10">
                             <SelectValue placeholder="Select industry" />
                           </SelectTrigger>
                         </FormControl>
@@ -339,7 +430,7 @@ export default function RegisterPage() {
                         defaultValue={field.value}
                       >
                         <FormControl>
-                          <SelectTrigger>
+                          <SelectTrigger className="text-sm sm:text-base h-10">
                             <SelectValue placeholder="Select size" />
                           </SelectTrigger>
                         </FormControl>
@@ -369,7 +460,7 @@ export default function RegisterPage() {
                         defaultValue={field.value}
                       >
                         <FormControl>
-                          <SelectTrigger>
+                          <SelectTrigger className="text-sm sm:text-base h-10">
                             <SelectValue placeholder="Select plan" />
                           </SelectTrigger>
                         </FormControl>
@@ -432,14 +523,19 @@ export default function RegisterPage() {
                   <Button
                     type="button"
                     variant="outline"
-                    className="w-1/2"
+                    className="w-1/2 text-sm sm:text-base h-10"
                     onClick={() => setActiveTab("account")}
                   >
                     Back
                   </Button>
                   <Button
-                    type="submit"
-                    className="w-1/2"
+                    type="button"
+                    className="w-1/2 h-10"
+                    onClick={() => {
+                      if (handleSubmitValidation()) {
+                        form.handleSubmit(onSubmit)();
+                      }
+                    }}
                     disabled={isSubmitting}
                   >
                     {isSubmitting ? (

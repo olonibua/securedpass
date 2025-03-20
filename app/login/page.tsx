@@ -163,9 +163,11 @@ export default function UnifiedOrgLoginPage() {
     <>
       <Header />
       <div className="flex min-h-screen flex-col">
-        <div className="flex-1 container px-4 sm:px-6 max-w-md mx-auto py-6 sm:py-10">
+        <div className="flex-1 container px-4 sm:px-6 max-w-md mx-auto py-28 sm:py-28 md:py-44">
           <div className="text-center mb-6 sm:mb-8">
-            <h1 className="text-2xl sm:text-3xl font-bold">Organization Login</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold">
+              Organization Login
+            </h1>
             <p className="text-muted-foreground mt-2 text-sm sm:text-base">
               Sign in to manage your organization
             </p>
@@ -247,7 +249,10 @@ export default function UnifiedOrgLoginPage() {
             </p>
             <p className="text-xs sm:text-sm text-muted-foreground">
               Looking for member access?{" "}
-              <Link href="/member-login" className="text-primary hover:underline">
+              <Link
+                href="/member-login"
+                className="text-primary hover:underline"
+              >
                 Member login
               </Link>
             </p>

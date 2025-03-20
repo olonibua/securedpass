@@ -32,7 +32,6 @@ export default function CheckInPage() {
         );
         
         setOrganization(org );
-        console.log("Organization data:", org);
       } catch (error: unknown) {
         const errorMessage = error instanceof Error ? error.message : 'Failed to load data';
         console.error("Error fetching organization:", errorMessage);

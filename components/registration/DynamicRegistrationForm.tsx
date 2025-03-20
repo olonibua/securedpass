@@ -37,7 +37,6 @@ export default function DynamicRegistrationForm({
 }: DynamicRegistrationFormProps) {
   const [submitting, setSubmitting] = useState(false);
 
-  console.log("DynamicRegistrationForm received:", { organizationId, customFields });
 
   // Build the form schema based on custom fields
   const buildFormSchema = () => {

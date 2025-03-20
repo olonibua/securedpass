@@ -63,12 +63,12 @@ export default function ForgotPasswordPage() {
   return (
     <>
       <Header />
-      <div className="container max-w-md mx-auto py-10">
+      <div className="container max-w-md mx-auto py-28 sm:py-28 md:py-44">
         <Card>
           <CardHeader>
             <CardTitle className="text-center">Reset Your Password</CardTitle>
             <CardDescription className="text-center">
-              {emailSent 
+              {emailSent
                 ? "We've sent you an email with instructions to reset your password."
                 : "Enter your email address and we'll send you instructions to reset your password."}
             </CardDescription>
@@ -76,19 +76,28 @@ export default function ForgotPasswordPage() {
           <CardContent>
             {emailSent ? (
               <div className="text-center">
-                <p className="mb-4">Please check your email inbox and follow the instructions to reset your password.</p>
+                <p className="mb-4">
+                  Please check your email inbox and follow the instructions to
+                  reset your password.
+                </p>
                 <div className="flex flex-col space-y-2">
                   <Link href="/login" className="text-primary hover:underline">
                     Return to organization login
                   </Link>
-                  <Link href="/member-login" className="text-primary hover:underline">
+                  <Link
+                    href="/member-login"
+                    className="text-primary hover:underline"
+                  >
                     Return to member login
                   </Link>
                 </div>
               </div>
             ) : (
               <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                <form
+                  onSubmit={form.handleSubmit(onSubmit)}
+                  className="space-y-6"
+                >
                   <FormField
                     control={form.control}
                     name="email"
@@ -96,10 +105,10 @@ export default function ForgotPasswordPage() {
                       <FormItem>
                         <FormLabel>Email</FormLabel>
                         <FormControl>
-                          <Input 
-                            placeholder="your.email@example.com" 
-                            type="email" 
-                            {...field} 
+                          <Input
+                            placeholder="your.email@example.com"
+                            type="email"
+                            {...field}
                             disabled={loading}
                           />
                         </FormControl>
@@ -107,7 +116,7 @@ export default function ForgotPasswordPage() {
                       </FormItem>
                     )}
                   />
-                  
+
                   <Button type="submit" className="w-full" disabled={loading}>
                     {loading ? (
                       <>
@@ -115,12 +124,15 @@ export default function ForgotPasswordPage() {
                         Processing...
                       </>
                     ) : (
-                      'Send Reset Link'
+                      "Send Reset Link"
                     )}
                   </Button>
 
                   <div className="text-center mt-4">
-                    <Link href="/login" className="text-sm text-muted-foreground hover:underline">
+                    <Link
+                      href="/login"
+                      className="text-sm text-muted-foreground hover:underline"
+                    >
                       Return to login
                     </Link>
                   </div>

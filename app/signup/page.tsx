@@ -88,15 +88,15 @@ export default function SignupPage() {
   return (
     <div className="flex min-h-screen flex-col">
       <Header />
-      
-      <div className="flex-1 container max-w-md mx-auto py-10">
+
+      <div className="flex-1 container max-w-md mx-auto py-28 sm:py-28 md:py-44">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold">Create an Account</h1>
           <p className="text-muted-foreground mt-2">
             Sign up to start managing your check-ins
           </p>
         </div>
-        
+
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <FormField
@@ -112,7 +112,7 @@ export default function SignupPage() {
                 </FormItem>
               )}
             />
-            
+
             <FormField
               control={form.control}
               name="email"
@@ -120,13 +120,17 @@ export default function SignupPage() {
                 <FormItem>
                   <FormLabel>Email</FormLabel>
                   <FormControl>
-                    <Input type="email" placeholder="Enter your email" {...field} />
+                    <Input
+                      type="email"
+                      placeholder="Enter your email"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            
+
             <FormField
               control={form.control}
               name="password"
@@ -134,13 +138,17 @@ export default function SignupPage() {
                 <FormItem>
                   <FormLabel>Password</FormLabel>
                   <FormControl>
-                    <Input type="password" placeholder="Create a password" {...field} />
+                    <Input
+                      type="password"
+                      placeholder="Create a password"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            
+
             <FormField
               control={form.control}
               name="confirmPassword"
@@ -148,13 +156,17 @@ export default function SignupPage() {
                 <FormItem>
                   <FormLabel>Confirm Password</FormLabel>
                   <FormControl>
-                    <Input type="password" placeholder="Confirm your password" {...field} />
+                    <Input
+                      type="password"
+                      placeholder="Confirm your password"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            
+
             <Button type="submit" className="w-full" disabled={isSubmitting}>
               {isSubmitting ? (
                 <>
@@ -162,15 +174,15 @@ export default function SignupPage() {
                   Creating account...
                 </>
               ) : (
-                'Sign up'
+                "Sign up"
               )}
             </Button>
           </form>
         </Form>
-        
+
         <div className="text-center mt-6">
           <p className="text-sm text-muted-foreground">
-            Already have an account?{' '}
+            Already have an account?{" "}
             <Link href="/login" className="text-primary hover:underline">
               Log in
             </Link>

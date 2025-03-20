@@ -98,12 +98,12 @@ export default function ResetPasswordPage() {
   return (
     <>
       <Header />
-      <div className="container max-w-md mx-auto py-10">
+      <div className="container max-w-md mx-auto py-28 sm:py-28 md:py-44">
         <Card>
           <CardHeader>
             <CardTitle className="text-center">Reset Your Password</CardTitle>
             <CardDescription className="text-center">
-              {resetComplete 
+              {resetComplete
                 ? "Your password has been reset successfully."
                 : "Please create a new password for your account."}
             </CardDescription>
@@ -111,19 +111,27 @@ export default function ResetPasswordPage() {
           <CardContent>
             {resetComplete ? (
               <div className="text-center">
-                <p className="mb-4">Your password has been updated successfully.</p>
+                <p className="mb-4">
+                  Your password has been updated successfully.
+                </p>
                 <div className="flex flex-col space-y-2">
                   <Link href="/login" className="text-primary hover:underline">
                     Log in to organization portal
                   </Link>
-                  <Link href="/member-login" className="text-primary hover:underline">
+                  <Link
+                    href="/member-login"
+                    className="text-primary hover:underline"
+                  >
                     Log in to member portal
                   </Link>
                 </div>
               </div>
             ) : (
               <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                <form
+                  onSubmit={form.handleSubmit(onSubmit)}
+                  className="space-y-6"
+                >
                   <FormField
                     control={form.control}
                     name="password"
@@ -131,9 +139,9 @@ export default function ResetPasswordPage() {
                       <FormItem>
                         <FormLabel>New Password</FormLabel>
                         <FormControl>
-                          <Input 
-                            type="password" 
-                            {...field} 
+                          <Input
+                            type="password"
+                            {...field}
                             disabled={loading || !userId || !secret}
                           />
                         </FormControl>
@@ -141,7 +149,7 @@ export default function ResetPasswordPage() {
                       </FormItem>
                     )}
                   />
-                  
+
                   <FormField
                     control={form.control}
                     name="confirmPassword"
@@ -149,9 +157,9 @@ export default function ResetPasswordPage() {
                       <FormItem>
                         <FormLabel>Confirm New Password</FormLabel>
                         <FormControl>
-                          <Input 
-                            type="password" 
-                            {...field} 
+                          <Input
+                            type="password"
+                            {...field}
                             disabled={loading || !userId || !secret}
                           />
                         </FormControl>
@@ -159,10 +167,10 @@ export default function ResetPasswordPage() {
                       </FormItem>
                     )}
                   />
-                  
-                  <Button 
-                    type="submit" 
-                    className="w-full" 
+
+                  <Button
+                    type="submit"
+                    className="w-full"
                     disabled={loading || !userId || !secret}
                   >
                     {loading ? (
@@ -171,7 +179,7 @@ export default function ResetPasswordPage() {
                         Resetting Password...
                       </>
                     ) : (
-                      'Reset Password'
+                      "Reset Password"
                     )}
                   </Button>
                 </form>

@@ -164,7 +164,6 @@ export default function MemberCreationForm({
         initialMemberData
       );
 
-      console.log("Member created:", newMember);
       
       // Reset form and show success message
       resetForm();

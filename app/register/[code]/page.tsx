@@ -40,7 +40,6 @@ export default function OrganizationRegistrationPage() {
   const { code } = useParams();
   const router = useRouter();
   
-  console.log("REGISTER PAGE - Component rendering with code:", code);
   
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -64,7 +63,6 @@ export default function OrganizationRegistrationPage() {
         }
         
         const organizationId = codeResponse.documents[0].organizationId;
-        console.log("REGISTER PAGE - Found organization ID from code:", organizationId);
         
         // Fetch organization details
         const orgResponse = await databases.getDocument(
@@ -76,11 +74,7 @@ export default function OrganizationRegistrationPage() {
         setOrganization(orgResponse as unknown as Organization);
         
         // Log details about what we're about to query
-        console.log("REGISTER PAGE - About to fetch custom fields with:", {
-          databaseId: DATABASE_ID,
-          collectionId: CUSTOMFIELDS_COLLECTION_ID,
-          organizationId
-        });
+       
         
         // Use exactly the same query pattern that works in CustomFieldsManager
         const fieldsResponse = await databases.listDocuments(
@@ -92,11 +86,9 @@ export default function OrganizationRegistrationPage() {
           ]
         );
         
-        console.log("REGISTER PAGE - Custom fields response:", fieldsResponse);
         
         // Set the custom fields
         setCustomFields(fieldsResponse.documents as unknown as CustomField[]);
-        console.log("REGISTER PAGE - Setting custom fields:", fieldsResponse.documents);
         
       } catch (error: unknown) {
         const errorMessage = error instanceof Error ? error.message : 'Failed to load registration page';

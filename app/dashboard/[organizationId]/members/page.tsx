@@ -23,7 +23,6 @@ export default function MembersPage() {
   const fetchMembers = useCallback(async () => {
     try {
       setLoading(true);
-      console.log("Fetching members for organization:", organizationId);
       
       // Make sure organizationId is a string
       const orgId = organizationId as string;
@@ -38,14 +37,12 @@ export default function MembersPage() {
         ]
       );
       
-      console.log(`Found ${response.documents.length} members for organization ${orgId}`);
       
       // Apply a strict filter to ensure only members from this organization
       const filteredMembers = response.documents.filter(member => 
         member.organizationId === orgId
       );
       
-      console.log(`After strict filtering: ${filteredMembers.length} members belong to this organization`);
       
       // For each member, check if they have an active subscription
       const membersWithSubscriptionStatus = await Promise.all(

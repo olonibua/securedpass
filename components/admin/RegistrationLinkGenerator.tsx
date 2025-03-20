@@ -24,8 +24,6 @@ export default function RegistrationLinkGenerator({
   const fetchOrCreateRegistrationCode = useCallback(async () => {
     try {
       setLoading(true);
-      console.log("Fetching registration code for organization:", organizationId);
-      console.log("Collection ID:", REGISTRATION_CODES_COLLECTION_ID);
 
       if (!organizationId || !REGISTRATION_CODES_COLLECTION_ID) {
         throw new Error("Missing required IDs");
@@ -38,15 +36,12 @@ export default function RegistrationLinkGenerator({
         [Query.equal("organizationId", organizationId)]
       );
 
-      console.log("Registration code query response:", response);
 
       if (response.documents.length > 0) {
         // Use existing code
         setRegistrationCode(response.documents[0].code);
-        console.log("Using existing code:", response.documents[0].code);
       } else {
         // Create new registration code
-        console.log("No existing code found, generating new one");
         await generateNewCode();
       }
     } catch (error: unknown) {
@@ -73,7 +68,6 @@ export default function RegistrationLinkGenerator({
       const randomPart = Math.random().toString(36).substring(2, 8).toUpperCase();
       const orgPrefix = organizationName.substring(0, 3).toUpperCase();
       const newCode = `${orgPrefix}-${randomPart}`;
-      console.log("Generated new code:", newCode);
       
       // Delete any existing codes
       try {
@@ -96,7 +90,6 @@ export default function RegistrationLinkGenerator({
       }
       
       // Create new registration code
-      console.log("Creating new code in database");
       await databases.createDocument(
         DATABASE_ID,
         REGISTRATION_CODES_COLLECTION_ID as string,
