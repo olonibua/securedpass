@@ -2,16 +2,12 @@ import { Suspense } from 'react';
 import { Loader2 } from 'lucide-react';
 import AdminManagement from '@/components/admin/AdminManagement';
 
-type PageProps = {
-  params: {
-    organizationId: string;
-  };
-  searchParams?: Record<string, string | string[] | undefined>;
-};
-
+// Use the Next.js generated types from the app directory
 export default function AdministratorsPage({ 
-  params 
-}: PageProps) {
+  params
+}: {
+  params: { organizationId: string }
+}) {
   return (
     <div className="container mx-auto py-6">
       <div className="space-y-6">
