@@ -2,11 +2,16 @@ import { Suspense } from 'react';
 import { Loader2 } from 'lucide-react';
 import AdminManagement from '@/components/admin/AdminManagement';
 
+type PageProps = {
+  params: {
+    organizationId: string;
+  };
+  searchParams?: Record<string, string | string[] | undefined>;
+};
+
 export default function AdministratorsPage({ 
   params 
-}: { 
-  params: { organizationId: string } 
-}) {
+}: PageProps) {
   return (
     <div className="container mx-auto py-6">
       <div className="space-y-6">
