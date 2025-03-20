@@ -1,15 +1,14 @@
 import { Suspense } from 'react';
 import { Loader2 } from 'lucide-react';
 import AdminManagement from '@/components/admin/AdminManagement';
+import { PageProps } from '@/.next/types/app/dashboard/[organizationId]/administrators/page';
 
-// Convert this to a Server Component to handle async params
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export default async function AdministratorsPage({
-  params,
-}: {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  params: { organizationId: string };
-}) {
+// Import the specific PageProps type that Next.js is generating for this page
+export default async function AdministratorsPage(props: PageProps) {
+  // Await the params since they're a Promise
+  const params = await props.params;
+  const organizationId = params.organizationId;
+
   return (
     <div className="container mx-auto py-6">
       <div className="space-y-6">
@@ -29,7 +28,7 @@ export default async function AdministratorsPage({
             </div>
           }
         >
-          <AdminManagement organizationId={params.organizationId} />
+          <AdminManagement organizationId={organizationId} />
         </Suspense>
       </div>
     </div>
