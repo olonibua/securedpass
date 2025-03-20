@@ -115,48 +115,51 @@ export default function MemberCreationForm({
     e.preventDefault();
     try {
       setLoading(true);
-      
+
       // Make sure name and email are provided
       if (!formData.name || !formData.email) {
-        toast.error('Name and email are required');
+        toast.error("Name and email are required");
         return;
       }
-      
+
       // For custom IDs, validate uniqueness
-      if (idMethod === 'custom') {
+      if (idMethod === "custom") {
         if (!formData.customMemberId) {
-          toast.error('Member ID is required when using custom ID');
+          toast.error("Member ID is required when using custom ID");
           return;
         }
-        
+
         const isValid = await validateCustomId();
         if (!isValid) return;
       }
 
       // Generate or use provided member ID
-      const memberId = idMethod === 'system' 
-        ? generateMemberId(formData.name)
-        : formData.customMemberId;
-      
+      const memberId =
+        idMethod === "system"
+          ? generateMemberId(formData.name)
+          : formData.customMemberId;
+
       // Initial member data
       const initialMemberData = {
         organizationId,
         name: formData.name,
         email: formData.email,
         phone: formData.phone || null,
-        status: 'active',
-        type: 'company',
+        status: "active",
+        type: "company",
         memberId: memberId, // Include memberId directly in initial creation
-        customFields: Object.keys(formData.customFieldValues).length > 0 
-          ? JSON.stringify(formData.customFieldValues) 
-          : null,
+        customFields:
+          Object.keys(formData.customFieldValues).length > 0
+            ? JSON.stringify(formData.customFieldValues)
+            : null,
         active: true,
         userId: null,
-        paymentStatus: 'unpaid',
-        createdAt: new Date().toISOString()
+        paymentStatus: "unpaid",
+        createdAt: new Date().toISOString(),
       };
 
       // Create the document
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const newMember = await databases.createDocument(
         DATABASE_ID,
         MEMBERS_COLLECTION_ID,
@@ -164,18 +167,16 @@ export default function MemberCreationForm({
         initialMemberData
       );
 
-      
       // Reset form and show success message
       resetForm();
       toast.success(`Member created with ID: ${memberId}`);
-      
+
       if (onMemberCreated) {
         onMemberCreated(memberId);
       }
-      
+
       // Close the modal
       onOpenChange(false);
-      
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to create member';
       console.error('Error creating member:', errorMessage);

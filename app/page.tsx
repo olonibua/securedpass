@@ -28,19 +28,27 @@ export default function Home() {
       <Header scrollState={scrolled} />
 
       {/* Hero Section with Enhanced Gradient - Responsive to scroll */}
-      <section className={`relative flex-1 flex flex-col items-center justify-center text-center px-4 py-28 sm:py-28 md:py-44 overflow-hidden transition-all duration-700 ease-in-out ${
-        scrolled ? 'opacity-90 scale-[0.99]' : 'opacity-100 scale-100'
-      }`}>
+      <section
+        className={`relative flex-1 flex flex-col items-center justify-center text-center px-4 py-28 sm:py-28 md:py-44 overflow-hidden transition-all duration-700 ease-in-out ${
+          scrolled ? "opacity-90 scale-[0.99]" : "opacity-100 scale-100"
+        }`}
+      >
         {/* Background gradient elements - dynamic based on scroll */}
-        <div className={`absolute inset-0 bg-gradient-to-b from-blue-50/20 to-indigo-50/20 dark:from-blue-950/20 dark:to-indigo-900/20 z-0 transition-opacity duration-700 ${
-          scrolled ? 'opacity-60' : 'opacity-100'
-        }`}></div>
-        <div className={`absolute -top-24 -right-24 w-96 h-96 bg-blue-400/10 dark:bg-blue-400/5 rounded-full blur-3xl transition-all duration-700 ${
-          scrolled ? 'opacity-50 translate-x-5' : 'opacity-100 translate-x-0'
-        }`}></div>
-        <div className={`absolute -bottom-24 -left-24 w-96 h-96 bg-indigo-400/10 dark:bg-indigo-400/5 rounded-full blur-3xl transition-all duration-700 ${
-          scrolled ? 'opacity-50 -translate-x-5' : 'opacity-100 translate-x-0'
-        }`}></div>
+        <div
+          className={`absolute inset-0 bg-gradient-to-b from-blue-50/20 to-indigo-50/20 dark:from-blue-950/20 dark:to-indigo-900/20 z-0 transition-opacity duration-700 ${
+            scrolled ? "opacity-60" : "opacity-100"
+          }`}
+        ></div>
+        <div
+          className={`absolute -top-24 -right-24 w-96 h-96 bg-blue-400/10 dark:bg-blue-400/5 rounded-full blur-3xl transition-all duration-700 ${
+            scrolled ? "opacity-50 translate-x-5" : "opacity-100 translate-x-0"
+          }`}
+        ></div>
+        <div
+          className={`absolute -bottom-24 -left-24 w-96 h-96 bg-indigo-400/10 dark:bg-indigo-400/5 rounded-full blur-3xl transition-all duration-700 ${
+            scrolled ? "opacity-50 -translate-x-5" : "opacity-100 translate-x-0"
+          }`}
+        ></div>
 
         {/* Content */}
         <motion.div
@@ -128,8 +136,8 @@ export default function Home() {
                 Register Organization
               </h3>
               <p className="text-gray-600 dark:text-gray-300">
-                Create an account and set up your organization's profile with
-                all necessary details.
+                Create an account and set up your organization&apos;s profile
+                with all necessary details.
               </p>
             </motion.div>
 
@@ -200,9 +208,11 @@ export default function Home() {
       </section>
 
       {/* Features Section with Better Animations */}
-      <section className={`py-24 relative bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-gray-950 ${
-        scrolled ? 'bg-opacity-95' : 'bg-opacity-100'
-      }`}>
+      <section
+        className={`py-24 relative bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-gray-950 ${
+          scrolled ? "bg-opacity-95" : "bg-opacity-100"
+        }`}
+      >
         <div className="absolute inset-0 bg-grid-black/[0.02] dark:bg-grid-white/[0.02]"></div>
         <div className="container mx-auto px-4 relative z-10">
           <div className="text-center mb-16">

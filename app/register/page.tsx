@@ -120,24 +120,7 @@ export default function RegisterPage() {
     toast.success("Account details saved successfully");
   };
 
-  const isOrganizationFormValid = () => {
-    const { organizationName, plan, organizationType } = form.getValues();
-    
-    // Check required fields
-    if (!organizationName || organizationName.length < 2) {
-      return false;
-    }
-    
-    if (!plan) {
-      return false;
-    }
-    
-    if (!organizationType) {
-      return false;
-    }
-    
-    return true;
-  };
+ 
 
   // Add a function to handle the validation when submitting the organization form
   const handleSubmitValidation = () => {
