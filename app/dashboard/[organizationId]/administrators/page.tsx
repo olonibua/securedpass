@@ -2,9 +2,9 @@ import { Suspense } from 'react';
 import { Loader2 } from 'lucide-react';
 import AdminManagement from '@/components/admin/AdminManagement';
 
-// Use the Next.js generated types from the app directory
-export default function AdministratorsPage({ 
-  params
+// Convert this to a Server Component to handle async params
+export default async function AdministratorsPage({ 
+  params 
 }: {
   params: { organizationId: string }
 }) {
