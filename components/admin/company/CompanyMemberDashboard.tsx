@@ -29,7 +29,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useAuth } from '@/lib/auth-context';
 
 interface CompanyMemberDashboardProps {
   organizationId: string;
