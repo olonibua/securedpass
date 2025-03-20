@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { databases, DATABASE_ID, MEMBERS_COLLECTION_ID, CUSTOMFIELDS_COLLECTION_ID, Query, USER_PREFERENCES_COLLECTION_ID, ORGANIZATIONS_COLLECTION_ID } from '@/lib/appwrite';
+import { databases, DATABASE_ID, MEMBERS_COLLECTION_ID, CUSTOMFIELDS_COLLECTION_ID, Query, ORGANIZATIONS_COLLECTION_ID } from '@/lib/appwrite';
 import { Member, CustomField } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -47,7 +47,6 @@ interface ColumnSetting {
 }
 
 export default function CompanyMemberDashboard({ organizationId }: CompanyMemberDashboardProps) {
-  const { user } = useAuth();
   const [members, setMembers] = useState<Member[]>([]);
   const [customFields, setCustomFields] = useState<CustomField[]>([]);
   const [loading, setLoading] = useState(true);
@@ -163,7 +162,7 @@ export default function CompanyMemberDashboard({ organizationId }: CompanyMember
         if (localSettings) {
           try {
             setColumnSettings(JSON.parse(localSettings));
-          } catch (e) {
+          } catch {
             // Use default settings if parsing fails
           }
         }
@@ -183,7 +182,7 @@ export default function CompanyMemberDashboard({ organizationId }: CompanyMember
       // Save to localStorage as backup
       try {
         localStorage.setItem(`columnSettings-${organizationId}`, JSON.stringify(newSettings));
-      } catch (e) {
+      } catch  {
         // Ignore localStorage errors
       }
       

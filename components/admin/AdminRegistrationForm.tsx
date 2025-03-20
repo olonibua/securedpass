@@ -66,23 +66,25 @@ export default function AdminRegistrationForm({
         DATABASE_ID,
         ADMINISTRATORS_COLLECTION_ID,
         [
-          Query.equal('email', email.toLowerCase()),
-          Query.equal('organizationId', organizationId)
+          Query.equal("email", email.toLowerCase()),
+          Query.equal("organizationId", organizationId),
         ]
       );
-      
+
       if (response.documents.length > 0) {
         setErrors({
           ...errors,
-          email: 'An administrator with this email already exists'
+          email: "An administrator with this email already exists",
         });
         setLoading(false);
         return;
       }
-      
+
       // Generate a temporary password
-      const tempPassword = Math.random().toString(36).slice(-8) + Math.random().toString(10).slice(-2);
-      
+      const tempPassword =
+        Math.random().toString(36).slice(-8) +
+        Math.random().toString(10).slice(-2);
+
       // Create an Appwrite account for the administrator
       const newUser = await account.create(
         ID.unique(),
@@ -90,8 +92,9 @@ export default function AdminRegistrationForm({
         tempPassword,
         name
       );
-      
+
       // Create the administrator record
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const adminRecord = await databases.createDocument(
         DATABASE_ID,
         ADMINISTRATORS_COLLECTION_ID,
@@ -100,15 +103,15 @@ export default function AdminRegistrationForm({
           name,
           email: email.toLowerCase(),
           role,
-          status: 'active',
+          status: "active",
           organizationId,
           createdAt: new Date().toISOString(),
           createdBy: user?.$id,
           lastLogin: null,
-          userId: newUser.$id // Link to their Appwrite account
+          userId: newUser.$id, // Link to their Appwrite account
         }
       );
-      
+
       // Create organization_members relationship to grant access to the dashboard
       await databases.createDocument(
         DATABASE_ID,
@@ -118,10 +121,10 @@ export default function AdminRegistrationForm({
           userId: newUser.$id,
           organizationId,
           role: role, // Use the selected role
-          createdAt: new Date().toISOString()
+          createdAt: new Date().toISOString(),
         }
       );
-      
+
       // Create an activity log entry
       await databases.createDocument(
         DATABASE_ID,
@@ -131,12 +134,12 @@ export default function AdminRegistrationForm({
           organizationId,
           adminId: user?.$id,
           adminName: user?.name,
-          action: 'added_admin',
+          action: "added_admin",
           details: `Added ${name} (${email}) as ${role}`,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         }
       );
-      
+
       onAdminAdded(tempPassword);
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to add administrator';

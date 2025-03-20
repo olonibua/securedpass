@@ -1,9 +1,9 @@
 'use client';
 import { useState, useEffect, useCallback } from 'react';
-import { databases, DATABASE_ID, ADMINISTRATORS_COLLECTION_ID, ORGANIZATIONS_COLLECTION_ID, Query, ID } from '@/lib/appwrite';
+import { databases, DATABASE_ID, ADMINISTRATORS_COLLECTION_ID, ORGANIZATIONS_COLLECTION_ID, Query} from '@/lib/appwrite';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { UserPlus, Loader2, Trash2, Activity } from 'lucide-react';
+import { UserPlus, Loader2, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { useAuth } from '@/lib/auth-context';
 import AdminRegistrationForm from './AdminRegistrationForm';
 import AdminActivityLog from './AdminActivityLog';
+import { Organization } from '@/types';
 
 interface Administrator {
   $id: string;
@@ -34,7 +35,7 @@ export default function AdminManagement({ organizationId }: AdminManagementProps
   const [loading, setLoading] = useState(true);
   const [isOwner, setIsOwner] = useState(false);
   const [showRegistrationForm, setShowRegistrationForm] = useState(false);
-  const [organization, setOrganization] = useState<any>(null);
+  const [organization, setOrganization] = useState<Organization | null>(null);
   const [tempPassword, setTempPassword] = useState<string>('');
   const [showPasswordModal, setShowPasswordModal] = useState(false);
 
@@ -49,7 +50,7 @@ export default function AdminManagement({ organizationId }: AdminManagementProps
         organizationId
       );
       
-      setOrganization(orgResponse);
+      setOrganization(orgResponse as unknown as Organization);
       setIsOwner(user?.$id === orgResponse.ownerId);
       
       // Then fetch administrators
@@ -123,7 +124,7 @@ export default function AdminManagement({ organizationId }: AdminManagementProps
         <h2 className="text-xl font-semibold">
           {organization?.name} - Administrator Management
         </h2>
-        
+
         {isOwner && (
           <Button onClick={() => setShowRegistrationForm(true)}>
             <UserPlus className="h-4 w-4 mr-2" />
@@ -131,13 +132,13 @@ export default function AdminManagement({ organizationId }: AdminManagementProps
           </Button>
         )}
       </div>
-      
+
       <Tabs defaultValue="administrators">
         <TabsList>
           <TabsTrigger value="administrators">Administrators</TabsTrigger>
           <TabsTrigger value="activity">Activity Log</TabsTrigger>
         </TabsList>
-        
+
         <TabsContent value="administrators">
           <Card>
             <CardHeader>
@@ -146,10 +147,12 @@ export default function AdminManagement({ organizationId }: AdminManagementProps
             <CardContent>
               {admins.length === 0 ? (
                 <div className="text-center py-4">
-                  <p className="text-muted-foreground">No administrators found.</p>
+                  <p className="text-muted-foreground">
+                    No administrators found.
+                  </p>
                   {isOwner && (
-                    <Button 
-                      variant="outline" 
+                    <Button
+                      variant="outline"
                       className="mt-4"
                       onClick={() => setShowRegistrationForm(true)}
                     >
@@ -169,7 +172,9 @@ export default function AdminManagement({ organizationId }: AdminManagementProps
                         <th className="px-4 py-3 text-left">Status</th>
                         <th className="px-4 py-3 text-left">Last Login</th>
                         <th className="px-4 py-3 text-left">Added On</th>
-                        {isOwner && <th className="px-4 py-3 text-right">Actions</th>}
+                        {isOwner && (
+                          <th className="px-4 py-3 text-right">Actions</th>
+                        )}
                       </tr>
                     </thead>
                     <tbody>
@@ -179,26 +184,28 @@ export default function AdminManagement({ organizationId }: AdminManagementProps
                           <td className="px-4 py-3">{admin.email}</td>
                           <td className="px-4 py-3 capitalize">{admin.role}</td>
                           <td className="px-4 py-3">
-                            <span className={`inline-block px-2 py-1 rounded text-xs ${
-                              admin.status === 'active' 
-                                ? 'bg-green-100 text-green-800' 
-                                : 'bg-gray-100 text-gray-800'
-                            }`}>
+                            <span
+                              className={`inline-block px-2 py-1 rounded text-xs ${
+                                admin.status === "active"
+                                  ? "bg-green-100 text-green-800"
+                                  : "bg-gray-100 text-gray-800"
+                              }`}
+                            >
                               {admin.status}
                             </span>
                           </td>
                           <td className="px-4 py-3">
-                            {admin.lastLogin 
-                              ? new Date(admin.lastLogin).toLocaleString() 
-                              : 'Never'}
+                            {admin.lastLogin
+                              ? new Date(admin.lastLogin).toLocaleString()
+                              : "Never"}
                           </td>
                           <td className="px-4 py-3">
                             {new Date(admin.createdAt).toLocaleDateString()}
                           </td>
                           {isOwner && (
                             <td className="px-4 py-3 text-right">
-                              <Button 
-                                variant="ghost" 
+                              <Button
+                                variant="ghost"
                                 size="sm"
                                 onClick={() => handleRemoveAdmin(admin.$id)}
                                 disabled={user?.$id === admin.createdBy} // Can't remove self
@@ -217,12 +224,12 @@ export default function AdminManagement({ organizationId }: AdminManagementProps
             </CardContent>
           </Card>
         </TabsContent>
-        
+
         <TabsContent value="activity">
           <AdminActivityLog organizationId={organizationId} />
         </TabsContent>
       </Tabs>
-      
+
       {showRegistrationForm && (
         <AdminRegistrationForm
           organizationId={organizationId}
@@ -230,7 +237,7 @@ export default function AdminManagement({ organizationId }: AdminManagementProps
           onAdminAdded={handleAdminAdded}
         />
       )}
-      
+
       {showPasswordModal && (
         <Dialog open={showPasswordModal} onOpenChange={setShowPasswordModal}>
           <DialogContent className="sm:max-w-[425px]">
@@ -240,18 +247,22 @@ export default function AdminManagement({ organizationId }: AdminManagementProps
                 Please save this temporary password. It will only be shown once.
               </DialogDescription>
             </DialogHeader>
-            
+
             <div className="my-6">
               <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-md">
-                <p className="font-medium text-sm text-yellow-800 mb-2">Temporary Password:</p>
+                <p className="font-medium text-sm text-yellow-800 mb-2">
+                  Temporary Password:
+                </p>
                 <div className="flex items-center justify-between bg-white p-3 rounded border">
-                  <code className="font-mono text-sm font-bold">{tempPassword}</code>
-                  <Button 
-                    variant="ghost" 
+                  <code className="font-mono text-sm font-bold">
+                    {tempPassword}
+                  </code>
+                  <Button
+                    variant="ghost"
                     size="sm"
                     onClick={() => {
                       navigator.clipboard.writeText(tempPassword);
-                      toast.success('Password copied to clipboard');
+                      toast.success("Password copied to clipboard");
                     }}
                   >
                     Copy
@@ -259,22 +270,23 @@ export default function AdminManagement({ organizationId }: AdminManagementProps
                 </div>
               </div>
             </div>
-            
+
             <div className="bg-blue-50 p-3 rounded-md border border-blue-100 mb-2">
               <p className="text-sm text-blue-800">
-                <strong>Important:</strong> Share this password securely with the administrator.
-                They will use it to log in for the first time.
+                <strong>Important:</strong> Share this password securely with
+                the administrator. They will use it to log in for the first
+                time.
               </p>
             </div>
-            
+
             <DialogFooter>
-              <Button 
+              <Button
                 onClick={() => {
                   setShowPasswordModal(false);
-                  setTempPassword('');
+                  setTempPassword("");
                 }}
               >
-                I've Saved the Password
+                I&apos;ve Saved the Password
               </Button>
             </DialogFooter>
           </DialogContent>
