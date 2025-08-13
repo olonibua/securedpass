@@ -51,6 +51,15 @@ export default function UnifiedOrgLoginPage() {
     try {
       setIsSubmitting(true);
       
+      // Check if there's already an active session and delete it first
+      try {
+        await account.get();
+        // If we get here, there's an active session - delete it first
+        await account.deleteSession('current');
+      } catch {
+        // No active session, which is what we want
+      }
+      
       // Sign in with Appwrite
       await account.createEmailPasswordSession(values.email, values.password);
       

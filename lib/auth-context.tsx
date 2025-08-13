@@ -63,6 +63,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = async (email: string, password: string) => {
     try {
       setLoading(true);
+      
+      // Check if there's already an active session and delete it first
+      try {
+        await account.get();
+        // If we get here, there's an active session - delete it first
+        await account.deleteSession('current');
+      } catch {
+        // No active session, which is what we want
+      }
+      
       // Create session - Note that duration is configured in Appwrite dashboard, not here
       await account.createEmailPasswordSession(email, password);
       await checkAuth();
