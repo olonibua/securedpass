@@ -249,16 +249,23 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <Header />
-
-      <div className="flex-1 container max-w-md mx-auto px-4 py-28  md:py-40">
-        <div className="text-center mb-6 sm:mb-8">
-          <h1 className="text-xl sm:text-3xl font-bold">Create Your Organization</h1>
-          <p className="text-sm sm:text-base text-muted-foreground mt-2">
-            Set up your organization and admin account
-          </p>
-        </div>
+    <div className="flex min-h-screen bg-white">
+      {/* Left side - Form */}
+      <div className="flex-1 flex flex-col justify-center px-6 py-12 lg:px-16">
+        <div className="mx-auto w-full max-w-sm">
+          {/* Logo */}
+          <div className="mb-8">
+            <Link href="/" className="text-[var(--stedi-teal)] text-2xl font-bold">
+              securedpass
+            </Link>
+          </div>
+          
+          <div className="mb-8">
+            <h1 className="text-2xl font-semibold text-gray-900">Create Your Organization</h1>
+            <p className="mt-2 text-sm text-gray-600">
+              Set up your organization and admin account
+            </p>
+          </div>
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 sm:space-y-8">
@@ -346,7 +353,7 @@ export default function RegisterPage() {
 
                 <Button
                   type="button"
-                  className="w-full h-10 mt-6"
+                  className="w-full h-10 mt-6 bg-[#1e293b]"
                   onClick={handleNextTab}
                 >
                   Next: Organization Details
@@ -513,7 +520,7 @@ export default function RegisterPage() {
                   </Button>
                   <Button
                     type="button"
-                    className="w-1/2 h-10"
+                    className="w-1/2 h-10 bg-[#1e293b]"
                     onClick={() => {
                       if (handleSubmitValidation()) {
                         form.handleSubmit(onSubmit)();
@@ -536,13 +543,82 @@ export default function RegisterPage() {
           </form>
         </Form>
 
-        <div className="text-center mt-6">
-          <p className="text-sm text-muted-foreground">
-            Already have an account?{" "}
-            <Link href="/login" className="text-primary hover:underline">
-              Log in
-            </Link>
-          </p>
+          <div className="mt-8 text-center">
+            <p className="text-sm text-gray-600">
+              Already have an account?{" "}
+              <Link href="/login" className="font-medium text-[var(--stedi-teal)] hover:text-[var(--stedi-teal-dark)]">
+                Sign in
+              </Link>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Right side - Promotional content */}
+      <div className="hidden lg:flex lg:flex-1 bg-[#1e293b] relative">
+        {/* Geometric background pattern */}
+        <div className="absolute inset-0 opacity-10">
+          <svg className="absolute inset-0 w-full h-full" viewBox="0 0 1000 1000" preserveAspectRatio="none">
+            <defs>
+              <pattern id="register-grid" width="50" height="50" patternUnits="userSpaceOnUse">
+                <path d="M 50 0 L 0 0 0 50" fill="none" stroke="currentColor" strokeWidth="1"/>
+              </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#register-grid)" />
+          </svg>
+        </div>
+
+        <div className="relative flex flex-col justify-center px-12 py-24 text-white">
+          {/* Icon */}
+          <div className="mb-8">
+            <div className="inline-flex items-center justify-center w-12 h-12 border border-[var(--stedi-teal)] rounded-lg">
+              <svg className="w-6 h-6 text-[var(--stedi-teal)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-9a2 2 0 00-2-2H6a2 2 0 00-2 2v9a2 2 0 002 2zm10-12V6a2 2 0 00-2-2H8a2 2 0 00-2 2v3h8z" />
+              </svg>
+            </div>
+          </div>
+
+          <div className="mb-12">
+            <h2 className="text-3xl font-bold mb-6">
+              Transform Your Check-in Experience
+            </h2>
+            <p className="text-lg text-teal-100 mb-8 max-w-md">
+              Join thousands of organizations using SecuredPass to streamline attendance tracking and member management.
+            </p>
+
+            <div className="space-y-4">
+              <div className="flex items-center">
+                <div className="flex-shrink-0">
+                  <svg className="w-5 h-5 text-[var(--stedi-teal)]" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" />
+                  </svg>
+                </div>
+                <p className="ml-3 text-teal-100">QR-based attendance tracking</p>
+              </div>
+              
+              <div className="flex items-center">
+                <div className="flex-shrink-0">
+                  <svg className="w-5 h-5 text-[var(--stedi-teal)]" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" />
+                  </svg>
+                </div>
+                <p className="ml-3 text-teal-100">Real-time analytics and reporting</p>
+              </div>
+              
+              <div className="flex items-center">
+                <div className="flex-shrink-0">
+                  <svg className="w-5 h-5 text-[var(--stedi-teal)]" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" />
+                  </svg>
+                </div>
+                <p className="ml-3 text-teal-100">Custom forms and data collection</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="text-sm text-teal-200">
+            Free plan includes 50 check-ins per month
+          </div>
         </div>
       </div>
     </div>

@@ -46,74 +46,126 @@
 }
 
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  /* Stedi Design System Colors */
+  --stedi-primary: #0052FF;
+  --stedi-primary-dark: #0040CC;
+  --stedi-primary-light: #E6EFFF;
+  --stedi-teal: #4ECDC4;
+  --stedi-teal-dark: #3AB9B0;
+  --stedi-teal-light: #E8FFFE;
+  --stedi-black: #000000;
+  --stedi-dark-gray: #333333;
+  --stedi-medium-gray: #666666;
+  --stedi-light-gray: #F5F5F5;
+  --stedi-white: #FFFFFF;
+  --stedi-success: #00B359;
+  --stedi-warning: #FF8C00;
+  --stedi-error: #FF4444;
+  --stedi-info: #0099FF;
+
+  /* Map to existing Tailwind/shadcn tokens */
+  --background: #FFFFFF;
+  --foreground: #000000;
+  --card: #FFFFFF;
+  --card-foreground: #000000;
+  --popover: #FFFFFF;
+  --popover-foreground: #000000;
+  --primary: #0052FF;
+  --primary-foreground: #FFFFFF;
+  --secondary: #F5F5F5;
+  --secondary-foreground: #333333;
+  --muted: #F5F5F5;
+  --muted-foreground: #666666;
+  --accent: #E6EFFF;
+  --accent-foreground: #0052FF;
+  --destructive: #FF4444;
+  --destructive-foreground: #FFFFFF;
+  --border: #CCCCCC;
+  --input: #FFFFFF;
+  --ring: #0052FF;
+  --chart-1: #0052FF;
+  --chart-2: #00B359;
+  --chart-3: #FF8C00;
+  --chart-4: #0099FF;
+  --chart-5: #FF4444;
+
+  /* Stedi Typography */
+  --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  --font-family-mono: 'Fira Code', 'Monaco', 'Consolas', monospace;
+
+  /* Stedi Spacing (8px base) */
+  --space-xxs: 4px;
+  --space-xs: 8px;
+  --space-sm: 16px;
+  --space-md: 24px;
+  --space-lg: 32px;
+  --space-xl: 48px;
+  --space-xxl: 64px;
+  --space-xxxl: 96px;
+
+  /* Stedi Border Radius */
+  --radius: 6px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+
+  /* Stedi Shadows */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.15);
+  --shadow-lg: 0 8px 25px rgba(0, 0, 0, 0.15);
+  --shadow-xl: 0 16px 35px rgba(0, 0, 0, 0.2);
+
+  /* Stedi Transitions */
+  --transition-fast: 150ms ease;
+  --transition-standard: 200ms ease;
+  --transition-slow: 300ms ease;
+
+  /* Sidebar tokens (updated for Stedi) */
+  --sidebar: #FFFFFF;
+  --sidebar-foreground: #000000;
+  --sidebar-primary: #0052FF;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #F5F5F5;
+  --sidebar-accent-foreground: #333333;
+  --sidebar-border: #CCCCCC;
+  --sidebar-ring: #0052FF;
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.145 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.145 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.985 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.396 0.141 25.723);
-  --destructive-foreground: oklch(0.637 0.237 25.331);
-  --border: oklch(0.269 0 0);
-  --input: oklch(0.269 0 0);
-  --ring: oklch(0.439 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(0.269 0 0);
-  --sidebar-ring: oklch(0.439 0 0);
+  /* Dark mode - using Stedi's dark approach */
+  --background: #1A1A1A;
+  --foreground: #E5E5E5;
+  --card: #1A1A1A;
+  --card-foreground: #E5E5E5;
+  --popover: #1A1A1A;
+  --popover-foreground: #E5E5E5;
+  --primary: #0052FF;
+  --primary-foreground: #FFFFFF;
+  --secondary: #333333;
+  --secondary-foreground: #E5E5E5;
+  --muted: #333333;
+  --muted-foreground: #999999;
+  --accent: #0052FF;
+  --accent-foreground: #FFFFFF;
+  --destructive: #FF4444;
+  --destructive-foreground: #FFFFFF;
+  --border: #333333;
+  --input: #1A1A1A;
+  --ring: #0052FF;
+  --chart-1: #0052FF;
+  --chart-2: #00B359;
+  --chart-3: #FF8C00;
+  --chart-4: #0099FF;
+  --chart-5: #FF4444;
+  --sidebar: #1A1A1A;
+  --sidebar-foreground: #E5E5E5;
+  --sidebar-primary: #0052FF;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #333333;
+  --sidebar-accent-foreground: #E5E5E5;
+  --sidebar-border: #333333;
+  --sidebar-ring: #0052FF;
 }
 
 @layer base {
@@ -122,5 +174,117 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-family: var(--font-family);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  code {
+    font-family: var(--font-family-mono);
+  }
+}
+
+@layer components {
+  /* Stedi Button Variants */
+  .btn-stedi-primary {
+    @apply inline-flex items-center justify-center rounded-md text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50;
+    background: var(--stedi-primary);
+    color: white;
+    padding: 12px 24px;
+    border: none;
+  }
+  .btn-stedi-primary:hover {
+    background: var(--stedi-primary-dark);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+  }
+
+  .btn-stedi-secondary {
+    @apply inline-flex items-center justify-center rounded-md text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50;
+    background: transparent;
+    color: var(--stedi-primary);
+    border: 1px solid var(--stedi-primary);
+    padding: 12px 24px;
+  }
+  .btn-stedi-secondary:hover {
+    background: var(--stedi-primary-light);
+  }
+
+  .btn-stedi-ghost {
+    @apply inline-flex items-center justify-center rounded-md text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50;
+    background: transparent;
+    color: var(--stedi-dark-gray);
+    border: none;
+    padding: 12px 24px;
+  }
+  .btn-stedi-ghost:hover {
+    background: var(--stedi-light-gray);
+  }
+
+  /* Stedi Card Variants */
+  .card-stedi {
+    background: white;
+    border: 1px solid #E5E5E5;
+    border-radius: var(--radius-lg);
+    padding: var(--space-md);
+    box-shadow: var(--shadow-sm);
+    transition: all var(--transition-standard);
+  }
+  .card-stedi:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+  }
+
+  .card-stedi-feature {
+    @apply card-stedi;
+    padding: var(--space-lg);
+    text-align: center;
+    border-radius: var(--radius-xl);
+  }
+  .card-stedi-feature:hover {
+    border-color: var(--stedi-primary);
+    box-shadow: 0 8px 25px rgba(0, 82, 255, 0.15);
+  }
+
+  /* Stedi Input Styles */
+  .input-stedi {
+    border: 1px solid #CCCCCC;
+    border-radius: var(--radius-md);
+    padding: 12px 16px;
+    font-size: 16px;
+    background: white;
+    transition: all var(--transition-standard);
+    width: 100%;
+  }
+  .input-stedi:focus {
+    border-color: var(--stedi-primary);
+    box-shadow: 0 0 0 3px rgba(0, 82, 255, 0.1);
+    outline: none;
+  }
+
+  /* Stedi Code Styles */
+  .code-inline {
+    background: var(--stedi-light-gray);
+    color: var(--stedi-dark-gray);
+    padding: 2px 6px;
+    border-radius: var(--radius-sm);
+    font-family: var(--font-family-mono);
+    font-size: 14px;
+  }
+
+  .code-block {
+    background: #1A1A1A;
+    color: #E5E5E5;
+    padding: var(--space-md);
+    border-radius: var(--radius-lg);
+    font-family: var(--font-family-mono);
+    font-size: 14px;
+    line-height: 1.5;
+    overflow-x: auto;
+  }
+
+  /* Stedi Focus States */
+  .focusable:focus {
+    outline: 2px solid var(--stedi-primary);
+    outline-offset: 2px;
   }
 }

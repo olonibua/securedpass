@@ -3,11 +3,12 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import Header from '@/components/layout/Header';
 import { useState, useEffect } from 'react';
 import { DemoModal } from '@/components/DemoModal';
 import { motion} from 'framer-motion';
-import { ArrowRight, ArrowUpRight, CheckCircle } from 'lucide-react';
+import { ArrowRight, CheckCircle, MessageSquare, Calendar } from 'lucide-react';
 
 export default function Home() {
   const [isDemoOpen, setIsDemoOpen] = useState(false);
@@ -25,95 +26,101 @@ export default function Home() {
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-950 dark:to-gray-900">
+      {/* Stedi-inspired Header with your original navigation */}
       <Header scrollState={scrolled} />
 
-      {/* Hero Section with Enhanced Gradient - Responsive to scroll */}
-      <section
-        className={`relative flex-1 flex flex-col items-center justify-center text-center px-4 py-28 sm:py-28 md:py-44 overflow-hidden transition-all duration-700 ease-in-out ${
-          scrolled ? "opacity-90 scale-[0.99]" : "opacity-100 scale-100"
-        }`}
-      >
-        {/* Background gradient elements - dynamic based on scroll */}
-        <div
-          className={`absolute inset-0 bg-gradient-to-b from-blue-50/20 to-indigo-50/20 dark:from-blue-950/20 dark:to-indigo-900/20 z-0 transition-opacity duration-700 ${
-            scrolled ? "opacity-60" : "opacity-100"
-          }`}
-        ></div>
-        <div
-          className={`absolute -top-24 -right-24 w-96 h-96 bg-blue-400/10 dark:bg-blue-400/5 rounded-full blur-3xl transition-all duration-700 ${
-            scrolled ? "opacity-50 translate-x-5" : "opacity-100 translate-x-0"
-          }`}
-        ></div>
-        <div
-          className={`absolute -bottom-24 -left-24 w-96 h-96 bg-indigo-400/10 dark:bg-indigo-400/5 rounded-full blur-3xl transition-all duration-700 ${
-            scrolled ? "opacity-50 -translate-x-5" : "opacity-100 translate-x-0"
-          }`}
-        ></div>
+      {/* Hero Section - Stedi style with your original content */}
+      <section className="relative flex-1 flex flex-col items-center justify-center text-center px-4 py-28 sm:py-28 md:py-44 overflow-hidden bg-[#1e293b] text-white">
+        {/* Geometric Pattern Background */}
+        <div className="absolute inset-0 opacity-10">
+          <svg className="absolute inset-0 w-full h-full" viewBox="0 0 1000 1000" preserveAspectRatio="none">
+            <defs>
+              <pattern id="grid" width="50" height="50" patternUnits="userSpaceOnUse">
+                <path d="M 50 0 L 0 0 0 50" fill="none" stroke="currentColor" strokeWidth="1"/>
+              </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#grid)" />
+          </svg>
+        </div>
 
-        {/* Content */}
+        {/* Your original hero content with Stedi styling */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7 }}
           className="relative z-10 max-w-5xl"
         >
-          <div className="inline-flex items-center px-3 py-1.5 mb-6 text-sm border border-blue-100 dark:border-blue-800 rounded-full bg-blue-50/50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-300">
-            <span className="mr-2 bg-blue-600 dark:bg-blue-500 w-2 h-2 rounded-full"></span>
+          <div className="inline-flex items-center px-3 py-1.5 mb-6 text-sm border border-teal-300/20 rounded-full bg-teal-500/10 text-[var(--stedi-teal)]">
+            <span className="mr-2 bg-[var(--stedi-teal)] w-2 h-2 rounded-full"></span>
             Streamlined Check-in Solution
           </div>
 
-          <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold tracking-tight mb-6 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400">
-            Modernize Your <br /> Check-in Experience
+          <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold tracking-tight mb-6 leading-tight">
+            Modernize Your <br />
+            <span className="text-[var(--stedi-teal)]">Check-in Experience</span>
           </h1>
 
-          <p className="text-lg sm:text-xl md:text-2xl text-gray-600 dark:text-gray-300 max-w-2xl md:max-w-3xl mx-auto mb-10">
+          <p className="text-xl sm:text-2xl text-teal-100 max-w-2xl md:max-w-3xl mx-auto mb-10">
             A powerful QR-based attendance system that helps organizations track
             attendance, collect data, and manage members effortlessly.
           </p>
 
-          <div className="flex flex-col sm:flex-row justify-center items-center gap-4 w-full max-w-md mx-auto">
+          <div className="flex flex-col sm:flex-row justify-center items-center gap-4 w-full max-w-md mx-auto mb-12">
             <Link href="/register" className="w-full sm:w-auto">
               <Button
+                variant="teal"
                 size="lg"
-                className="w-full px-8 py-6 text-base sm:text-lg rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 dark:from-blue-500 dark:to-indigo-500 shadow-lg hover:shadow-blue-500/20 transform hover:-translate-y-1 transition-all duration-200"
+                className="w-full px-8 py-6 text-base sm:text-lg rounded-xl bg-[var(--stedi-teal)] hover:bg-[var(--stedi-teal-dark)] shadow-lg hover:-translate-y-1 transition-all duration-200"
               >
                 Get Started <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             </Link>
             <Button
               size="lg"
-              variant="outline"
-              className="w-full sm:w-auto px-8 py-6 text-base sm:text-lg rounded-xl border-2 bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm hover:bg-white dark:hover:bg-gray-800 transform hover:-translate-y-1 transition-all duration-200"
+              variant="secondary"
+              className="w-full sm:w-auto px-8 py-6 text-base sm:text-lg rounded-xl bg-white text-[#0F4A47] hover:bg-gray-100 hover:-translate-y-1 transition-all duration-200"
               onClick={() => setIsDemoOpen(true)}
             >
-              View Demo <ArrowUpRight className="ml-2 h-5 w-5" />
+              View Demo
             </Button>
           </div>
 
-          <div className="mt-12 flex items-center justify-center gap-8 text-sm text-gray-500 dark:text-gray-400">
+          <div className="mt-12 flex items-center justify-center gap-8 text-sm text-teal-200">
             <div className="flex items-center">
-              <CheckCircle className="text-green-500 mr-2 h-5 w-5" />
+              <CheckCircle className="text-[var(--stedi-teal)] mr-2 h-5 w-5" />
               No credit card required
             </div>
             <div className="flex items-center">
-              <CheckCircle className="text-green-500 mr-2 h-5 w-5" />
+              <CheckCircle className="text-[var(--stedi-teal)] mr-2 h-5 w-5" />
               Free plan available
+            </div>
+          </div>
+
+          {/* Customer Logos - adapted from your social proof */}
+          <div className="mt-16 text-center">
+            <p className="text-teal-200 text-sm mb-6">Trusted by growing organizations</p>
+            <div className="flex flex-wrap items-center justify-center gap-8 opacity-70">
+              <div className="text-white/60 font-semibold">GymTech</div>
+              <div className="text-white/60 font-semibold">FlexSpace</div>
+              <div className="text-white/60 font-semibold">EventPro</div>
+              <div className="text-white/60 font-semibold">CoWork</div>
+              <div className="text-white/60 font-semibold">MemberHub</div>
             </div>
           </div>
         </motion.div>
       </section>
 
-      {/* How It Works Section - Enhanced Cards */}
-      <section className="py-24 relative bg-gray-50 dark:bg-gray-900">
+      {/* Your original "How It Works" section with Stedi styling */}
+      <section className="py-24 relative bg-white">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
-            <span className="inline-block px-3 py-1 text-sm rounded-full bg-blue-100/50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300 mb-4">
+            <span className="inline-block px-3 py-1 text-sm rounded-full bg-[var(--stedi-teal-light)] text-[var(--stedi-teal)] mb-4">
               How It Works
             </span>
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+            <h2 className="text-3xl sm:text-4xl font-bold text-[var(--stedi-black)] mb-4">
               Simple Steps to Get Started
             </h2>
-            <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+            <p className="text-lg text-[var(--stedi-medium-gray)] max-w-2xl mx-auto">
               Our platform makes it easy to manage attendance and check-ins for
               any organization
             </p>
@@ -126,16 +133,16 @@ export default function Home() {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.1 }}
               viewport={{ once: true }}
-              className="group bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 border border-gray-100 dark:border-gray-700 relative overflow-hidden"
+              className="group bg-white p-8 rounded-2xl shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)] transition-all duration-300 border border-gray-100 relative overflow-hidden hover:-translate-y-1"
             >
-              <div className="absolute top-0 right-0 w-24 h-24 bg-blue-100/30 dark:bg-blue-900/20 rounded-bl-full -mr-12 -mt-12"></div>
-              <div className="bg-blue-100 dark:bg-blue-900/50 p-4 rounded-xl w-14 h-14 flex items-center justify-center mb-6 text-blue-600 dark:text-blue-300 font-bold text-xl group-hover:scale-110 transition-transform z-10">
+              <div className="absolute top-0 right-0 w-24 h-24 bg-[var(--stedi-teal-light)] rounded-bl-full -mr-12 -mt-12"></div>
+              <div className="bg-[var(--stedi-teal-light)] p-4 rounded-xl w-14 h-14 flex items-center justify-center mb-6 text-[var(--stedi-teal)] font-bold text-xl group-hover:scale-110 transition-transform z-10 relative">
                 1
               </div>
-              <h3 className="text-xl font-semibold mb-3 text-gray-900 dark:text-white">
+              <h3 className="text-xl font-semibold mb-3 text-[var(--stedi-black)]">
                 Register Organization
               </h3>
-              <p className="text-gray-600 dark:text-gray-300">
+              <p className="text-[var(--stedi-medium-gray)]">
                 Create an account and set up your organization&apos;s profile
                 with all necessary details.
               </p>
@@ -147,16 +154,16 @@ export default function Home() {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.2 }}
               viewport={{ once: true }}
-              className="group bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 border border-gray-100 dark:border-gray-700 relative overflow-hidden"
+              className="group bg-white p-8 rounded-2xl shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)] transition-all duration-300 border border-gray-100 relative overflow-hidden hover:-translate-y-1"
             >
-              <div className="absolute top-0 right-0 w-24 h-24 bg-indigo-100/30 dark:bg-indigo-900/20 rounded-bl-full -mr-12 -mt-12"></div>
-              <div className="bg-indigo-100 dark:bg-indigo-900/50 p-4 rounded-xl w-14 h-14 flex items-center justify-center mb-6 text-indigo-600 dark:text-indigo-300 font-bold text-xl group-hover:scale-110 transition-transform z-10">
+              <div className="absolute top-0 right-0 w-24 h-24 bg-[var(--stedi-primary-light)] rounded-bl-full -mr-12 -mt-12"></div>
+              <div className="bg-[var(--stedi-primary-light)] p-4 rounded-xl w-14 h-14 flex items-center justify-center mb-6 text-[var(--stedi-primary)] font-bold text-xl group-hover:scale-110 transition-transform z-10 relative">
                 2
               </div>
-              <h3 className="text-xl font-semibold mb-3 text-gray-900 dark:text-white">
+              <h3 className="text-xl font-semibold mb-3 text-[var(--stedi-black)]">
                 Configure Check-in
               </h3>
-              <p className="text-gray-600 dark:text-gray-300">
+              <p className="text-[var(--stedi-medium-gray)]">
                 Design custom forms and generate unique QR codes for your events
                 or locations.
               </p>
@@ -168,16 +175,16 @@ export default function Home() {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.3 }}
               viewport={{ once: true }}
-              className="group bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 border border-gray-100 dark:border-gray-700 relative overflow-hidden"
+              className="group bg-white p-8 rounded-2xl shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)] transition-all duration-300 border border-gray-100 relative overflow-hidden hover:-translate-y-1"
             >
-              <div className="absolute top-0 right-0 w-24 h-24 bg-purple-100/30 dark:bg-purple-900/20 rounded-bl-full -mr-12 -mt-12"></div>
-              <div className="bg-purple-100 dark:bg-purple-900/50 p-4 rounded-xl w-14 h-14 flex items-center justify-center mb-6 text-purple-600 dark:text-purple-300 font-bold text-xl group-hover:scale-110 transition-transform z-10">
+              <div className="absolute top-0 right-0 w-24 h-24 bg-[var(--stedi-primary-light)] rounded-bl-full -mr-12 -mt-12"></div>
+              <div className="bg-[var(--stedi-primary-light)] p-4 rounded-xl w-14 h-14 flex items-center justify-center mb-6 text-[var(--stedi-primary)] font-bold text-xl group-hover:scale-110 transition-transform z-10 relative">
                 3
               </div>
-              <h3 className="text-xl font-semibold mb-3 text-gray-900 dark:text-white">
+              <h3 className="text-xl font-semibold mb-3 text-[var(--stedi-black)]">
                 Members Check In
               </h3>
-              <p className="text-gray-600 dark:text-gray-300">
+              <p className="text-[var(--stedi-medium-gray)]">
                 Members simply scan the QR code and complete the custom form for
                 quick access.
               </p>
@@ -189,16 +196,16 @@ export default function Home() {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.4 }}
               viewport={{ once: true }}
-              className="group bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 border border-gray-100 dark:border-gray-700 relative overflow-hidden"
+              className="group bg-white p-8 rounded-2xl shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)] transition-all duration-300 border border-gray-100 relative overflow-hidden hover:-translate-y-1"
             >
-              <div className="absolute top-0 right-0 w-24 h-24 bg-teal-100/30 dark:bg-teal-900/20 rounded-bl-full -mr-12 -mt-12"></div>
-              <div className="bg-teal-100 dark:bg-teal-900/50 p-4 rounded-xl w-14 h-14 flex items-center justify-center mb-6 text-teal-600 dark:text-teal-300 font-bold text-xl group-hover:scale-110 transition-transform z-10">
+              <div className="absolute top-0 right-0 w-24 h-24 bg-[var(--stedi-primary-light)] rounded-bl-full -mr-12 -mt-12"></div>
+              <div className="bg-[var(--stedi-primary-light)] p-4 rounded-xl w-14 h-14 flex items-center justify-center mb-6 text-[var(--stedi-primary)] font-bold text-xl group-hover:scale-110 transition-transform z-10 relative">
                 4
               </div>
-              <h3 className="text-xl font-semibold mb-3 text-gray-900 dark:text-white">
+              <h3 className="text-xl font-semibold mb-3 text-[var(--stedi-black)]">
                 Track & Analyze
               </h3>
-              <p className="text-gray-600 dark:text-gray-300">
+              <p className="text-[var(--stedi-medium-gray)]">
                 Access real-time attendance data and generate comprehensive
                 analytical reports.
               </p>
@@ -277,8 +284,8 @@ export default function Home() {
               viewport={{ once: true }}
               className="group bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg hover:shadow-xl border border-gray-100 dark:border-gray-700 transition-all duration-300 hover:-translate-y-1"
             >
-              <div className="bg-gradient-to-br from-purple-100 to-purple-50 dark:from-purple-900/40 dark:to-purple-800/40 p-4 rounded-xl w-16 h-16 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                <ChartIcon className="h-8 w-8 text-purple-600 dark:text-purple-400" />
+              <div className="bg-gradient-to-br from-blue-100 to-blue-50 dark:from-blue-900/40 dark:to-blue-800/40 p-4 rounded-xl w-16 h-16 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                <ChartIcon className="h-8 w-8 text-blue-600 dark:text-blue-400" />
               </div>
               <h3 className="text-xl font-semibold mb-3 text-gray-900 dark:text-white">
                 Attendance Analytics
@@ -293,10 +300,8 @@ export default function Home() {
       </section>
 
       {/* CTA Section with Gradient */}
-      <section className="py-24 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-700 dark:to-indigo-700"></div>
-        <div className="absolute inset-0 bg-[url('/grid-pattern.svg')] opacity-20"></div>
-        <div className="container mx-auto px-4 relative z-10">
+      <section className="py-24 relative overflow-hidden bg-[#1e293b]">
+        <div className="container mx-auto px-4 relative z-10 bg-[#1e293b]">
           <div className="max-w-3xl mx-auto text-center">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -333,15 +338,9 @@ export default function Home() {
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="flex items-center gap-3 mb-6 md:mb-0">
-              <Image
-                src="/entryflex.webp"
-                alt="QR Check-in Logo"
-                width={32}
-                height={32}
-                className="dark:invert"
-              />
+              
               <span className="font-semibold text-xl text-gray-900 dark:text-white">
-                QR Check-in
+                SecuredPass
               </span>
             </div>
             <div className="flex flex-wrap justify-center gap-6 md:gap-8">

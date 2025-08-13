@@ -109,7 +109,7 @@ const Header = ({ scrollState = false }: HeaderProps) => {
     if (userRole === "admin") {
       return (
         <Link href="/dashboard">
-          <Button variant="ghost" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400">Dashboard</Button>
+          <Button variant="ghost" className="text-[var(--stedi-dark-gray)] hover:text-[var(--stedi-primary)] dark:text-[var(--stedi-light-gray)]">Dashboard</Button>
         </Link>
       );
     }
@@ -117,7 +117,7 @@ const Header = ({ scrollState = false }: HeaderProps) => {
     if (userRole === "member") {
       return (
         <Link href="/member-portal">
-          <Button variant="ghost" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400">Member Portal</Button>
+          <Button variant="ghost" className="text-[var(--stedi-dark-gray)] hover:text-[var(--stedi-primary)] dark:text-[var(--stedi-light-gray)]">Member Portal</Button>
         </Link>
       );
     }
@@ -134,7 +134,7 @@ const Header = ({ scrollState = false }: HeaderProps) => {
     if (userRole === "admin") {
       return (
         <Link href="/dashboard" onClick={() => setIsOpen(false)}>
-          <Button variant="ghost" className="w-full justify-start text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400">
+          <Button variant="ghost" className="w-full justify-start text-gray-700 dark:text-gray-300 ">
             Dashboard
           </Button>
         </Link>
@@ -144,7 +144,7 @@ const Header = ({ scrollState = false }: HeaderProps) => {
     if (userRole === "member") {
       return (
         <Link href="/member-portal" onClick={() => setIsOpen(false)}>
-          <Button variant="ghost" className="w-full justify-start text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400">
+          <Button variant="ghost" className="w-full justify-start text-gray-700 dark:text-gray-300 ">
             Member Portal
           </Button>
         </Link>
@@ -165,15 +165,8 @@ const Header = ({ scrollState = false }: HeaderProps) => {
     >
       <div className="container mx-auto flex justify-between items-center py-4 px-4">
         <Link href="/" className="flex items-center gap-2 z-10">
-          <Image
-            src="/entryflex.webp"
-            alt="SecuredPass Logo"
-            width={40}
-            height={40}
-            className={`transition-all duration-300 ${scrollState ? 'dark:invert' : 'dark:invert'}`}
-          />
           <span className={`text-xl font-bold transition-all duration-300 ${
-            scrollState ? 'text-gray-900 dark:text-white' : 'text-gray-900 dark:text-white'
+            scrollState ? 'text-black' : 'text-white'
           }`}>SecuredPass</span>
         </Link>
 
@@ -185,7 +178,7 @@ const Header = ({ scrollState = false }: HeaderProps) => {
               <Button 
                 variant="outline" 
                 onClick={logout}
-                className="border-blue-200 dark:border-blue-800 hover:bg-blue-50 dark:hover:bg-blue-900/30"
+                className="border-[var(--stedi-primary)] text-[var(--stedi-primary)] hover:bg-[var(--stedi-primary-light)]"
               >
                 Sign out
               </Button>
@@ -194,7 +187,12 @@ const Header = ({ scrollState = false }: HeaderProps) => {
             <>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button 
+                  <Button variant="ghost" className={`font-bold transition-all duration-300 ${
+                     scrollState ? 'text-black' : 'text-white'}`}>
+                      Log in
+                      <ChevronDown className={`h-4 w-4 ${scrollState ? 'text-black' : ''}`} />
+                  </Button>
+                  {/* <Button 
                     variant="ghost" 
                     className={`flex items-center gap-1 transition-all duration-300 ${
                       scrollState ? 'text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400' : 'text-gray-800 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400'
@@ -202,18 +200,18 @@ const Header = ({ scrollState = false }: HeaderProps) => {
                   >
                     Log in
                     <ChevronDown className="h-4 w-4" />
-                  </Button>
+                  </Button> */}
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="border border-blue-100 dark:border-blue-800 bg-white dark:bg-gray-900">
                   <DropdownMenuItem asChild>
-                    <Link href="/login" className="w-full cursor-pointer hover:text-blue-600 dark:hover:text-blue-400">
+                    <Link href="/login" className="w-full cursor-pointer ">
                       Organization Login
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <Link
                       href="/member-login"
-                      className="w-full cursor-pointer hover:text-blue-600 dark:hover:text-blue-400"
+                      className="w-full cursor-pointer "
                     >
                       Member Login
                     </Link>
@@ -223,14 +221,14 @@ const Header = ({ scrollState = false }: HeaderProps) => {
 
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button className="flex items-center gap-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 dark:from-blue-500 dark:to-indigo-500 shadow-md hover:shadow-blue-500/20 transform transition-all duration-200">
+                  <Button className="flex items-center gap-1 bg-[#1e293b] text-white hover:bg-[#1e293b] hover:-translate-y-px transition-all duration-200">
                     Register
                     <ChevronDown className="h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="border border-blue-100 dark:border-blue-800 bg-white dark:bg-gray-900">
                   <DropdownMenuItem asChild>
-                    <Link href="/register" className="w-full cursor-pointer hover:text-blue-600 dark:hover:text-blue-400">
+                    <Link href="/register" className="w-full cursor-pointer ">
                       Organization Registration
                     </Link>
                   </DropdownMenuItem>
@@ -253,13 +251,6 @@ const Header = ({ scrollState = false }: HeaderProps) => {
             <div className="flex flex-col h-full">
               <div className="p-4 border-b border-blue-100 dark:border-blue-800 flex items-center justify-between">
                 <Link href="/" className="flex items-center gap-2" onClick={() => setIsOpen(false)}>
-                  <Image
-                    src="/entryflex.webp"
-                    alt="SecuredPass Logo"
-                    width={32}
-                    height={32}
-                    className="dark:invert"
-                  />
                   <span className="text-lg font-bold text-gray-900 dark:text-white">SecuredPass</span>
                 </Link>
                 {/* <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)} className="text-gray-700 dark:text-gray-300">
@@ -288,12 +279,12 @@ const Header = ({ scrollState = false }: HeaderProps) => {
                       <h3 className="font-medium mb-2 text-sm text-gray-500 dark:text-gray-400 uppercase tracking-wider">Log in</h3>
                       <div className="space-y-1">
                         <Link href="/login" onClick={() => setIsOpen(false)}>
-                          <Button variant="ghost" className="w-full justify-start text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400">
+                          <Button variant="ghost" className="w-full justify-start text-gray-700 dark:text-gray-300 ">
                             Organization Login
                           </Button>
                         </Link>
                         <Link href="/member-login" onClick={() => setIsOpen(false)}>
-                          <Button variant="ghost" className="w-full justify-start text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400">
+                          <Button variant="ghost" className="w-full justify-start text-gray-700 dark:text-gray-300 ">
                             Member Login
                           </Button>
                         </Link>
