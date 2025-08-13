@@ -18,7 +18,6 @@ import { Input } from '@/components/ui/input';
 import { Loader2 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 import { useRouter } from 'next/navigation';
-import Header from '@/components/layout/Header';
 import { account, databases, DATABASE_ID, ADMINISTRATORS_COLLECTION_ID, ORGANIZATIONS_COLLECTION_ID, ORGANIZATIONS_MEMBERS_COLLECTION_ID } from '@/lib/appwrite';
 import { Query } from 'appwrite';
 import { toast } from 'sonner';
@@ -256,7 +255,7 @@ export default function UnifiedOrgLoginPage() {
 
           <div className="mt-8 space-y-4 text-center">
             <p className="text-sm text-gray-600">
-              Don't have an organization?{" "}
+              Don&apos;t have an organization?{" "}
               <Link href="/register" className="font-medium text-[var(--stedi-teal)] hover:text-[var(--stedi-teal-dark)]">
                 Create an organization
               </Link>
@@ -300,7 +299,7 @@ export default function UnifiedOrgLoginPage() {
               Welcome Back
             </h2>
             <p className="text-lg text-teal-100 mb-8 max-w-md">
-              Access your organization dashboard to manage attendance, view reports, and oversee your team's check-ins.
+              Access your organization dashboard to manage attendance, view reports, and oversee your team&apos;s check-ins.
             </p>
 
             <div className="space-y-4">

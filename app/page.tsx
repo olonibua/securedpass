@@ -1,14 +1,12 @@
 'use client';
 
-import Image from 'next/image';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import Header from '@/components/layout/Header';
 import { useState, useEffect } from 'react';
 import { DemoModal } from '@/components/DemoModal';
 import { motion} from 'framer-motion';
-import { ArrowRight, CheckCircle, MessageSquare, Calendar } from 'lucide-react';
+import { ArrowRight, CheckCircle } from 'lucide-react';
 
 export default function Home() {
   const [isDemoOpen, setIsDemoOpen] = useState(false);

@@ -20,7 +20,6 @@ import { account, DATABASE_ID, MEMBERS_COLLECTION_ID, ORGANIZATIONS_MEMBERS_COLL
 import { toast } from 'sonner';
 import { Query } from 'appwrite';
 import { useAuth } from '@/lib/auth-context';
-import Header from '@/components/layout/Header';
 import Link from 'next/link';
 
 const formSchema = z.object({
@@ -222,7 +221,7 @@ export default function SignInPage() {
 
           <div className="mt-8 text-center">
             <p className="text-sm text-gray-600">
-              Don't have an account?{" "}
+              Don&apos;t have an account?{" "}
               <Link href="/register" className="font-medium text-[var(--stedi-teal)] hover:text-[var(--stedi-teal-dark)]">
                 Register
               </Link>
